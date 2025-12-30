@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizador de Gastos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+        
+        * {
+            font-family: 'DM Sans', sans-serif;
+        }
+        
+        h1, h2, h3, .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes shine {
+            0% { box-shadow: 0 0 5px rgba(79, 70, 229, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(79, 70, 229, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(79, 70, 229, 0.3); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        .animate-slide-in-right { animation: slideInRight 0.3s ease-out; }
+        .animate-pulse-once { animation: pulse 0.5s ease-in-out; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .badge-glow { animation: shine 2s infinite; }
+        .progress-bar { transition: width 0.5s ease-out, background-color 0.3s; }
+        
+        /* Gradientes suaves */
+        .gradient-bg {
+            background: linear-gradient(-45deg, #e3f2fd, #f3e5f5, #e8f5e9, #fff3e0);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        /* Modo oscuro */
+        body.dark-mode {
+            background: linear-gradient(to bottom right, #1a1a2e, #16213e) !important;
+            color: #e5e7eb;
+        }
+        body.dark-mode .bg-white { background-color: #16213e !important; color: #e5e7eb; }
+        body.dark-mode .text-gray-800 { color: #e5e7eb !important; }
+        body.dark-mode .text-gray-600 { color: #9ca3af !important; }
+        body.dark-mode .text-gray-500 { color: #6b7280 !important; }
+        body.dark-mode .border-gray-300 { border-color: #374151 !important; }
+        body.dark-mode input, body.dark-mode select { background-color: #1a1a2e !important; color: #e5e7eb !important; border-color: #374151 !important; }
+        body.dark-mode .bg-gray-50 { background-color: #1f2937 !important; }
+        body.dark-mode .gradient-bg { background: linear-gradient(-45deg, #1a1a2e, #16213e, #1a1a2e, #16213e); }
+        
+        /* Filtros de tiempo con colores suaves */
+        .time-filter {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            transition: all 0.3s ease;
+        }
+        .time-filter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+        .time-filter-active { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        /* Transiciones suaves */
+        .card { 
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        
+        /* ========== CORRECCIÓN PRINCIPAL: Tarjetas de totales ========== */
+        .total-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            transition: all 0.3s ease;
+            min-width: 0; /* Permite que flex/grid reduzca el tamaño */
+            overflow: hidden;
+        }
+        .total-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        /* Contenedor de cantidad con texto responsive */
+        .amount-display {
+            font-size: clamp(0.875rem, 2.5vw, 1.5rem);
+            line-height: 1.2;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+        
+        .amount-display-large {
+            font-size: clamp(1rem, 3vw, 1.75rem);
+            line-height: 1.2;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        /* Grid de totales responsive */
+        .totals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        @media (min-width: 768px) {
+            .totals-grid {
+                grid-template-columns: repeat(7, 1fr);
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .totals-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .totals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Secciones colapsables */
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .collapsible-content.open {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        /* Botón toggle animado */
+        .toggle-btn {
+            transition: transform 0.3s ease;
+        }
+        .toggle-btn.open {
+            transform: rotate(180deg);
+        }
+        
+        /* Scroll personalizado */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
+            border-radius: 3px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #94a3b8, #64748b);
+            border-radius: 3px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #64748b, #475569);
+        }
+        
+        /* Efecto hover en gastos */
+        .expense-item {
+            transition: all 0.2s ease;
+            background: linear-gradient(to right, #f8fafc, #ffffff);
+        }
+        .expense-item:hover {
+            transform: translateX(4px);
+            background: linear-gradient(to right, #e0f2fe, #f0f9ff);
+        }
+        
+        /* Colores suaves para categorías */
+        .category-item {
+            transition: all 0.2s ease;
+        }
+        .category-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        /* Indicador de conexión */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .connection-status.online {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+        }
+        .connection-status.offline {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+        }
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .connection-dot.online { background: #10b981; }
+        .connection-dot.offline { background: #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    
+    <div id="app" class="p-4 max-w-7xl mx-auto"></div>
+
+    <script>
+        // ========== CONFIGURACIÓN SUPABASE ==========
+        const SUPABASE_CONFIG = {
+            url: 'https://zdbpzndvuqtfemkfjman.supabase.co',
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkYnB6bmR2dXF0ZmVta2ZqbWFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1MDI2MTEsImV4cCI6MjA4MjA3ODYxMX0.2Wb2mhplCe0DQtLOM3jNDVTUFyz1qAiFOag1loP2e8g',
+            initialized: false
+        };
+
+        let supabaseClient = null;
+        let currentUser = null;
+        let isOnline = false;
+        let syncQueue = [];
+
+        // ========== ESTADO DE LA APLICACIÓN ==========
+        let state = {
+            expenses: [],
+            savingsWithdrawals: [],
+            debtors: [],
+            monthlyIncome: '',
+            creditCardIncome: '',
+            monthlyBudget: '',
+            owedMoney: '',
+            projectionMonths: '',
+            monthlySavingsPlan: '',
+            description: '',
+            amount: '',
+            category: '🍎 Alimentación',
+            date: new Date().toISOString().split('T')[0],
+            withdrawalDescription: '',
+            withdrawalAmount: '',
+            debtorName: '',
+            debtorAmount: '',
+            editingExpenseId: null,
+            darkMode: false,
+            timeFilter: 'month',
+            badges: [],
+            lastMonthSavings: 0,
+            showSavingsSection: false,
+            showDebtorsSection: false,
+            showProjectionsSection: false,
+            userId: null,
+            lastSync: null
+        };
+
+        const categories = [
+            { name: '🍎 Alimentación', displayName: 'Alimentación', type: 'esencial', icon: '🍎' },
+            { name: '🚗 Transporte', displayName: 'Transporte', type: 'esencial', icon: '🚗' },
+            { name: '🏠 Vivienda', displayName: 'Vivienda', type: 'esencial', icon: '🏠' },
+            { name: '💊 Salud', displayName: 'Salud', type: 'esencial', icon: '💊' },
+            { name: '📚 Educación', displayName: 'Educación', type: 'esencial', icon: '📚' },
+            { name: '🎮 Entretenimiento', displayName: 'Entretenimiento', type: 'salida', icon: '🎮' },
+            { name: '🍕 Restaurantes', displayName: 'Restaurantes', type: 'salida', icon: '🍕' },
+            { name: '🛍️ Compras', displayName: 'Compras', type: 'salida', icon: '🛍️' },
+            { name: '✈️ Viajes', displayName: 'Viajes', type: 'salida', icon: '✈️' },
+            { name: '💰 Ahorro', displayName: 'Ahorro', type: 'ahorro', icon: '💰' },
+            { name: '📈 Inversiones', displayName: 'Inversiones', type: 'ahorro', icon: '📈' },
+            { name: '💸 Bizum', displayName: 'Bizum', type: 'bizum', icon: '💸' },
+            { name: '🏦 Transferencias', displayName: 'Transferencias', type: 'transferencia', icon: '🏦' },
+            { name: '📦 Otros Gastos', displayName: 'Otros Gastos', type: 'otros', icon: '📦' },
+            { name: '🔧 Varios', displayName: 'Varios', type: 'otros', icon: '🔧' }
+        ];
+
+        const categoryColors = {
+            '🍎 Alimentación': 'bg-green-100 text-green-800',
+            '🚗 Transporte': 'bg-blue-100 text-blue-800',
+            '🏠 Vivienda': 'bg-purple-100 text-purple-800',
+            '🎮 Entretenimiento': 'bg-pink-100 text-pink-800',
+            '💊 Salud': 'bg-red-100 text-red-800',
+            '📚 Educación': 'bg-yellow-100 text-yellow-800',
+            '🍕 Restaurantes': 'bg-orange-100 text-orange-800',
+            '🛍️ Compras': 'bg-fuchsia-100 text-fuchsia-800',
+            '✈️ Viajes': 'bg-cyan-100 text-cyan-800',
+            '💰 Ahorro': 'bg-emerald-100 text-emerald-800',
+            '📈 Inversiones': 'bg-teal-100 text-teal-800',
+            '💸 Bizum': 'bg-indigo-100 text-indigo-800',
+            '🏦 Transferencias': 'bg-violet-100 text-violet-800',
+            '📦 Otros Gastos': 'bg-gray-100 text-gray-800',
+            '🔧 Varios': 'bg-slate-100 text-slate-800'
+        };
+
+        const badgeDefinitions = [
+            { id: 'first_saving', name: 'Primer Ahorro', icon: '🌱', condition: () => getTotalByType().ahorro > 0 },
+            { id: 'save_100', name: 'Ahorrador Novato', icon: '💵', condition: () => getTotalByType().ahorro >= 100 },
+            { id: 'save_500', name: 'Ahorrador Experto', icon: '💎', condition: () => getTotalByType().ahorro >= 500 },
+            { id: 'save_1000', name: 'Maestro del Ahorro', icon: '👑', condition: () => getTotalByType().ahorro >= 1000 },
+            { id: 'positive_balance', name: 'Balance Positivo', icon: '✅', condition: () => (getTotalIncome() - getTotalMonth()) > 0 },
+            { id: 'no_luxury_3days', name: '3 Días Sin Caprichos', icon: '🎯', condition: () => checkNoDaysNoLuxury(3) },
+            { id: 'month_complete', name: 'Mes Completado', icon: '📅', condition: () => state.expenses.length >= 10 }
+        ];
+
+        // ========== FUNCIONES DE FORMATO ==========
+        function formatEuro(amount) {
+            const num = parseFloat(amount).toFixed(2);
+            const parts = num.split('.');
+            const integerPart = parts[0];
+            const decimalPart = parts[1];
+            const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return formattedInteger + ',' + decimalPart + '€';
+        }
+
+        // Formato compacto para números muy grandes
+        function formatEuroCompact(amount) {
+            const num = Math.abs(parseFloat(amount));
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M€';
+            } else if (num >= 10000) {
+                return (num / 1000).toFixed(1) + 'K€';
+            }
+            return formatEuro(amount);
+        }
+
+        // ========== FUNCIONES DE SUPABASE ==========
+        async function initSupabase(url, anonKey) {
+            if (!url || !anonKey) {
+                console.log('Supabase no configurado - usando localStorage');
+                return false;
+            }
+            
+            try {
+                // Cargar Supabase JS desde CDN
+                if (!window.supabase) {
+                    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+                }
+                
+                supabaseClient = window.supabase.createClient(url, anonKey);
+                SUPABASE_CONFIG.url = url;
+                SUPABASE_CONFIG.anonKey = anonKey;
+                SUPABASE_CONFIG.initialized = true;
+                isOnline = true;
+                
+                // Escuchar cambios de autenticación
+                supabaseClient.auth.onAuthStateChange((event, session) => {
+                    if (session) {
+                        currentUser = session.user;
+                        state.userId = session.user.id;
+                        loadDataFromSupabase();
+                    } else {
+                        currentUser = null;
+                        state.userId = null;
+                    }
+                    render();
+                });
+                
+                showNotification('✅ Conectado a Supabase');
+                return true;
+            } catch (error) {
+                console.error('Error inicializando Supabase:', error);
+                isOnline = false;
+                return false;
+            }
+        }
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        async function loadDataFromSupabase() {
+            if (!supabaseClient || !currentUser) return;
+            
+            try {
+                // Cargar gastos
+                const { data: expenses, error: expError } = await supabaseClient
+                    .from('expenses')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('date', { ascending: false });
+                
+                if (!expError && expenses) state.expenses = expenses;
+                
+                // Cargar retiros
+                const { data: withdrawals, error: withError } = await supabaseClient
+                    .from('savings_withdrawals')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('date', { ascending: false });
+                
+                if (!withError && withdrawals) state.savingsWithdrawals = withdrawals;
+                
+                // Cargar deudores
+                const { data: debtors, error: debtError } = await supabaseClient
+                    .from('debtors')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('date', { ascending: false });
+                
+                if (!debtError && debtors) state.debtors = debtors;
+                
+                // Cargar configuración del usuario
+                const { data: config, error: configError } = await supabaseClient
+                    .from('user_config')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                if (!configError && config) {
+                    state.monthlyIncome = config.monthly_income || '';
+                    state.creditCardIncome = config.credit_card_income || '';
+                    state.monthlyBudget = config.monthly_budget || '';
+                    state.projectionMonths = config.projection_months || '';
+                    state.monthlySavingsPlan = config.monthly_savings_plan || '';
+                    state.darkMode = config.dark_mode || false;
+                    state.badges = config.badges || [];
+                }
+                
+                state.lastSync = new Date().toISOString();
+                render();
+                showNotification('✅ Datos sincronizados');
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                showNotification('❌ Error al sincronizar', true);
+            }
+        }
+
+        async function saveToSupabase(table, data) {
+            if (!supabaseClient) {
+                syncQueue.push({ table, data, action: 'upsert' });
+                saveDataLocal();
+                return;
+            }
+            
+            try {
+                const { error } = await supabaseClient
+                    .from(table)
+                    .upsert(data);
+                
+                if (error) throw error;
+            } catch (error) {
+                console.error('Error guardando en Supabase:', error);
+                syncQueue.push({ table, data, action: 'upsert' });
+            }
+        }
+
+        async function deleteFromSupabase(table, id) {
+            if (!supabaseClient) {
+                syncQueue.push({ table, id, action: 'delete' });
+                saveDataLocal();
+                return;
+            }
+            
+            try {
+                const { error } = await supabaseClient
+                    .from(table)
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+            } catch (error) {
+                console.error('Error eliminando de Supabase:', error);
+                syncQueue.push({ table, id, action: 'delete' });
+            }
+        }
+
+        // ========== FUNCIONES DE AUTENTICACIÓN ==========
+        async function signUp(email, password) {
+            if (!supabaseClient) {
+                showNotification('❌ Supabase no configurado', true);
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                showNotification('✅ Cuenta creada. Verifica tu email.');
+            } catch (error) {
+                showNotification('❌ ' + error.message, true);
+            }
+        }
+
+        async function signIn(email, password) {
+            if (!supabaseClient) {
+                showNotification('❌ Supabase no configurado', true);
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                showNotification('✅ Sesión iniciada');
+            } catch (error) {
+                showNotification('❌ ' + error.message, true);
+            }
+        }
+
+        async function signOut() {
+            if (!supabaseClient) return;
+            
+            try {
+                await supabaseClient.auth.signOut();
+                currentUser = null;
+                state.userId = null;
+                showNotification('👋 Sesión cerrada');
+                render();
+            } catch (error) {
+                showNotification('❌ Error al cerrar sesión', true);
+            }
+        }
+
+        // ========== FUNCIONES DE UI ==========
+        function toggleDarkMode() {
+            state.darkMode = !state.darkMode;
+            document.body.classList.toggle('dark-mode', state.darkMode);
+            saveData();
+        }
+
+        function toggleSection(section) {
+            state[section] = !state[section];
+            const element = document.getElementById(section);
+            const button = document.getElementById(section + 'Btn');
+            if (element && button) {
+                element.classList.toggle('open');
+                button.classList.toggle('open');
+            }
+        }
+
+        function setTimeFilter(filter) {
+            state.timeFilter = filter;
+            render();
+        }
+
+        function getFilteredExpenses() {
+            const now = new Date();
+            let startDate;
+
+            switch(state.timeFilter) {
+                case 'week':
+                    startDate = new Date(now.setDate(now.getDate() - 7));
+                    break;
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'year':
+                    startDate = new Date(now.getFullYear(), 0, 1);
+                    break;
+                default:
+                    return state.expenses;
+            }
+
+            return state.expenses.filter(exp => new Date(exp.date) >= startDate);
+        }
+
+        // ========== FUNCIONES DE DATOS LOCALES ==========
+        function loadData() {
+            const savedData = localStorage.getItem('expenseTrackerData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                state.expenses = data.expenses || [];
+                state.savingsWithdrawals = data.savingsWithdrawals || [];
+                state.debtors = data.debtors || [];
+                state.monthlyIncome = data.monthlyIncome || '';
+                state.creditCardIncome = data.creditCardIncome || '';
+                state.monthlyBudget = data.monthlyBudget || '';
+                state.owedMoney = data.owedMoney || '';
+                state.projectionMonths = data.projectionMonths || '';
+                state.monthlySavingsPlan = data.monthlySavingsPlan || '';
+                state.darkMode = data.darkMode || false;
+                state.badges = data.badges || [];
+                state.lastMonthSavings = data.lastMonthSavings || 0;
+                syncQueue = data.syncQueue || [];
+            }
+            document.body.classList.toggle('dark-mode', state.darkMode);
+            checkBadges();
+            render();
+        }
+
+        function saveDataLocal() {
+            const dataToSave = {
+                expenses: state.expenses,
+                savingsWithdrawals: state.savingsWithdrawals,
+                debtors: state.debtors,
+                monthlyIncome: state.monthlyIncome,
+                creditCardIncome: state.creditCardIncome,
+                monthlyBudget: state.monthlyBudget,
+                owedMoney: state.owedMoney,
+                projectionMonths: state.projectionMonths,
+                monthlySavingsPlan: state.monthlySavingsPlan,
+                darkMode: state.darkMode,
+                badges: state.badges,
+                lastMonthSavings: state.lastMonthSavings,
+                syncQueue: syncQueue,
+                lastSaved: new Date().toISOString()
+            };
+            localStorage.setItem('expenseTrackerData', JSON.stringify(dataToSave));
+        }
+
+        function saveData() {
+            saveDataLocal();
+            
+            if (supabaseClient) {
+                // Guardar configuración en Supabase (modo público)
+                saveToSupabase('user_config', {
+                    id: 1, // ID fijo para configuración pública
+                    monthly_income: parseFloat(state.monthlyIncome) || 0,
+                    credit_card_income: parseFloat(state.creditCardIncome) || 0,
+                    monthly_budget: parseFloat(state.monthlyBudget) || 0,
+                    projection_months: parseInt(state.projectionMonths) || 0,
+                    monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0,
+                    dark_mode: state.darkMode,
+                    badges: state.badges
+                });
+            }
+            
+            showNotification('✅ Datos guardados correctamente');
+        }
+
+        function exportData() {
+            const dataToExport = {
+                expenses: state.expenses,
+                savingsWithdrawals: state.savingsWithdrawals,
+                debtors: state.debtors,
+                monthlyIncome: state.monthlyIncome,
+                creditCardIncome: state.creditCardIncome,
+                monthlyBudget: state.monthlyBudget,
+                owedMoney: state.owedMoney,
+                projectionMonths: state.projectionMonths,
+                monthlySavingsPlan: state.monthlySavingsPlan,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(dataToExport, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `gastos_backup_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('📥 Archivo descargado correctamente');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    state.expenses = data.expenses || [];
+                    state.savingsWithdrawals = data.savingsWithdrawals || [];
+                    state.debtors = data.debtors || [];
+                    state.monthlyIncome = data.monthlyIncome || '';
+                    state.creditCardIncome = data.creditCardIncome || '';
+                    state.monthlyBudget = data.monthlyBudget || '';
+                    state.owedMoney = data.owedMoney || '';
+                    state.projectionMonths = data.projectionMonths || '';
+                    state.monthlySavingsPlan = data.monthlySavingsPlan || '';
+                    
+                    saveData();
+                    render();
+                    showNotification('✅ Datos importados correctamente');
+                } catch (error) {
+                    showNotification('❌ Error al importar archivo', true);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function showNotification(message, isError = false) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-50 animate-slide-in ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function checkBadges() {
+            badgeDefinitions.forEach(badge => {
+                if (badge.condition() && !state.badges.includes(badge.id)) {
+                    state.badges.push(badge.id);
+                    showNotification(`🎉 ¡Nuevo logro desbloqueado: ${badge.name}!`);
+                }
+            });
+        }
+
+        function checkNoDaysNoLuxury(days) {
+            if (state.expenses.length === 0) return false;
+            const luxuryCategories = ['🎮 Entretenimiento', '🍕 Restaurantes', '🛍️ Compras', '✈️ Viajes'];
+            const now = new Date();
+            const daysAgo = new Date(now.setDate(now.getDate() - days));
+            
+            const recentLuxury = state.expenses.filter(exp => 
+                luxuryCategories.includes(exp.category) && new Date(exp.date) >= daysAgo
+            );
+            
+            return recentLuxury.length === 0 && state.expenses.some(exp => new Date(exp.date) >= daysAgo);
+        }
+
+        // ========== FUNCIONES DE GASTOS ==========
+        function addExpense() {
+            if (!state.description || !state.amount || parseFloat(state.amount) <= 0) {
+                showNotification('❌ Completa todos los campos correctamente', true);
+                return;
+            }
+
+            if (state.editingExpenseId) {
+                const index = state.expenses.findIndex(exp => exp.id === state.editingExpenseId);
+                if (index !== -1) {
+                    const updatedExpense = {
+                        id: state.editingExpenseId,
+                        description: state.description,
+                        amount: parseFloat(state.amount),
+                        category: state.category,
+                        date: state.date
+                    };
+                    state.expenses[index] = updatedExpense;
+                    saveToSupabase('expenses', updatedExpense);
+                    showNotification('✅ Gasto actualizado');
+                }
+                state.editingExpenseId = null;
+            } else {
+                const newExpense = {
+                    id: Date.now(),
+                    description: state.description,
+                    amount: parseFloat(state.amount),
+                    category: state.category,
+                    date: state.date
+                };
+                state.expenses.unshift(newExpense);
+                saveToSupabase('expenses', newExpense);
+                showNotification('✅ Gasto añadido');
+            }
+
+            state.description = '';
+            state.amount = '';
+            state.date = new Date().toISOString().split('T')[0];
+            
+            checkBadges();
+            saveDataLocal();
+            render();
+        }
+
+        function editExpense(id) {
+            const expense = state.expenses.find(exp => exp.id === id);
+            if (expense) {
+                state.editingExpenseId = id;
+                state.description = expense.description;
+                state.amount = expense.amount.toString();
+                state.category = expense.category;
+                state.date = expense.date;
+                render();
+                setTimeout(() => {
+                    document.getElementById('description').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+
+        function cancelEdit() {
+            state.editingExpenseId = null;
+            state.description = '';
+            state.amount = '';
+            state.category = '🍎 Alimentación';
+            state.date = new Date().toISOString().split('T')[0];
+            render();
+        }
+
+        function deleteExpense(id) {
+            state.expenses = state.expenses.filter(exp => exp.id !== id);
+            deleteFromSupabase('expenses', id);
+            checkBadges();
+            saveDataLocal();
+            render();
+            showNotification('🗑️ Gasto eliminado');
+        }
+
+        // ========== FUNCIONES DE CÁLCULO ==========
+        function getCategoryType(catName) {
+            const cat = categories.find(c => c.name === catName);
+            return cat ? cat.type : 'otros';
+        }
+
+        function getTotalByType() {
+            const totals = {
+                esencial: 0,
+                salida: 0,
+                ahorro: 0,
+                bizum: 0,
+                transferencia: 0,
+                otros: 0
+            };
+            const filtered = getFilteredExpenses();
+            filtered.forEach(exp => {
+                const type = getCategoryType(exp.category);
+                totals[type] += exp.amount;
+            });
+            return totals;
+        }
+
+        function getTotalByCategory() {
+            const totals = {};
+            const filtered = getFilteredExpenses();
+            categories.forEach(cat => {
+                totals[cat.name] = filtered
+                    .filter(exp => exp.category === cat.name)
+                    .reduce((sum, exp) => sum + exp.amount, 0);
+            });
+            return totals;
+        }
+
+        function getTotalMonth() {
+            return getFilteredExpenses().reduce((sum, exp) => sum + exp.amount, 0);
+        }
+
+        function getTotalIncome() {
+            return (parseFloat(state.monthlyIncome) || 0) + (parseFloat(state.creditCardIncome) || 0);
+        }
+
+        function getTotalWithdrawals() {
+            return state.savingsWithdrawals.reduce((sum, withdrawal) => sum + withdrawal.amount, 0);
+        }
+
+        function getNetSavings() {
+            const typeTotals = getTotalByType();
+            return typeTotals.ahorro - getTotalWithdrawals();
+        }
+
+        // ========== FUNCIONES DE RETIROS ==========
+        function addWithdrawal() {
+            if (!state.withdrawalDescription || !state.withdrawalAmount || parseFloat(state.withdrawalAmount) <= 0) {
+                showNotification('❌ Completa todos los campos correctamente', true);
+                return;
+            }
+
+            const totalSavings = getTotalByType().ahorro;
+            const currentWithdrawals = getTotalWithdrawals();
+            const availableSavings = totalSavings - currentWithdrawals;
+
+            if (parseFloat(state.withdrawalAmount) > availableSavings) {
+                showNotification('❌ No tienes suficiente ahorro disponible', true);
+                return;
+            }
+
+            const newWithdrawal = {
+                id: Date.now(),
+                description: state.withdrawalDescription,
+                amount: parseFloat(state.withdrawalAmount),
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            state.savingsWithdrawals.unshift(newWithdrawal);
+            saveToSupabase('savings_withdrawals', newWithdrawal);
+            state.withdrawalDescription = '';
+            state.withdrawalAmount = '';
+            
+            saveDataLocal();
+            render();
+            showNotification('✅ Retiro registrado');
+        }
+
+        function deleteWithdrawal(id) {
+            state.savingsWithdrawals = state.savingsWithdrawals.filter(w => w.id !== id);
+            deleteFromSupabase('savings_withdrawals', id);
+            saveDataLocal();
+            render();
+            showNotification('🗑️ Retiro eliminado');
+        }
+
+        // ========== FUNCIONES DE DEUDORES ==========
+        function getTotalOwed() {
+            return state.debtors.reduce((sum, debtor) => sum + debtor.amount, 0);
+        }
+
+        function addDebtor() {
+            if (!state.debtorName || !state.debtorAmount || parseFloat(state.debtorAmount) <= 0) {
+                showNotification('❌ Completa todos los campos correctamente', true);
+                return;
+            }
+
+            const newDebtor = {
+                id: Date.now(),
+                name: state.debtorName,
+                amount: parseFloat(state.debtorAmount),
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            state.debtors.unshift(newDebtor);
+            saveToSupabase('debtors', newDebtor);
+            state.debtorName = '';
+            state.debtorAmount = '';
+            
+            saveDataLocal();
+            render();
+            showNotification('✅ Deudor añadido');
+        }
+
+        function deleteDebtor(id) {
+            state.debtors = state.debtors.filter(d => d.id !== id);
+            deleteFromSupabase('debtors', id);
+            saveDataLocal();
+            render();
+            showNotification('🗑️ Deudor eliminado');
+        }
+
+        function remindDebtorWhatsApp(name, amount) {
+            const message = `Hola ${name}, te recuerdo que me debes ${formatEuro(amount)}. ¡Gracias! 😊`;
+            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        // ========== FUNCIONES DE PROYECCIONES ==========
+        function calculateProjections() {
+            const months = parseFloat(state.projectionMonths) || 0;
+            const monthlySavings = parseFloat(state.monthlySavingsPlan) || 0;
+            const currentSavings = getNetSavings();
+            const owed = getTotalOwed();
+            const remainingBalance = getTotalIncome() - getTotalMonth();
+            
+            const validMonthlySavings = monthlySavings <= remainingBalance ? monthlySavings : remainingBalance;
+            
+            const projectionFromZero = validMonthlySavings * months;
+            const projectionWithCurrent = currentSavings + projectionFromZero;
+            const projectionWithOwed = projectionWithCurrent + owed;
+            
+            return {
+                fromZero: projectionFromZero,
+                withCurrent: projectionWithCurrent,
+                withoutOwed: projectionWithCurrent,
+                withOwed: projectionWithOwed,
+                validMonthlySavings
+            };
+        }
+
+        function calculateMonthEndPrediction() {
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const currentDay = now.getDate();
+            const daysLeft = daysInMonth - currentDay;
+            
+            if (daysLeft <= 0) return getTotalIncome() - getTotalMonth();
+            
+            const avgDailyExpense = getTotalMonth() / currentDay;
+            const predictedTotalExpense = getTotalMonth() + (avgDailyExpense * daysLeft);
+            
+            return getTotalIncome() - predictedTotalExpense;
+        }
+
+        function getFinancialHealthMessage() {
+            const netSavings = getNetSavings();
+            const totalIncome = getTotalIncome();
+            const totalExpenses = getTotalMonth();
+            const savingsRate = totalIncome > 0 ? (netSavings / totalIncome) * 100 : 0;
+            const typeTotals = getTotalByType();
+            
+            let messages = [];
+            
+            if (savingsRate >= 20) {
+                messages.push('🌟 ¡Excelente! Estás ahorrando más del 20% de tus ingresos');
+            } else if (savingsRate >= 10) {
+                messages.push('👍 Buen trabajo, estás ahorrando un ' + savingsRate.toFixed(1) + '%');
+            } else if (savingsRate > 0) {
+                messages.push('⚠️ Intenta aumentar tu tasa de ahorro (actual: ' + savingsRate.toFixed(1) + '%)');
+            } else if (totalIncome > 0) {
+                messages.push('❗ No estás ahorrando este mes. ¡Intenta guardar algo!');
+            }
+            
+            if (typeTotals.salida > totalIncome * 0.3) {
+                messages.push('💡 Tus gastos en salidas superan el 30% de tus ingresos');
+            }
+            
+            if (state.lastMonthSavings > 0 && netSavings > state.lastMonthSavings) {
+                const increase = ((netSavings - state.lastMonthSavings) / state.lastMonthSavings * 100).toFixed(1);
+                messages.push(`📈 ¡Has ahorrado un ${increase}% más que el mes pasado!`);
+            }
+            
+            return messages;
+        }
+
+        function getBudgetProgress() {
+            const budget = parseFloat(state.monthlyBudget) || 0;
+            if (budget === 0) return { percentage: 0, color: 'bg-gray-300' };
+            
+            const spent = getTotalMonth();
+            const percentage = Math.min((spent / budget) * 100, 100);
+            
+            let color = 'bg-green-500';
+            if (percentage >= 90) color = 'bg-red-500';
+            else if (percentage >= 70) color = 'bg-yellow-500';
+            
+            return { percentage, color, spent, budget };
+        }
+
+        // ========== GRÁFICO ==========
+        let chartInstance = null;
+        function renderChart() {
+            const ctx = document.getElementById('expenseChart');
+            if (!ctx) return;
+            
+            const totals = getTotalByCategory();
+            const labels = [];
+            const data = [];
+            const colors = [];
+            
+            const colorPalette = [
+                '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#ef4444',
+                '#f59e0b', '#f97316', '#d946ef', '#06b6d4', '#14b8a6',
+                '#6366f1', '#8b5cf6', '#64748b', '#475569'
+            ];
+            
+            categories.forEach((cat, idx) => {
+                if (totals[cat.name] > 0) {
+                    labels.push(cat.displayName);
+                    data.push(totals[cat.name]);
+                    colors.push(colorPalette[idx % colorPalette.length]);
+                }
+            });
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 12,
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${context.label}: ${formatEuro(value)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTotalsOnly() {
+            const monthTotal = getTotalMonth();
+            const remainingBalance = getTotalIncome() - monthTotal;
+
+            const saldoElement = document.querySelector('.saldo-display');
+            if (saldoElement) {
+                saldoElement.className = `saldo-display amount-display-large font-bold ${remainingBalance >= 0 ? 'text-green-600' : 'text-red-600'}`;
+                saldoElement.textContent = formatEuro(remainingBalance);
+            }
+        }
+
+        // ========== RENDER PRINCIPAL ==========
+        function render() {
+            const typeTotals = getTotalByType();
+            const totals = getTotalByCategory();
+            const monthTotal = getTotalMonth();
+            const remainingBalance = getTotalIncome() - monthTotal;
+            const projections = calculateProjections();
+            const budgetProgress = getBudgetProgress();
+            const prediction = calculateMonthEndPrediction();
+            const healthMessages = getFinancialHealthMessage();
+            const earnedBadges = badgeDefinitions.filter(b => state.badges.includes(b.id));
+
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <!-- Header -->
+                <div class="bg-white rounded-2xl shadow-xl p-5 mb-4 card animate-slide-in">
+                    <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
+                        <div class="flex-1 min-w-[280px]">
+                            <div class="flex items-center gap-3 mb-1">
+                                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+                                    💰 Organizador de Gastos
+                                </h1>
+                                <div class="connection-status ${isOnline ? 'online' : 'offline'}">
+                                    <span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>
+                                    ${isOnline ? 'Online' : 'Local'}
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-3">Controla tus finanzas mensuales</p>
+                            
+                            <!-- Filtros de tiempo -->
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="setTimeFilter('week')" class="time-filter px-3 py-2 rounded-lg transition font-medium text-sm ${state.timeFilter === 'week' ? 'time-filter-active' : 'text-gray-700'}">
+                                    📅 Semana
+                                </button>
+                                <button onclick="setTimeFilter('month')" class="time-filter px-3 py-2 rounded-lg transition font-medium text-sm ${state.timeFilter === 'month' ? 'time-filter-active' : 'text-gray-700'}">
+                                    📅 Mes
+                                </button>
+                                <button onclick="setTimeFilter('year')" class="time-filter px-3 py-2 rounded-lg transition font-medium text-sm ${state.timeFilter === 'year' ? 'time-filter-active' : 'text-gray-700'}">
+                                    📅 Año
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="toggleDarkMode()" class="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-3 py-2 rounded-lg hover:from-gray-700 hover:to-gray-800 transition font-medium shadow-md text-sm">
+                                ${state.darkMode ? '☀️' : '🌙'}
+                            </button>
+                            <button onclick="saveData()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-2 rounded-lg hover:from-green-600 hover:to-emerald-700 transition font-medium shadow-md text-sm">
+                                💾
+                            </button>
+                            <button onclick="exportData()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition font-medium shadow-md text-sm">
+                                📥
+                            </button>
+                            <label class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-3 py-2 rounded-lg hover:from-purple-600 hover:to-pink-700 transition font-medium cursor-pointer shadow-md text-sm">
+                                📤
+                                <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
+                            </label>
+                        </div>
+                    </div>
+                    
+                    ${earnedBadges.length > 0 ? `
+                        <div class="mb-4 p-3 bg-gradient-to-r from-yellow-50 via-amber-50 to-orange-50 rounded-lg border-2 border-yellow-200 animate-fade-in">
+                            <h3 class="text-sm font-bold text-gray-800 mb-2">🏆 Logros</h3>
+                            <div class="flex gap-2 flex-wrap">
+                                ${earnedBadges.map(badge => `
+                                    <div class="badge-glow px-3 py-1 bg-white rounded-full border-2 border-yellow-400 text-xs font-medium" title="${badge.name}">
+                                        ${badge.icon} ${badge.name}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${healthMessages.length > 0 ? `
+                        <div class="mb-4 space-y-2 animate-fade-in">
+                            ${healthMessages.map(msg => `
+                                <div class="p-2 bg-gradient-to-r from-blue-50 to-cyan-50 border-l-4 border-blue-400 rounded">
+                                    <p class="text-xs font-medium text-gray-800">${msg}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        <div>
+                            <label class="text-xs font-medium text-gray-700 block mb-1">Ingresos del mes:</label>
+                            <input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0.00" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-gray-700 block mb-1">Ingresos tarjeta:</label>
+                            <input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0.00" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent transition text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-gray-700 block mb-1">Presupuesto:</label>
+                            <input type="number" id="monthlyBudget" value="${state.monthlyBudget}" placeholder="0.00" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent transition text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-gray-700 block mb-1">Me deben:</label>
+                            <div class="px-3 py-2 bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-300 rounded-lg font-bold text-emerald-700 text-sm">
+                                ${formatEuro(getTotalOwed())}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${state.monthlyBudget ? `
+                        <div class="mb-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-xs font-medium text-gray-700">Progreso del Presupuesto</span>
+                                <span class="text-xs font-bold text-gray-800">${formatEuro(budgetProgress.spent)} / ${formatEuro(budgetProgress.budget)}</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                <div class="progress-bar h-3 rounded-full ${budgetProgress.color}" style="width: ${budgetProgress.percentage}%"></div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="p-3 rounded-lg border-2 ${prediction >= 0 ? 'border-green-300 bg-gradient-to-r from-green-50 to-emerald-50' : 'border-red-300 bg-gradient-to-r from-red-50 to-orange-50'}">
+                        <div class="flex flex-wrap justify-between items-center gap-2">
+                            <div>
+                                <h3 class="text-xs font-bold text-gray-800">📊 Predicción Fin de Mes</h3>
+                            </div>
+                            <p class="text-lg font-bold ${prediction >= 0 ? 'text-green-700' : 'text-red-700'}">
+                                ${prediction >= 0 ? '+' : ''}${formatEuro(prediction)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== TARJETAS DE TOTALES CORREGIDAS ========== -->
+                <div class="totals-grid mb-4">
+                    <!-- Saldo Disponible - Tarjeta principal más grande -->
+                    <div class="total-card rounded-xl shadow-lg p-4 border-l-4 border-indigo-500 animate-slide-in col-span-2 md:col-span-1">
+                        <p class="text-gray-500 text-xs mb-1">Saldo Disponible</p>
+                        <p class="saldo-display amount-display-large font-bold ${remainingBalance >= 0 ? 'text-green-600' : 'text-red-600'}">
+                            ${formatEuro(remainingBalance)}
+                        </p>
+                    </div>
+
+                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-green-500 animate-slide-in">
+                        <p class="text-gray-500 text-xs">Esenciales</p>
+                        <p class="amount-display font-bold text-green-700">${formatEuro(typeTotals.esencial)}</p>
+                    </div>
+
+                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-pink-500 animate-slide-in">
+                        <p class="text-gray-500 text-xs">Salidas</p>
+                        <p class="amount-display font-bold text-pink-700">${formatEuro(typeTotals.salida)}</p>
+                    </div>
+
+                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-emerald-500 animate-slide-in">
+                        <p class="text-gray-500 text-xs">Ahorro Neto</p>
+                        <p class="amount-display font-bold text-emerald-700">${formatEuro(getNetSavings())}</p>
+                    </div>
+
+                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-indigo-500 animate-slide-in">
+                        <p class="text-gray-500 text-xs">Bizums</p>
+                        <p class="amount-display font-bold text-indigo-700">${formatEuro(typeTotals.bizum)}</p>
+                    </div>
+
+                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-violet-500 animate-slide-in">
+                        <p class="text-gray-500 text-xs">Transfer.</p>
+                        <p class="amount-display font-bold text-violet-700">${formatEuro(typeTotals.transferencia)}</p>
+                    </div>
+
+                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-gray-500 animate-slide-in">
+                        <p class="text-gray-500 text-xs">Otros</p>
+                        <p class="amount-display font-bold text-gray-700">${formatEuro(typeTotals.otros)}</p>
+                    </div>
+                </div>
+
+                <!-- Gráfico de distribución -->
+                ${Object.values(totals).some(v => v > 0) ? `
+                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in mb-4">
+                        <h2 class="text-lg font-bold text-gray-800 mb-3">📊 Distribución de Gastos</h2>
+                        <div style="height: 280px; position: relative;">
+                            <canvas id="expenseChart"></canvas>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Fila principal: Formulario | Categorías | Historial -->
+                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                    <!-- Formulario -->
+                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in ${state.editingExpenseId ? 'border-4 border-amber-400' : ''}">
+                        <h2 class="text-lg font-bold text-gray-800 mb-3">${state.editingExpenseId ? '✏️ Editar Gasto' : '➕ Nuevo Gasto'}</h2>
+                        <div class="space-y-3">
+                            <input type="text" id="description" value="${state.description}" placeholder="Descripción" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition" />
+                            <input type="number" id="amount" value="${state.amount}" placeholder="0.00" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition" />
+                            <select id="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                                ${categories.map(cat => `<option value="${cat.name}" ${state.category === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
+                            </select>
+                            <input type="date" id="date" value="${state.date}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition" />
+                            <div class="flex gap-2">
+                                <button onclick="addExpense()" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition font-medium shadow-md">
+                                    ${state.editingExpenseId ? '✅ Actualizar' : '➕ Agregar'}
+                                </button>
+                                ${state.editingExpenseId ? `<button onclick="cancelEdit()" class="px-4 bg-gray-400 text-white py-3 rounded-lg hover:bg-gray-500 transition font-medium shadow-md">❌</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gastos por Categoría -->
+                    <div class="bg-white rounded-xl shadow-lg p-5 max-h-[500px] overflow-y-auto custom-scroll card animate-slide-in">
+                        <h2 class="text-lg font-bold text-gray-800 mb-3">📋 Por Categoría</h2>
+                        ${renderCategorySections(totals)}
+                    </div>
+
+                    <!-- Historial de Gastos -->
+                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in">
+                        <h2 class="text-lg font-bold text-gray-800 mb-3">📝 Historial</h2>
+                        <div class="space-y-2 max-h-[380px] overflow-y-auto custom-scroll">
+                            ${getFilteredExpenses().length === 0 ? `
+                                <p class="text-gray-400 text-center py-8">No hay gastos</p>
+                            ` : getFilteredExpenses().slice(0, 20).map(exp => `
+                                <div class="expense-item flex items-center justify-between p-2 rounded-lg transition">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="px-2 py-0.5 rounded-full text-xs font-medium ${categoryColors[exp.category]} truncate">
+                                                ${exp.category.split(' ')[0]}
+                                            </span>
+                                            <span class="font-medium text-gray-800 text-sm truncate">${exp.description}</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500">${exp.date}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 flex-shrink-0">
+                                        <span class="font-bold text-sm text-gray-800">${formatEuro(exp.amount)}</span>
+                                        <button onclick="editExpense(${exp.id})" class="text-blue-500 hover:text-blue-700 transition p-1 hover:bg-blue-50 rounded" title="Editar">✏️</button>
+                                        <button onclick="handleDeleteExpense(${exp.id})" class="text-red-500 hover:text-red-700 transition p-1 hover:bg-red-50 rounded" title="Eliminar">🗑️</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        ${getFilteredExpenses().length > 0 ? `
+                            <div class="mt-3 pt-3 border-t-2 border-gray-200">
+                                <div class="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-lg border-2 border-indigo-200">
+                                    <span class="text-sm font-bold text-gray-800">💰 TOTAL:</span>
+                                    <span class="amount-display-large font-bold text-indigo-700">${formatEuro(monthTotal)}</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <!-- Secciones colapsables -->
+                <div class="grid md:grid-cols-3 gap-4">
+                    <!-- Ahorros -->
+                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in-right">
+                        <button onclick="toggleSection('showSavingsSection')" class="w-full flex justify-between items-center mb-3">
+                            <h2 class="text-lg font-bold text-gray-800">💸 Ahorros</h2>
+                            <span id="showSavingsSectionBtn" class="toggle-btn text-xl ${state.showSavingsSection ? 'open' : ''}">▼</span>
+                        </button>
+                        <div id="showSavingsSection" class="collapsible-content ${state.showSavingsSection ? 'open' : ''} custom-scroll">
+                            <div class="mb-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
+                                <p class="text-xs text-gray-600">Total: <span class="font-bold text-emerald-700">${formatEuro(typeTotals.ahorro)}</span></p>
+                                <p class="text-xs text-gray-600">Retiros: <span class="font-bold text-red-600">-${formatEuro(getTotalWithdrawals())}</span></p>
+                                <p class="text-sm font-bold text-emerald-700 mt-1">Disponible: ${formatEuro(getNetSavings())}</p>
+                            </div>
+                            <div class="space-y-2 mb-3">
+                                <input type="text" id="withdrawalDescription" value="${state.withdrawalDescription}" placeholder="Motivo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 text-sm transition" />
+                                <input type="number" id="withdrawalAmount" value="${state.withdrawalAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 text-sm transition" />
+                                <button onclick="addWithdrawal()" class="w-full bg-gradient-to-r from-red-500 to-orange-600 text-white py-2 rounded-lg hover:from-red-600 hover:to-orange-700 transition shadow-md text-sm">➖ Registrar Retiro</button>
+                            </div>
+                            ${state.savingsWithdrawals.length > 0 ? `
+                                <div class="space-y-2">
+                                    ${state.savingsWithdrawals.map(w => `
+                                        <div class="flex justify-between items-center p-2 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="font-medium text-xs truncate">${w.description}</p>
+                                                <p class="text-xs text-gray-500">${w.date}</p>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <span class="font-bold text-red-600 text-sm">-${formatEuro(w.amount)}</span>
+                                                <button onclick="handleDeleteWithdrawal(${w.id})" class="text-red-500 hover:text-red-700 p-1">🗑️</button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : '<p class="text-gray-400 text-xs text-center py-3">Sin retiros</p>'}
+                        </div>
+                    </div>
+
+                    <!-- Deudas -->
+                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in-right" style="animation-delay: 0.1s;">
+                        <button onclick="toggleSection('showDebtorsSection')" class="w-full flex justify-between items-center mb-3">
+                            <h2 class="text-lg font-bold text-gray-800">💵 Deudas</h2>
+                            <span id="showDebtorsSectionBtn" class="toggle-btn text-xl ${state.showDebtorsSection ? 'open' : ''}">▼</span>
+                        </button>
+                        <div id="showDebtorsSection" class="collapsible-content ${state.showDebtorsSection ? 'open' : ''} custom-scroll">
+                            <div class="mb-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
+                                <p class="text-xs text-gray-600">Total que me deben:</p>
+                                <p class="text-lg font-bold text-emerald-700">${formatEuro(getTotalOwed())}</p>
+                            </div>
+                            <div class="space-y-2 mb-3">
+                                <input type="text" id="debtorName" value="${state.debtorName}" placeholder="Nombre" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 text-sm transition" />
+                                <input type="number" id="debtorAmount" value="${state.debtorAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 text-sm transition" />
+                                <button onclick="addDebtor()" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white py-2 rounded-lg hover:from-emerald-600 hover:to-green-700 transition shadow-md text-sm">➕ Añadir Deudor</button>
+                            </div>
+                            ${state.debtors.length > 0 ? `
+                                <div class="space-y-2">
+                                    ${state.debtors.map(d => `
+                                        <div class="flex justify-between items-center p-2 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="font-medium text-xs truncate">${d.name}</p>
+                                                <p class="text-xs text-gray-500">${d.date}</p>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <span class="font-bold text-emerald-700 text-sm">${formatEuro(d.amount)}</span>
+                                                <button onclick="remindDebtorWhatsApp('${d.name}', ${d.amount})" class="text-green-600 hover:text-green-800 p-1" title="WhatsApp">📱</button>
+                                                <button onclick="handleDeleteDebtor(${d.id})" class="text-red-500 hover:text-red-700 p-1">🗑️</button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : '<p class="text-gray-400 text-xs text-center py-3">Sin deudas</p>'}
+                        </div>
+                    </div>
+
+                    <!-- Proyecciones -->
+                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in-right" style="animation-delay: 0.2s;">
+                        <button onclick="toggleSection('showProjectionsSection')" class="w-full flex justify-between items-center mb-3">
+                            <h2 class="text-lg font-bold text-gray-800">📈 Proyecciones</h2>
+                            <span id="showProjectionsSectionBtn" class="toggle-btn text-xl ${state.showProjectionsSection ? 'open' : ''}">▼</span>
+                        </button>
+                        <div id="showProjectionsSection" class="collapsible-content ${state.showProjectionsSection ? 'open' : ''} custom-scroll">
+                            <div class="space-y-2 mb-3">
+                                <input type="number" id="projectionMonths" value="${state.projectionMonths}" placeholder="Meses" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 text-sm transition" />
+                                <input type="number" id="monthlySavingsPlan" value="${state.monthlySavingsPlan}" placeholder="Ahorro mensual" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 text-sm transition" />
+                            </div>
+                            ${state.projectionMonths && state.monthlySavingsPlan ? `
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-2 rounded-lg border border-blue-200">
+                                        <p class="text-xs font-semibold text-blue-800">Desde cero</p>
+                                        <p class="amount-display font-bold text-blue-900">${formatEuro(projections.fromZero)}</p>
+                                    </div>
+                                    <div class="bg-gradient-to-br from-emerald-50 to-green-50 p-2 rounded-lg border border-emerald-200">
+                                        <p class="text-xs font-semibold text-emerald-800">Con actual</p>
+                                        <p class="amount-display font-bold text-emerald-900">${formatEuro(projections.withCurrent)}</p>
+                                    </div>
+                                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-2 rounded-lg border border-purple-200">
+                                        <p class="text-xs font-semibold text-purple-800">Sin prestado</p>
+                                        <p class="amount-display font-bold text-purple-900">${formatEuro(projections.withoutOwed)}</p>
+                                    </div>
+                                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-2 rounded-lg border border-amber-200">
+                                        <p class="text-xs font-semibold text-amber-800">Si pagan</p>
+                                        <p class="amount-display font-bold text-amber-900">${formatEuro(projections.withOwed)}</p>
+                                    </div>
+                                </div>
+                            ` : '<p class="text-gray-400 text-xs text-center py-3">Completa los campos</p>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Event listeners
+            ['monthlyIncome', 'creditCardIncome', 'monthlyBudget'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', (e) => {
+                    state[id] = e.target.value;
+                    if (id !== 'monthlyBudget') updateTotalsOnly();
+                    else render();
+                });
+            });
+
+            ['projectionMonths', 'monthlySavingsPlan'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', (e) => {
+                    state[id] = e.target.value;
+                    render();
+                });
+            });
+
+            ['description', 'amount', 'withdrawalDescription', 'withdrawalAmount', 'debtorName', 'debtorAmount'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', (e) => state[id] = e.target.value);
+            });
+
+            const categoryEl = document.getElementById('category');
+            if (categoryEl) categoryEl.addEventListener('change', (e) => state.category = e.target.value);
+
+            const dateEl = document.getElementById('date');
+            if (dateEl) dateEl.addEventListener('change', (e) => state.date = e.target.value);
+
+            setTimeout(() => renderChart(), 100);
+        }
+
+        function renderCategorySections(totals) {
+            const sections = [
+                { title: 'Esenciales', type: 'esencial', color: 'green' },
+                { title: 'Salidas', type: 'salida', color: 'pink' },
+                { title: 'Ahorro', type: 'ahorro', color: 'emerald' },
+                { title: 'Bizums', type: 'bizum', color: 'indigo' },
+                { title: 'Transferencias', type: 'transferencia', color: 'violet' },
+                { title: 'Otros', type: 'otros', color: 'gray' }
+            ];
+
+            return sections.map(section => {
+                const categoryList = categories.filter(c => c.type === section.type);
+                const hasExpenses = categoryList.some(cat => totals[cat.name] > 0);
+                if (!hasExpenses) return '';
+
+                return `
+                    <div class="mb-3">
+                        <h3 class="text-xs font-semibold text-${section.color}-700 mb-2 uppercase">${section.title}</h3>
+                        <div class="space-y-1">
+                            ${categoryList.map(cat => {
+                                if (totals[cat.name] <= 0) return '';
+                                return `
+                                    <div class="category-item flex items-center justify-between p-2 bg-gradient-to-r from-${section.color}-50 to-white rounded-lg">
+                                        <span class="text-xs font-medium truncate">${cat.icon} ${cat.displayName}</span>
+                                        <span class="font-bold text-gray-800 text-sm">${formatEuro(totals[cat.name])}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleDeleteExpense(id) {
+            if (confirm('¿Eliminar este gasto?')) deleteExpense(id);
+        }
+
+        function handleDeleteWithdrawal(id) {
+            if (confirm('¿Eliminar este retiro?')) deleteWithdrawal(id);
+        }
+
+        function handleDeleteDebtor(id) {
+            if (confirm('¿Eliminar este deudor?')) deleteDebtor(id);
+        }
+
+        // Exponer funciones globalmente para API externa
+        window.ExpenseTracker = {
+            initSupabase,
+            signUp,
+            signIn,
+            signOut,
+            getState: () => state,
+            loadDataFromSupabase,
+            saveData,
+            exportData
+        };
+
+        // Auto-inicializar con Supabase
+        async function autoInit() {
+            loadData();
+            
+            if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+                try {
+                    if (!window.supabase) {
+                        await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+                    }
+                    
+                    supabaseClient = window.supabase.createClient(
+                        SUPABASE_CONFIG.url, 
+                        SUPABASE_CONFIG.anonKey
+                    );
+                    SUPABASE_CONFIG.initialized = true;
+                    isOnline = true;
+                    
+                    // Usar ID público fijo para modo sin autenticación
+                    state.userId = 'public-user';
+                    currentUser = { id: 'public-user' };
+                    
+                    // Cargar datos desde Supabase
+                    await loadDataFromSupabasePublic();
+                    
+                    render();
+                    showNotification('✅ Conectado a Supabase');
+                } catch (error) {
+                    console.error('Error auto-init:', error);
+                    isOnline = false;
+                    render();
+                }
+            }
+        }
+
+        // Cargar datos sin autenticación
+        async function loadDataFromSupabasePublic() {
+            if (!supabaseClient) return;
+            
+            try {
+                const { data: expenses, error: expError } = await supabaseClient
+                    .from('expenses')
+                    .select('*')
+                    .order('date', { ascending: false });
+                
+                if (!expError && expenses) state.expenses = expenses;
+                
+                const { data: withdrawals, error: withError } = await supabaseClient
+                    .from('savings_withdrawals')
+                    .select('*')
+                    .order('date', { ascending: false });
+                
+                if (!withError && withdrawals) state.savingsWithdrawals = withdrawals;
+                
+                const { data: debtors, error: debtError } = await supabaseClient
+                    .from('debtors')
+                    .select('*')
+                    .order('date', { ascending: false });
+                
+                if (!debtError && debtors) state.debtors = debtors;
+                
+                const { data: config, error: configError } = await supabaseClient
+                    .from('user_config')
+                    .select('*')
+                    .limit(1)
+                    .single();
+                
+                if (!configError && config) {
+                    state.monthlyIncome = config.monthly_income || '';
+                    state.creditCardIncome = config.credit_card_income || '';
+                    state.monthlyBudget = config.monthly_budget || '';
+                    state.projectionMonths = config.projection_months || '';
+                    state.monthlySavingsPlan = config.monthly_savings_plan || '';
+                    state.darkMode = config.dark_mode || false;
+                    state.badges = config.badges || [];
+                }
+                
+                state.lastSync = new Date().toISOString();
+                checkBadges();
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+            }
+        }
+
+        // Inicializar
+        autoInit();
+    </script>
+
+</body>
+</html>

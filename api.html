@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API - Configuración Supabase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
+        
+        * {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        code, pre, .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .code-block {
+            background: #1e1e2e;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .code-header {
+            background: #313244;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .code-content {
+            padding: 16px;
+            overflow-x: auto;
+            color: #cdd6f4;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .code-content .keyword { color: #cba6f7; }
+        .code-content .string { color: #a6e3a1; }
+        .code-content .comment { color: #6c7086; }
+        .code-content .function { color: #89b4fa; }
+        .code-content .number { color: #fab387; }
+        
+        .copy-btn {
+            background: #45475a;
+            color: #cdd6f4;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: #585b70;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .tab-btn {
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    <div class="container mx-auto p-6 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">🔧 API & Configuración</h1>
+            <p class="text-purple-200">Conecta tu Organizador de Gastos con Supabase</p>
+        </div>
+
+        <!-- Status Card -->
+        <div id="statusCard" class="card rounded-2xl shadow-2xl p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div id="statusDot" class="status-dot bg-gray-400"></div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Estado de Conexión</h2>
+                        <p id="statusText" class="text-gray-600">No configurado</p>
+                    </div>
+                </div>
+                <div id="userInfo" class="hidden">
+                    <p class="text-sm text-gray-600">Usuario: <span id="userEmail" class="font-bold"></span></p>
+                    <button onclick="signOut()" class="text-red-500 hover:text-red-700 text-sm">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6 flex-wrap">
+            <button onclick="showTab('config')" id="tab-config" class="tab-btn active px-6 py-3 rounded-xl font-medium">
+                ⚙️ Configuración
+            </button>
+            <button onclick="showTab('schema')" id="tab-schema" class="tab-btn bg-white/80 px-6 py-3 rounded-xl font-medium">
+                🗄️ Esquema SQL
+            </button>
+            <button onclick="showTab('auth')" id="tab-auth" class="tab-btn bg-white/80 px-6 py-3 rounded-xl font-medium">
+                🔐 Autenticación
+            </button>
+            <button onclick="showTab('api')" id="tab-api" class="tab-btn bg-white/80 px-6 py-3 rounded-xl font-medium">
+                📡 API REST
+            </button>
+            <button onclick="showTab('test')" id="tab-test" class="tab-btn bg-white/80 px-6 py-3 rounded-xl font-medium">
+                🧪 Test
+            </button>
+        </div>
+
+        <!-- Content Panels -->
+        <div id="content-config" class="card rounded-2xl shadow-2xl p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">⚙️ Configuración de Supabase</h2>
+            
+            <!-- Pasos -->
+            <div class="space-y-6">
+                <div class="flex gap-4 items-start">
+                    <div class="step-number">1</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 mb-2">Crear cuenta en Supabase</h3>
+                        <p class="text-gray-600 mb-3">Ve a <a href="https://supabase.com" target="_blank" class="text-indigo-600 hover:underline">supabase.com</a> y crea una cuenta gratuita.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start">
+                    <div class="step-number">2</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 mb-2">Crear un nuevo proyecto</h3>
+                        <p class="text-gray-600 mb-3">Crea un proyecto nuevo y espera a que se inicialice (1-2 minutos).</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start">
+                    <div class="step-number">3</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 mb-2">Ejecutar el esquema SQL</h3>
+                        <p class="text-gray-600 mb-3">Ve a la pestaña "Esquema SQL" y copia el código en el Editor SQL de Supabase.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start">
+                    <div class="step-number">4</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 mb-2">Obtener credenciales</h3>
+                        <p class="text-gray-600 mb-3">En tu proyecto de Supabase, ve a Settings → API y copia:</p>
+                        <ul class="list-disc list-inside text-gray-600 ml-4">
+                            <li>Project URL</li>
+                            <li>anon public key</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start">
+                    <div class="step-number">5</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 mb-2">Configurar credenciales</h3>
+                        <div class="space-y-4 mt-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Supabase URL:</label>
+                                <input type="text" id="supabaseUrl" placeholder="https://xxxxx.supabase.co" 
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition mono text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Anon Key:</label>
+                                <input type="password" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." 
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition mono text-sm">
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="saveConfig()" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition shadow-lg">
+                                    💾 Guardar Configuración
+                                </button>
+                                <button onclick="testConnection()" class="px-6 bg-emerald-500 text-white py-3 rounded-xl font-medium hover:bg-emerald-600 transition shadow-lg">
+                                    🔌 Probar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-schema" class="card rounded-2xl shadow-2xl p-6 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🗄️ Esquema de Base de Datos</h2>
+            <p class="text-gray-600 mb-6">Copia este SQL y ejecútalo en el Editor SQL de tu proyecto Supabase.</p>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="text-gray-400 text-sm">schema-public.sql</span>
+                    <button onclick="copyCode('schemaCode')" class="copy-btn">📋 Copiar</button>
+                </div>
+                <pre class="code-content" id="schemaCode">
+<span class="comment">-- ================================================</span>
+<span class="comment">-- ORGANIZADOR DE GASTOS - ESQUEMA SUPABASE</span>
+<span class="comment">-- ACCESO PÚBLICO (SIN AUTENTICACIÓN)</span>
+<span class="comment">-- ================================================</span>
+
+<span class="comment">-- Eliminar tablas existentes si las hay</span>
+<span class="keyword">DROP TABLE IF EXISTS</span> expenses <span class="keyword">CASCADE</span>;
+<span class="keyword">DROP TABLE IF EXISTS</span> savings_withdrawals <span class="keyword">CASCADE</span>;
+<span class="keyword">DROP TABLE IF EXISTS</span> debtors <span class="keyword">CASCADE</span>;
+<span class="keyword">DROP TABLE IF EXISTS</span> user_config <span class="keyword">CASCADE</span>;
+
+<span class="comment">-- ================================================</span>
+<span class="comment">-- TABLAS (SIN user_id para acceso público)</span>
+<span class="comment">-- ================================================</span>
+
+<span class="keyword">CREATE TABLE</span> <span class="function">expenses</span> (
+    id <span class="keyword">BIGINT PRIMARY KEY</span>,
+    description <span class="keyword">TEXT NOT NULL</span>,
+    amount <span class="keyword">DECIMAL</span>(<span class="number">12</span>,<span class="number">2</span>) <span class="keyword">NOT NULL</span>,
+    category <span class="keyword">TEXT NOT NULL</span>,
+    date <span class="keyword">DATE NOT NULL</span>,
+    created_at <span class="keyword">TIMESTAMPTZ DEFAULT</span> <span class="function">NOW</span>(),
+    updated_at <span class="keyword">TIMESTAMPTZ DEFAULT</span> <span class="function">NOW</span>()
+);
+
+<span class="keyword">CREATE TABLE</span> <span class="function">savings_withdrawals</span> (
+    id <span class="keyword">BIGINT PRIMARY KEY</span>,
+    description <span class="keyword">TEXT NOT NULL</span>,
+    amount <span class="keyword">DECIMAL</span>(<span class="number">12</span>,<span class="number">2</span>) <span class="keyword">NOT NULL</span>,
+    date <span class="keyword">DATE NOT NULL</span>,
+    created_at <span class="keyword">TIMESTAMPTZ DEFAULT</span> <span class="function">NOW</span>()
+);
+
+<span class="keyword">CREATE TABLE</span> <span class="function">debtors</span> (
+    id <span class="keyword">BIGINT PRIMARY KEY</span>,
+    name <span class="keyword">TEXT NOT NULL</span>,
+    amount <span class="keyword">DECIMAL</span>(<span class="number">12</span>,<span class="number">2</span>) <span class="keyword">NOT NULL</span>,
+    date <span class="keyword">DATE NOT NULL</span>,
+    created_at <span class="keyword">TIMESTAMPTZ DEFAULT</span> <span class="function">NOW</span>()
+);
+
+<span class="keyword">CREATE TABLE</span> <span class="function">user_config</span> (
+    id <span class="keyword">INTEGER PRIMARY KEY DEFAULT</span> <span class="number">1</span>,
+    monthly_income <span class="keyword">DECIMAL</span>(<span class="number">12</span>,<span class="number">2</span>) <span class="keyword">DEFAULT</span> <span class="number">0</span>,
+    credit_card_income <span class="keyword">DECIMAL</span>(<span class="number">12</span>,<span class="number">2</span>) <span class="keyword">DEFAULT</span> <span class="number">0</span>,
+    monthly_budget <span class="keyword">DECIMAL</span>(<span class="number">12</span>,<span class="number">2</span>) <span class="keyword">DEFAULT</span> <span class="number">0</span>,
+    projection_months <span class="keyword">INTEGER DEFAULT</span> <span class="number">0</span>,
+    monthly_savings_plan <span class="keyword">DECIMAL</span>(<span class="number">12</span>,<span class="number">2</span>) <span class="keyword">DEFAULT</span> <span class="number">0</span>,
+    dark_mode <span class="keyword">BOOLEAN DEFAULT FALSE</span>,
+    badges <span class="keyword">JSONB DEFAULT</span> <span class="string">'[]'</span>,
+    created_at <span class="keyword">TIMESTAMPTZ DEFAULT</span> <span class="function">NOW</span>(),
+    updated_at <span class="keyword">TIMESTAMPTZ DEFAULT</span> <span class="function">NOW</span>()
+);
+
+<span class="comment">-- Insertar configuración inicial</span>
+<span class="keyword">INSERT INTO</span> user_config (id) <span class="keyword">VALUES</span> (<span class="number">1</span>) <span class="keyword">ON CONFLICT</span> (id) <span class="keyword">DO NOTHING</span>;
+
+<span class="comment">-- ================================================</span>
+<span class="comment">-- HABILITAR RLS + POLÍTICAS PÚBLICAS</span>
+<span class="comment">-- ================================================</span>
+
+<span class="keyword">ALTER TABLE</span> expenses <span class="keyword">ENABLE ROW LEVEL SECURITY</span>;
+<span class="keyword">ALTER TABLE</span> savings_withdrawals <span class="keyword">ENABLE ROW LEVEL SECURITY</span>;
+<span class="keyword">ALTER TABLE</span> debtors <span class="keyword">ENABLE ROW LEVEL SECURITY</span>;
+<span class="keyword">ALTER TABLE</span> user_config <span class="keyword">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="comment">-- Políticas PÚBLICAS para expenses (cualquiera puede todo)</span>
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public read expenses"</span> <span class="keyword">ON</span> expenses
+    <span class="keyword">FOR SELECT USING</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public insert expenses"</span> <span class="keyword">ON</span> expenses
+    <span class="keyword">FOR INSERT WITH CHECK</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public update expenses"</span> <span class="keyword">ON</span> expenses
+    <span class="keyword">FOR UPDATE USING</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public delete expenses"</span> <span class="keyword">ON</span> expenses
+    <span class="keyword">FOR DELETE USING</span> (<span class="keyword">true</span>);
+
+<span class="comment">-- Políticas PÚBLICAS para savings_withdrawals</span>
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public read withdrawals"</span> <span class="keyword">ON</span> savings_withdrawals
+    <span class="keyword">FOR SELECT USING</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public insert withdrawals"</span> <span class="keyword">ON</span> savings_withdrawals
+    <span class="keyword">FOR INSERT WITH CHECK</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public update withdrawals"</span> <span class="keyword">ON</span> savings_withdrawals
+    <span class="keyword">FOR UPDATE USING</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public delete withdrawals"</span> <span class="keyword">ON</span> savings_withdrawals
+    <span class="keyword">FOR DELETE USING</span> (<span class="keyword">true</span>);
+
+<span class="comment">-- Políticas PÚBLICAS para debtors</span>
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public read debtors"</span> <span class="keyword">ON</span> debtors
+    <span class="keyword">FOR SELECT USING</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public insert debtors"</span> <span class="keyword">ON</span> debtors
+    <span class="keyword">FOR INSERT WITH CHECK</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public update debtors"</span> <span class="keyword">ON</span> debtors
+    <span class="keyword">FOR UPDATE USING</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public delete debtors"</span> <span class="keyword">ON</span> debtors
+    <span class="keyword">FOR DELETE USING</span> (<span class="keyword">true</span>);
+
+<span class="comment">-- Políticas PÚBLICAS para user_config</span>
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public read config"</span> <span class="keyword">ON</span> user_config
+    <span class="keyword">FOR SELECT USING</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public insert config"</span> <span class="keyword">ON</span> user_config
+    <span class="keyword">FOR INSERT WITH CHECK</span> (<span class="keyword">true</span>);
+<span class="keyword">CREATE POLICY</span> <span class="string">"Public update config"</span> <span class="keyword">ON</span> user_config
+    <span class="keyword">FOR UPDATE USING</span> (<span class="keyword">true</span>);
+
+<span class="comment">-- ================================================</span>
+<span class="comment">-- ÍNDICES</span>
+<span class="comment">-- ================================================</span>
+
+<span class="keyword">CREATE INDEX</span> idx_expenses_date <span class="keyword">ON</span> expenses(date);
+<span class="keyword">CREATE INDEX</span> idx_expenses_category <span class="keyword">ON</span> expenses(category);
+<span class="keyword">CREATE INDEX</span> idx_expenses_created <span class="keyword">ON</span> expenses(created_at <span class="keyword">DESC</span>);
+
+<span class="comment">-- ================================================</span>
+<span class="comment">-- TRIGGER PARA updated_at</span>
+<span class="comment">-- ================================================</span>
+
+<span class="keyword">CREATE OR REPLACE FUNCTION</span> <span class="function">update_updated_at</span>()
+<span class="keyword">RETURNS TRIGGER AS</span> $$
+<span class="keyword">BEGIN</span>
+    NEW.updated_at = <span class="function">NOW</span>();
+    <span class="keyword">RETURN</span> NEW;
+<span class="keyword">END</span>;
+$$ <span class="keyword">LANGUAGE</span> plpgsql;
+
+<span class="keyword">CREATE TRIGGER</span> expenses_updated_at
+    <span class="keyword">BEFORE UPDATE ON</span> expenses
+    <span class="keyword">FOR EACH ROW EXECUTE FUNCTION</span> <span class="function">update_updated_at</span>();
+
+<span class="keyword">CREATE TRIGGER</span> user_config_updated_at
+    <span class="keyword">BEFORE UPDATE ON</span> user_config
+    <span class="keyword">FOR EACH ROW EXECUTE FUNCTION</span> <span class="function">update_updated_at</span>();
+
+<span class="comment">-- ¡LISTO! Base de datos con acceso público</span>
+</pre>
+            </div>
+        </div>
+
+        <div id="content-auth" class="card rounded-2xl shadow-2xl p-6 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">🔐 Autenticación</h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Registro -->
+                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">📝 Crear Cuenta</h3>
+                    <div class="space-y-4">
+                        <input type="email" id="signupEmail" placeholder="Email" 
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 transition">
+                        <input type="password" id="signupPassword" placeholder="Contraseña (min. 6 caracteres)" 
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 transition">
+                        <button onclick="handleSignUp()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition">
+                            Crear Cuenta
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Login -->
+                <div class="bg-gradient-to-br from-emerald-50 to-green-50 p-6 rounded-xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">🔑 Iniciar Sesión</h3>
+                    <div class="space-y-4">
+                        <input type="email" id="loginEmail" placeholder="Email" 
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 transition">
+                        <input type="password" id="loginPassword" placeholder="Contraseña" 
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 transition">
+                        <button onclick="handleSignIn()" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white py-3 rounded-xl font-medium hover:from-emerald-600 hover:to-green-700 transition">
+                            Iniciar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-api" class="card rounded-2xl shadow-2xl p-6 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">📡 Documentación API REST</h2>
+            <p class="text-gray-600 mb-6">Ejemplos de cómo usar la API REST de Supabase con el Organizador de Gastos.</p>
+
+            <div class="space-y-6">
+                <!-- GET Expenses -->
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="text-emerald-400 font-bold">GET</span>
+                        <span class="text-gray-400 text-sm">/rest/v1/expenses</span>
+                        <button onclick="copyCode('getExpenses')" class="copy-btn">📋 Copiar</button>
+                    </div>
+                    <pre class="code-content" id="getExpenses">
+<span class="comment">// Obtener todos los gastos del usuario</span>
+<span class="keyword">const</span> { data, error } = <span class="keyword">await</span> supabase
+    .<span class="function">from</span>(<span class="string">'expenses'</span>)
+    .<span class="function">select</span>(<span class="string">'*'</span>)
+    .<span class="function">order</span>(<span class="string">'date'</span>, { ascending: <span class="keyword">false</span> });
+
+<span class="comment">// Con filtros</span>
+<span class="keyword">const</span> { data } = <span class="keyword">await</span> supabase
+    .<span class="function">from</span>(<span class="string">'expenses'</span>)
+    .<span class="function">select</span>(<span class="string">'*'</span>)
+    .<span class="function">gte</span>(<span class="string">'date'</span>, <span class="string">'2024-01-01'</span>)
+    .<span class="function">lte</span>(<span class="string">'date'</span>, <span class="string">'2024-12-31'</span>)
+    .<span class="function">eq</span>(<span class="string">'category'</span>, <span class="string">'🍎 Alimentación'</span>);
+</pre>
+                </div>
+
+                <!-- POST Expense -->
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="text-blue-400 font-bold">POST</span>
+                        <span class="text-gray-400 text-sm">/rest/v1/expenses</span>
+                        <button onclick="copyCode('postExpense')" class="copy-btn">📋 Copiar</button>
+                    </div>
+                    <pre class="code-content" id="postExpense">
+<span class="comment">// Crear nuevo gasto</span>
+<span class="keyword">const</span> { data, error } = <span class="keyword">await</span> supabase
+    .<span class="function">from</span>(<span class="string">'expenses'</span>)
+    .<span class="function">insert</span>({
+        id: <span class="function">Date</span>.<span class="function">now</span>(),
+        user_id: user.id,
+        description: <span class="string">'Compra supermercado'</span>,
+        amount: <span class="number">45.50</span>,
+        category: <span class="string">'🍎 Alimentación'</span>,
+        date: <span class="string">'2024-01-15'</span>
+    });
+</pre>
+                </div>
+
+                <!-- UPDATE Expense -->
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="text-amber-400 font-bold">PATCH</span>
+                        <span class="text-gray-400 text-sm">/rest/v1/expenses</span>
+                        <button onclick="copyCode('patchExpense')" class="copy-btn">📋 Copiar</button>
+                    </div>
+                    <pre class="code-content" id="patchExpense">
+<span class="comment">// Actualizar gasto</span>
+<span class="keyword">const</span> { data, error } = <span class="keyword">await</span> supabase
+    .<span class="function">from</span>(<span class="string">'expenses'</span>)
+    .<span class="function">update</span>({ 
+        amount: <span class="number">50.00</span>,
+        description: <span class="string">'Compra supermercado (actualizado)'</span>
+    })
+    .<span class="function">eq</span>(<span class="string">'id'</span>, expenseId)
+    .<span class="function">eq</span>(<span class="string">'user_id'</span>, user.id);
+</pre>
+                </div>
+
+                <!-- DELETE Expense -->
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="text-red-400 font-bold">DELETE</span>
+                        <span class="text-gray-400 text-sm">/rest/v1/expenses</span>
+                        <button onclick="copyCode('deleteExpense')" class="copy-btn">📋 Copiar</button>
+                    </div>
+                    <pre class="code-content" id="deleteExpense">
+<span class="comment">// Eliminar gasto</span>
+<span class="keyword">const</span> { error } = <span class="keyword">await</span> supabase
+    .<span class="function">from</span>(<span class="string">'expenses'</span>)
+    .<span class="function">delete</span>()
+    .<span class="function">eq</span>(<span class="string">'id'</span>, expenseId)
+    .<span class="function">eq</span>(<span class="string">'user_id'</span>, user.id);
+</pre>
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="text-purple-400 font-bold">RPC</span>
+                        <span class="text-gray-400 text-sm">Función personalizada</span>
+                        <button onclick="copyCode('rpcStats')" class="copy-btn">📋 Copiar</button>
+                    </div>
+                    <pre class="code-content" id="rpcStats">
+<span class="comment">-- Añadir esta función en Supabase para estadísticas</span>
+<span class="keyword">CREATE OR REPLACE FUNCTION</span> <span class="function">get_monthly_stats</span>(user_uuid <span class="keyword">UUID</span>, year_month <span class="keyword">TEXT</span>)
+<span class="keyword">RETURNS TABLE</span>(
+    category <span class="keyword">TEXT</span>,
+    total <span class="keyword">DECIMAL</span>,
+    count <span class="keyword">BIGINT</span>
+) <span class="keyword">AS</span> $$
+<span class="keyword">BEGIN</span>
+    <span class="keyword">RETURN QUERY</span>
+    <span class="keyword">SELECT</span> 
+        e.category,
+        <span class="function">SUM</span>(e.amount) <span class="keyword">as</span> total,
+        <span class="function">COUNT</span>(*) <span class="keyword">as</span> count
+    <span class="keyword">FROM</span> expenses e
+    <span class="keyword">WHERE</span> e.user_id = user_uuid
+      <span class="keyword">AND</span> <span class="function">TO_CHAR</span>(e.date, <span class="string">'YYYY-MM'</span>) = year_month
+    <span class="keyword">GROUP BY</span> e.category
+    <span class="keyword">ORDER BY</span> total <span class="keyword">DESC</span>;
+<span class="keyword">END</span>;
+$$ <span class="keyword">LANGUAGE</span> plpgsql <span class="keyword">SECURITY DEFINER</span>;
+
+<span class="comment">// Llamar desde JavaScript</span>
+<span class="keyword">const</span> { data } = <span class="keyword">await</span> supabase
+    .<span class="function">rpc</span>(<span class="string">'get_monthly_stats'</span>, {
+        user_uuid: user.id,
+        year_month: <span class="string">'2024-01'</span>
+    });
+</pre>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-test" class="card rounded-2xl shadow-2xl p-6 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">🧪 Panel de Pruebas</h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Test de conexión -->
+                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">🔌 Test de Conexión</h3>
+                    <button onclick="runConnectionTest()" class="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600 transition mb-4">
+                        Ejecutar Test
+                    </button>
+                    <div id="connectionTestResult" class="p-4 bg-white rounded-lg text-sm mono min-h-[100px]">
+                        Esperando...
+                    </div>
+                </div>
+
+                <!-- Test CRUD -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">📝 Test CRUD</h3>
+                    <button onclick="runCRUDTest()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-medium hover:bg-emerald-600 transition mb-4">
+                        Ejecutar Test CRUD
+                    </button>
+                    <div id="crudTestResult" class="p-4 bg-white rounded-lg text-sm mono min-h-[100px]">
+                        Esperando...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs -->
+            <div class="mt-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">📋 Logs</h3>
+                <div id="testLogs" class="code-block">
+                    <div class="code-content min-h-[200px] max-h-[400px] overflow-y-auto">
+                        <span class="text-gray-500">Los logs aparecerán aquí...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let supabase = null;
+        let currentUser = null;
+
+        // Cargar configuración guardada
+        function loadConfig() {
+            // Credenciales preconfiguradas
+            const defaultConfig = {
+                url: 'https://zdbpzndvuqtfemkfjman.supabase.co',
+                key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkYnB6bmR2dXF0ZmVta2ZqbWFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1MDI2MTEsImV4cCI6MjA4MjA3ODYxMX0.2Wb2mhplCe0DQtLOM3jNDVTUFyz1qAiFOag1loP2e8g'
+            };
+            
+            document.getElementById('supabaseUrl').value = defaultConfig.url;
+            document.getElementById('supabaseKey').value = defaultConfig.key;
+            
+            initSupabase(defaultConfig.url, defaultConfig.key);
+        }
+
+        // Guardar configuración
+        function saveConfig() {
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+            
+            if (!url || !key) {
+                showNotification('❌ Completa todos los campos', true);
+                return;
+            }
+            
+            localStorage.setItem('supabaseConfig', JSON.stringify({ url, key }));
+            initSupabase(url, key);
+            showNotification('✅ Configuración guardada');
+        }
+
+        // Inicializar Supabase
+        async function initSupabase(url, key) {
+            try {
+                supabase = window.supabase.createClient(url, key);
+                
+                // Verificar sesión existente
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    currentUser = session.user;
+                    updateStatus(true);
+                }
+                
+                // Escuchar cambios de autenticación
+                supabase.auth.onAuthStateChange((event, session) => {
+                    currentUser = session?.user || null;
+                    updateStatus(!!currentUser);
+                });
+                
+                updateStatus(false);
+            } catch (error) {
+                console.error('Error inicializando Supabase:', error);
+                updateStatus(false);
+                showNotification('❌ Error de conexión', true);
+            }
+        }
+
+        // Actualizar estado visual
+        function updateStatus(authenticated) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            const userInfo = document.getElementById('userInfo');
+            const userEmail = document.getElementById('userEmail');
+            
+            if (supabase && authenticated) {
+                dot.className = 'status-dot bg-green-500';
+                text.textContent = 'Conectado y autenticado';
+                userInfo.classList.remove('hidden');
+                userEmail.textContent = currentUser?.email || '';
+            } else if (supabase) {
+                dot.className = 'status-dot bg-yellow-500';
+                text.textContent = 'Conectado (sin autenticar)';
+                userInfo.classList.add('hidden');
+            } else {
+                dot.className = 'status-dot bg-gray-400';
+                text.textContent = 'No configurado';
+                userInfo.classList.add('hidden');
+            }
+        }
+
+        // Test de conexión
+        async function testConnection() {
+            if (!supabase) {
+                showNotification('❌ Primero guarda la configuración', true);
+                return;
+            }
+            
+            try {
+                const { error } = await supabase.from('expenses').select('count', { count: 'exact', head: true });
+                
+                if (error && error.code !== 'PGRST116') {
+                    throw error;
+                }
+                
+                showNotification('✅ Conexión exitosa');
+                updateStatus(!!currentUser);
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, true);
+            }
+        }
+
+        // Autenticación
+        async function handleSignUp() {
+            if (!supabase) {
+                showNotification('❌ Primero configura Supabase', true);
+                return;
+            }
+            
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            if (!email || !password) {
+                showNotification('❌ Completa todos los campos', true);
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({ email, password });
+                
+                if (error) throw error;
+                
+                showNotification('✅ Cuenta creada. Verifica tu email.');
+            } catch (error) {
+                showNotification('❌ ' + error.message, true);
+            }
+        }
+
+        async function handleSignIn() {
+            if (!supabase) {
+                showNotification('❌ Primero configura Supabase', true);
+                return;
+            }
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showNotification('❌ Completa todos los campos', true);
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                
+                if (error) throw error;
+                
+                showNotification('✅ Sesión iniciada');
+            } catch (error) {
+                showNotification('❌ ' + error.message, true);
+            }
+        }
+
+        async function signOut() {
+            if (!supabase) return;
+            
+            try {
+                await supabase.auth.signOut();
+                currentUser = null;
+                updateStatus(false);
+                showNotification('👋 Sesión cerrada');
+            } catch (error) {
+                showNotification('❌ Error al cerrar sesión', true);
+            }
+        }
+
+        // Tabs
+        function showTab(tab) {
+            const tabs = ['config', 'schema', 'auth', 'api', 'test'];
+            tabs.forEach(t => {
+                document.getElementById(`content-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('active');
+                document.getElementById(`tab-${t}`).classList.add('bg-white/80');
+            });
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.remove('bg-white/80');
+        }
+
+        // Copiar código
+        function copyCode(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            navigator.clipboard.writeText(text);
+            showNotification('📋 Código copiado');
+        }
+
+        // Tests
+        function addLog(message, type = 'info') {
+            const logs = document.getElementById('testLogs').querySelector('.code-content');
+            const color = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-green-400' : 'text-gray-300';
+            const time = new Date().toLocaleTimeString();
+            logs.innerHTML += `<div class="${color}">[${time}] ${message}</div>`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        async function runConnectionTest() {
+            const result = document.getElementById('connectionTestResult');
+            result.innerHTML = '<span class="text-blue-500">Ejecutando...</span>';
+            
+            if (!supabase) {
+                result.innerHTML = '<span class="text-red-500">❌ Supabase no configurado</span>';
+                addLog('Test de conexión fallido: Supabase no configurado', 'error');
+                return;
+            }
+            
+            try {
+                addLog('Iniciando test de conexión...');
+                
+                const start = Date.now();
+                const { error } = await supabase.from('expenses').select('count', { count: 'exact', head: true });
+                const duration = Date.now() - start;
+                
+                if (error && error.code !== 'PGRST116') {
+                    throw error;
+                }
+                
+                result.innerHTML = `
+                    <span class="text-green-500">✅ Conexión exitosa</span><br>
+                    <span class="text-gray-500">Latencia: ${duration}ms</span><br>
+                    <span class="text-gray-500">Usuario: ${currentUser?.email || 'No autenticado'}</span>
+                `;
+                addLog(`Conexión exitosa (${duration}ms)`, 'success');
+            } catch (error) {
+                result.innerHTML = `<span class="text-red-500">❌ ${error.message}</span>`;
+                addLog('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function runCRUDTest() {
+            const result = document.getElementById('crudTestResult');
+            result.innerHTML = '<span class="text-blue-500">Ejecutando...</span>';
+            
+            if (!supabase) {
+                result.innerHTML = '<span class="text-red-500">❌ Supabase no conectado</span>';
+                addLog('Test CRUD fallido: Supabase no conectado', 'error');
+                return;
+            }
+            
+            try {
+                addLog('Iniciando test CRUD (modo público)...');
+                const testId = Date.now();
+                
+                // CREATE
+                addLog('CREATE: Insertando gasto de prueba...');
+                const { data: insertData, error: insertError } = await supabase
+                    .from('expenses')
+                    .insert({
+                        id: testId,
+                        description: 'Test CRUD Público',
+                        amount: 99.99,
+                        category: '🔧 Varios',
+                        date: new Date().toISOString().split('T')[0]
+                    })
+                    .select();
+                
+                if (insertError) throw insertError;
+                addLog('CREATE: ✅ Gasto insertado', 'success');
+                
+                // READ
+                addLog('READ: Leyendo gasto...');
+                const { data: readData, error: readError } = await supabase
+                    .from('expenses')
+                    .select('*')
+                    .eq('id', testId)
+                    .single();
+                
+                if (readError) throw readError;
+                addLog('READ: ✅ Gasto leído correctamente', 'success');
+                
+                // UPDATE
+                addLog('UPDATE: Actualizando gasto...');
+                const { error: updateError } = await supabase
+                    .from('expenses')
+                    .update({ amount: 100.00 })
+                    .eq('id', testId);
+                
+                if (updateError) throw updateError;
+                addLog('UPDATE: ✅ Gasto actualizado', 'success');
+                
+                // DELETE
+                addLog('DELETE: Eliminando gasto de prueba...');
+                const { error: deleteError } = await supabase
+                    .from('expenses')
+                    .delete()
+                    .eq('id', testId);
+                
+                if (deleteError) throw deleteError;
+                addLog('DELETE: ✅ Gasto eliminado', 'success');
+                
+                result.innerHTML = `
+                    <span class="text-green-500">✅ Test CRUD completado</span><br>
+                    <span class="text-gray-500">CREATE: ✅</span><br>
+                    <span class="text-gray-500">READ: ✅</span><br>
+                    <span class="text-gray-500">UPDATE: ✅</span><br>
+                    <span class="text-gray-500">DELETE: ✅</span>
+                `;
+                addLog('Test CRUD completado exitosamente', 'success');
+            } catch (error) {
+                result.innerHTML = `<span class="text-red-500">❌ ${error.message}</span>`;
+                addLog('Error CRUD: ' + error.message, 'error');
+            }
+        }
+
+        // Notificaciones
+        function showNotification(message, isError = false) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-50 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            notification.style.animation = 'slideIn 0.3s ease-out';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Inicializar
+        loadConfig();
+    </script>
+</body>
+</html>
