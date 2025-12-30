@@ -7,32 +7,32 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
         * {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         
-        h1, h2, h3, .font-display {
-            font-family: 'Space Grotesk', sans-serif;
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
+            from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(20px); }
+            from { opacity: 0; transform: translateX(12px); }
             to { opacity: 1; transform: translateX(0); }
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.03); }
         }
-        @keyframes shine {
-            0% { box-shadow: 0 0 5px rgba(79, 70, 229, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(79, 70, 229, 0.6); }
-            100% { box-shadow: 0 0 5px rgba(79, 70, 229, 0.3); }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -44,92 +44,107 @@
             100% { background-position: 0% 50%; }
         }
         
-        .animate-slide-in { animation: slideIn 0.3s ease-out; }
-        .animate-slide-in-right { animation: slideInRight 0.3s ease-out; }
-        .animate-pulse-once { animation: pulse 0.5s ease-in-out; }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-        .badge-glow { animation: shine 2s infinite; }
-        .progress-bar { transition: width 0.5s ease-out, background-color 0.3s; }
+        .animate-slide-in { animation: slideIn 0.25s ease-out; }
+        .animate-slide-in-right { animation: slideInRight 0.25s ease-out; }
+        .animate-pulse-once { animation: pulse 0.4s ease-in-out; }
+        .animate-fade-in { animation: fadeIn 0.25s ease-out; }
+        .badge-glow { 
+            background: linear-gradient(90deg, #fef3c7, #fde68a, #fef3c7);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        .progress-bar { transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s; }
         
-        /* Gradientes suaves */
+        /* Fondo suave */
         .gradient-bg {
-            background: linear-gradient(-45deg, #e3f2fd, #f3e5f5, #e8f5e9, #fff3e0);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f0f4f8 100%);
+            min-height: 100vh;
         }
         
         /* Modo oscuro */
         body.dark-mode {
-            background: linear-gradient(to bottom right, #1a1a2e, #16213e) !important;
-            color: #e5e7eb;
+            background: #0f172a !important;
+            color: #e2e8f0;
         }
-        body.dark-mode .bg-white { background-color: #16213e !important; color: #e5e7eb; }
-        body.dark-mode .text-gray-800 { color: #e5e7eb !important; }
-        body.dark-mode .text-gray-600 { color: #9ca3af !important; }
-        body.dark-mode .text-gray-500 { color: #6b7280 !important; }
-        body.dark-mode .border-gray-300 { border-color: #374151 !important; }
-        body.dark-mode input, body.dark-mode select { background-color: #1a1a2e !important; color: #e5e7eb !important; border-color: #374151 !important; }
-        body.dark-mode .bg-gray-50 { background-color: #1f2937 !important; }
-        body.dark-mode .gradient-bg { background: linear-gradient(-45deg, #1a1a2e, #16213e, #1a1a2e, #16213e); }
+        body.dark-mode .bg-white { background-color: #1e293b !important; color: #e2e8f0; }
+        body.dark-mode .text-gray-800 { color: #f1f5f9 !important; }
+        body.dark-mode .text-gray-600 { color: #94a3b8 !important; }
+        body.dark-mode .text-gray-500 { color: #64748b !important; }
+        body.dark-mode .border-gray-300 { border-color: #334155 !important; }
+        body.dark-mode input, body.dark-mode select { 
+            background-color: #0f172a !important; 
+            color: #e2e8f0 !important; 
+            border-color: #334155 !important; 
+        }
+        body.dark-mode .bg-gray-50 { background-color: #1e293b !important; }
+        body.dark-mode .gradient-bg { background: #0f172a; }
+        body.dark-mode .total-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        body.dark-mode .card { background: #1e293b; border: 1px solid #334155; }
         
-        /* Filtros de tiempo con colores suaves */
+        /* Filtros de tiempo */
         .time-filter {
-            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-            transition: all 0.3s ease;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
         }
         .time-filter:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+            background: #f1f5f9;
+            border-color: #cbd5e1;
         }
         .time-filter-active { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
             color: white !important;
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+            font-weight: 600;
         }
         
-        /* Transiciones suaves */
+        /* Tarjetas */
         .card { 
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             background: white;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
         .card:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
         
-        /* ========== CORRECCIÓN PRINCIPAL: Tarjetas de totales ========== */
+        /* Tarjetas de totales */
         .total-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            transition: all 0.3s ease;
-            min-width: 0; /* Permite que flex/grid reduzca el tamaño */
+            background: white;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+            min-width: 0;
             overflow: hidden;
         }
         .total-card:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         
         /* Contenedor de cantidad con texto responsive */
         .amount-display {
-            font-size: clamp(0.875rem, 2.5vw, 1.5rem);
-            line-height: 1.2;
+            font-size: clamp(0.875rem, 2.5vw, 1.25rem);
+            line-height: 1.3;
             word-break: break-word;
             overflow-wrap: break-word;
-            hyphens: auto;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
         
         .amount-display-large {
-            font-size: clamp(1rem, 3vw, 1.75rem);
-            line-height: 1.2;
+            font-size: clamp(1.125rem, 3vw, 1.5rem);
+            line-height: 1.3;
             word-break: break-word;
             overflow-wrap: break-word;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
         
         /* Grid de totales responsive */
         .totals-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 0.75rem;
         }
         
@@ -155,16 +170,17 @@
         .collapsible-content {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease-out;
+            transition: max-height 0.25s ease-out;
         }
         .collapsible-content.open {
             max-height: 600px;
             overflow-y: auto;
         }
         
-        /* Botón toggle animado */
+        /* Botón toggle */
         .toggle-btn {
-            transition: transform 0.3s ease;
+            transition: transform 0.2s ease;
+            color: #64748b;
         }
         .toggle-btn.open {
             transform: rotate(180deg);
@@ -172,65 +188,82 @@
         
         /* Scroll personalizado */
         .custom-scroll::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
         .custom-scroll::-webkit-scrollbar-track {
-            background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
-            border-radius: 3px;
+            background: #f1f5f9;
+            border-radius: 4px;
         }
         .custom-scroll::-webkit-scrollbar-thumb {
-            background: linear-gradient(to bottom, #94a3b8, #64748b);
-            border-radius: 3px;
+            background: #cbd5e1;
+            border-radius: 4px;
         }
         .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(to bottom, #64748b, #475569);
+            background: #94a3b8;
         }
         
-        /* Efecto hover en gastos */
+        /* Items de gastos */
         .expense-item {
-            transition: all 0.2s ease;
-            background: linear-gradient(to right, #f8fafc, #ffffff);
+            transition: all 0.15s ease;
+            background: #fafafa;
+            border: 1px solid transparent;
         }
         .expense-item:hover {
-            transform: translateX(4px);
-            background: linear-gradient(to right, #e0f2fe, #f0f9ff);
+            background: #f0f9ff;
+            border-color: #bae6fd;
         }
         
-        /* Colores suaves para categorías */
+        /* Categorías */
         .category-item {
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
+            border: 1px solid #f1f5f9;
         }
         .category-item:hover {
-            transform: scale(1.02);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: #f8fafc;
+            border-color: #e2e8f0;
         }
         
         /* Indicador de conexión */
         .connection-status {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.25rem 0.75rem;
+            gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
             border-radius: 9999px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 500;
+            letter-spacing: 0.01em;
         }
         .connection-status.online {
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-            color: #065f46;
+            background: #dcfce7;
+            color: #166534;
         }
         .connection-status.offline {
-            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            background: #fee2e2;
             color: #991b1b;
         }
         .connection-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            animation: pulse 2s infinite;
         }
-        .connection-dot.online { background: #10b981; }
+        .connection-dot.online { background: #22c55e; }
         .connection-dot.offline { background: #ef4444; }
+        
+        /* Inputs mejorados */
+        input, select {
+            font-size: 0.875rem;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Botones */
+        button {
+            font-weight: 500;
+        }
     </style>
 </head>
 <body class="min-h-screen gradient-bg">
@@ -1129,45 +1162,45 @@
             const app = document.getElementById('app');
             app.innerHTML = `
                 <!-- Header -->
-                <div class="bg-white rounded-2xl shadow-xl p-5 mb-4 card animate-slide-in">
+                <div class="bg-white rounded-2xl shadow-sm p-5 mb-4 card animate-slide-in border border-gray-100">
                     <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
                         <div class="flex-1 min-w-[280px]">
                             <div class="flex items-center gap-3 mb-1">
-                                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+                                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">
                                     💰 Organizador de Gastos
                                 </h1>
                                 <div class="connection-status ${isOnline ? 'online' : 'offline'}">
                                     <span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>
-                                    ${isOnline ? 'Online' : 'Local'}
+                                    ${isOnline ? 'Sincronizado' : 'Local'}
                                 </div>
                             </div>
-                            <p class="text-gray-600 mb-3">Controla tus finanzas mensuales</p>
+                            <p class="text-gray-500 text-sm mb-4">Controla tus finanzas de forma simple</p>
                             
                             <!-- Filtros de tiempo -->
                             <div class="flex flex-wrap gap-2">
-                                <button onclick="setTimeFilter('week')" class="time-filter px-3 py-2 rounded-lg transition font-medium text-sm ${state.timeFilter === 'week' ? 'time-filter-active' : 'text-gray-700'}">
-                                    📅 Semana
+                                <button onclick="setTimeFilter('week')" class="time-filter px-4 py-2 rounded-lg text-sm ${state.timeFilter === 'week' ? 'time-filter-active' : 'text-gray-600'}">
+                                    Semana
                                 </button>
-                                <button onclick="setTimeFilter('month')" class="time-filter px-3 py-2 rounded-lg transition font-medium text-sm ${state.timeFilter === 'month' ? 'time-filter-active' : 'text-gray-700'}">
-                                    📅 Mes
+                                <button onclick="setTimeFilter('month')" class="time-filter px-4 py-2 rounded-lg text-sm ${state.timeFilter === 'month' ? 'time-filter-active' : 'text-gray-600'}">
+                                    Mes
                                 </button>
-                                <button onclick="setTimeFilter('year')" class="time-filter px-3 py-2 rounded-lg transition font-medium text-sm ${state.timeFilter === 'year' ? 'time-filter-active' : 'text-gray-700'}">
-                                    📅 Año
+                                <button onclick="setTimeFilter('year')" class="time-filter px-4 py-2 rounded-lg text-sm ${state.timeFilter === 'year' ? 'time-filter-active' : 'text-gray-600'}">
+                                    Año
                                 </button>
                             </div>
                         </div>
                         
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="toggleDarkMode()" class="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-3 py-2 rounded-lg hover:from-gray-700 hover:to-gray-800 transition font-medium shadow-md text-sm">
+                            <button onclick="toggleDarkMode()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition text-sm">
                                 ${state.darkMode ? '☀️' : '🌙'}
                             </button>
-                            <button onclick="saveData()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-2 rounded-lg hover:from-green-600 hover:to-emerald-700 transition font-medium shadow-md text-sm">
+                            <button onclick="saveData()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg transition text-sm">
                                 💾
                             </button>
-                            <button onclick="exportData()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition font-medium shadow-md text-sm">
+                            <button onclick="exportData()" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg transition text-sm">
                                 📥
                             </button>
-                            <label class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-3 py-2 rounded-lg hover:from-purple-600 hover:to-pink-700 transition font-medium cursor-pointer shadow-md text-sm">
+                            <label class="bg-violet-500 hover:bg-violet-600 text-white px-3 py-2 rounded-lg transition cursor-pointer text-sm">
                                 📤
                                 <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
                             </label>
@@ -1175,11 +1208,11 @@
                     </div>
                     
                     ${earnedBadges.length > 0 ? `
-                        <div class="mb-4 p-3 bg-gradient-to-r from-yellow-50 via-amber-50 to-orange-50 rounded-lg border-2 border-yellow-200 animate-fade-in">
-                            <h3 class="text-sm font-bold text-gray-800 mb-2">🏆 Logros</h3>
+                        <div class="mb-4 p-3 bg-amber-50 rounded-xl border border-amber-200 animate-fade-in">
+                            <h3 class="text-xs font-semibold text-amber-800 mb-2 uppercase tracking-wide">🏆 Logros</h3>
                             <div class="flex gap-2 flex-wrap">
                                 ${earnedBadges.map(badge => `
-                                    <div class="badge-glow px-3 py-1 bg-white rounded-full border-2 border-yellow-400 text-xs font-medium" title="${badge.name}">
+                                    <div class="badge-glow px-3 py-1.5 bg-white rounded-full border border-amber-300 text-xs font-medium text-amber-800" title="${badge.name}">
                                         ${badge.icon} ${badge.name}
                                     </div>
                                 `).join('')}
@@ -1190,8 +1223,8 @@
                     ${healthMessages.length > 0 ? `
                         <div class="mb-4 space-y-2 animate-fade-in">
                             ${healthMessages.map(msg => `
-                                <div class="p-2 bg-gradient-to-r from-blue-50 to-cyan-50 border-l-4 border-blue-400 rounded">
-                                    <p class="text-xs font-medium text-gray-800">${msg}</p>
+                                <div class="p-2.5 bg-blue-50 border-l-3 border-blue-400 rounded-r-lg">
+                                    <p class="text-xs text-blue-800">${msg}</p>
                                 </div>
                             `).join('')}
                         </div>
@@ -1199,95 +1232,94 @@
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                         <div>
-                            <label class="text-xs font-medium text-gray-700 block mb-1">Ingresos del mes:</label>
-                            <input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0.00" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition text-sm" />
+                            <label class="text-xs font-medium text-gray-500 block mb-1.5">Ingresos del mes</label>
+                            <input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
                         </div>
                         <div>
-                            <label class="text-xs font-medium text-gray-700 block mb-1">Ingresos tarjeta:</label>
-                            <input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0.00" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent transition text-sm" />
+                            <label class="text-xs font-medium text-gray-500 block mb-1.5">Ingresos tarjeta</label>
+                            <input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
                         </div>
                         <div>
-                            <label class="text-xs font-medium text-gray-700 block mb-1">Presupuesto:</label>
-                            <input type="number" id="monthlyBudget" value="${state.monthlyBudget}" placeholder="0.00" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent transition text-sm" />
+                            <label class="text-xs font-medium text-gray-500 block mb-1.5">Presupuesto</label>
+                            <input type="number" id="monthlyBudget" value="${state.monthlyBudget}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
                         </div>
                         <div>
-                            <label class="text-xs font-medium text-gray-700 block mb-1">Me deben:</label>
-                            <div class="px-3 py-2 bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-300 rounded-lg font-bold text-emerald-700 text-sm">
+                            <label class="text-xs font-medium text-gray-500 block mb-1.5">Me deben</label>
+                            <div class="px-3 py-2.5 bg-emerald-50 border border-emerald-200 rounded-lg font-semibold text-emerald-700 text-sm">
                                 ${formatEuro(getTotalOwed())}
                             </div>
                         </div>
                     </div>
                     
                     ${state.monthlyBudget ? `
-                        <div class="mb-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                        <div class="mb-4 p-3 bg-gray-50 rounded-xl">
                             <div class="flex justify-between mb-2">
-                                <span class="text-xs font-medium text-gray-700">Progreso del Presupuesto</span>
-                                <span class="text-xs font-bold text-gray-800">${formatEuro(budgetProgress.spent)} / ${formatEuro(budgetProgress.budget)}</span>
+                                <span class="text-xs font-medium text-gray-600">Presupuesto</span>
+                                <span class="text-xs font-semibold text-gray-800">${formatEuro(budgetProgress.spent)} / ${formatEuro(budgetProgress.budget)}</span>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                                <div class="progress-bar h-3 rounded-full ${budgetProgress.color}" style="width: ${budgetProgress.percentage}%"></div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                <div class="progress-bar h-2 rounded-full ${budgetProgress.color}" style="width: ${budgetProgress.percentage}%"></div>
                             </div>
                         </div>
                     ` : ''}
                     
-                    <div class="p-3 rounded-lg border-2 ${prediction >= 0 ? 'border-green-300 bg-gradient-to-r from-green-50 to-emerald-50' : 'border-red-300 bg-gradient-to-r from-red-50 to-orange-50'}">
+                    <div class="p-3 rounded-xl ${prediction >= 0 ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}">
                         <div class="flex flex-wrap justify-between items-center gap-2">
                             <div>
-                                <h3 class="text-xs font-bold text-gray-800">📊 Predicción Fin de Mes</h3>
+                                <h3 class="text-xs font-semibold ${prediction >= 0 ? 'text-emerald-800' : 'text-red-800'}">📊 Predicción fin de mes</h3>
                             </div>
-                            <p class="text-lg font-bold ${prediction >= 0 ? 'text-green-700' : 'text-red-700'}">
+                            <p class="text-lg font-bold ${prediction >= 0 ? 'text-emerald-700' : 'text-red-700'}">
                                 ${prediction >= 0 ? '+' : ''}${formatEuro(prediction)}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== TARJETAS DE TOTALES CORREGIDAS ========== -->
+                <!-- Tarjetas de Totales -->
                 <div class="totals-grid mb-4">
-                    <!-- Saldo Disponible - Tarjeta principal más grande -->
-                    <div class="total-card rounded-xl shadow-lg p-4 border-l-4 border-indigo-500 animate-slide-in col-span-2 md:col-span-1">
+                    <div class="total-card rounded-xl p-4 border-l-4 border-blue-500 animate-slide-in col-span-2 md:col-span-1">
                         <p class="text-gray-500 text-xs mb-1">Saldo Disponible</p>
-                        <p class="saldo-display amount-display-large font-bold ${remainingBalance >= 0 ? 'text-green-600' : 'text-red-600'}">
+                        <p class="saldo-display amount-display-large ${remainingBalance >= 0 ? 'text-emerald-600' : 'text-red-600'}">
                             ${formatEuro(remainingBalance)}
                         </p>
                     </div>
 
-                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-green-500 animate-slide-in">
-                        <p class="text-gray-500 text-xs">Esenciales</p>
-                        <p class="amount-display font-bold text-green-700">${formatEuro(typeTotals.esencial)}</p>
+                    <div class="total-card rounded-xl p-3 border-l-4 border-green-400 animate-slide-in">
+                        <p class="text-gray-400 text-xs">Esenciales</p>
+                        <p class="amount-display text-gray-800">${formatEuro(typeTotals.esencial)}</p>
                     </div>
 
-                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-pink-500 animate-slide-in">
-                        <p class="text-gray-500 text-xs">Salidas</p>
-                        <p class="amount-display font-bold text-pink-700">${formatEuro(typeTotals.salida)}</p>
+                    <div class="total-card rounded-xl p-3 border-l-4 border-pink-400 animate-slide-in">
+                        <p class="text-gray-400 text-xs">Salidas</p>
+                        <p class="amount-display text-gray-800">${formatEuro(typeTotals.salida)}</p>
                     </div>
 
-                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-emerald-500 animate-slide-in">
-                        <p class="text-gray-500 text-xs">Ahorro Neto</p>
-                        <p class="amount-display font-bold text-emerald-700">${formatEuro(getNetSavings())}</p>
+                    <div class="total-card rounded-xl p-3 border-l-4 border-emerald-400 animate-slide-in">
+                        <p class="text-gray-400 text-xs">Ahorro Neto</p>
+                        <p class="amount-display text-emerald-600">${formatEuro(getNetSavings())}</p>
                     </div>
 
-                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-indigo-500 animate-slide-in">
-                        <p class="text-gray-500 text-xs">Bizums</p>
-                        <p class="amount-display font-bold text-indigo-700">${formatEuro(typeTotals.bizum)}</p>
+                    <div class="total-card rounded-xl p-3 border-l-4 border-indigo-400 animate-slide-in">
+                        <p class="text-gray-400 text-xs">Bizums</p>
+                        <p class="amount-display text-gray-800">${formatEuro(typeTotals.bizum)}</p>
                     </div>
 
-                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-violet-500 animate-slide-in">
-                        <p class="text-gray-500 text-xs">Transfer.</p>
-                        <p class="amount-display font-bold text-violet-700">${formatEuro(typeTotals.transferencia)}</p>
+                    <div class="total-card rounded-xl p-3 border-l-4 border-violet-400 animate-slide-in">
+                        <p class="text-gray-400 text-xs">Transfer.</p>
+                        <p class="amount-display text-gray-800">${formatEuro(typeTotals.transferencia)}</p>
                     </div>
 
-                    <div class="total-card rounded-xl shadow-lg p-3 border-l-4 border-gray-500 animate-slide-in">
-                        <p class="text-gray-500 text-xs">Otros</p>
-                        <p class="amount-display font-bold text-gray-700">${formatEuro(typeTotals.otros)}</p>
+                    <div class="total-card rounded-xl p-3 border-l-4 border-gray-400 animate-slide-in">
+                        <p class="text-gray-400 text-xs">Otros</p>
+                        <p class="amount-display text-gray-800">${formatEuro(typeTotals.otros)}</p>
                     </div>
                 </div>
 
                 <!-- Gráfico de distribución -->
                 ${Object.values(totals).some(v => v > 0) ? `
-                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in mb-4">
-                        <h2 class="text-lg font-bold text-gray-800 mb-3">📊 Distribución de Gastos</h2>
-                        <div style="height: 280px; position: relative;">
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in mb-4 border border-gray-100">
+                        <h2 class="text-base font-semibold text-gray-800 mb-3">📊 Distribución</h2>
+                        <div style="height: 260px; position: relative;">
                             <canvas id="expenseChart"></canvas>
                         </div>
                     </div>
@@ -1296,61 +1328,61 @@
                 <!-- Fila principal: Formulario | Categorías | Historial -->
                 <div class="grid md:grid-cols-3 gap-4 mb-4">
                     <!-- Formulario -->
-                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in ${state.editingExpenseId ? 'border-4 border-amber-400' : ''}">
-                        <h2 class="text-lg font-bold text-gray-800 mb-3">${state.editingExpenseId ? '✏️ Editar Gasto' : '➕ Nuevo Gasto'}</h2>
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in border ${state.editingExpenseId ? 'border-amber-300 ring-2 ring-amber-100' : 'border-gray-100'}">
+                        <h2 class="text-base font-semibold text-gray-800 mb-4">${state.editingExpenseId ? '✏️ Editar Gasto' : '➕ Nuevo Gasto'}</h2>
                         <div class="space-y-3">
-                            <input type="text" id="description" value="${state.description}" placeholder="Descripción" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition" />
-                            <input type="number" id="amount" value="${state.amount}" placeholder="0.00" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition" />
-                            <select id="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                            <input type="text" id="description" value="${state.description}" placeholder="Descripción" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
+                            <input type="number" id="amount" value="${state.amount}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
+                            <select id="category" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm">
                                 ${categories.map(cat => `<option value="${cat.name}" ${state.category === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
                             </select>
-                            <input type="date" id="date" value="${state.date}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition" />
+                            <input type="date" id="date" value="${state.date}" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
                             <div class="flex gap-2">
-                                <button onclick="addExpense()" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition font-medium shadow-md">
-                                    ${state.editingExpenseId ? '✅ Actualizar' : '➕ Agregar'}
+                                <button onclick="addExpense()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-lg transition text-sm">
+                                    ${state.editingExpenseId ? '✓ Actualizar' : '+ Agregar'}
                                 </button>
-                                ${state.editingExpenseId ? `<button onclick="cancelEdit()" class="px-4 bg-gray-400 text-white py-3 rounded-lg hover:bg-gray-500 transition font-medium shadow-md">❌</button>` : ''}
+                                ${state.editingExpenseId ? `<button onclick="cancelEdit()" class="px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-lg transition text-sm">✕</button>` : ''}
                             </div>
                         </div>
                     </div>
                     
                     <!-- Gastos por Categoría -->
-                    <div class="bg-white rounded-xl shadow-lg p-5 max-h-[500px] overflow-y-auto custom-scroll card animate-slide-in">
-                        <h2 class="text-lg font-bold text-gray-800 mb-3">📋 Por Categoría</h2>
+                    <div class="bg-white rounded-xl p-5 max-h-[480px] overflow-y-auto custom-scroll card animate-slide-in border border-gray-100">
+                        <h2 class="text-base font-semibold text-gray-800 mb-3">📋 Por Categoría</h2>
                         ${renderCategorySections(totals)}
                     </div>
 
                     <!-- Historial de Gastos -->
-                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in">
-                        <h2 class="text-lg font-bold text-gray-800 mb-3">📝 Historial</h2>
-                        <div class="space-y-2 max-h-[380px] overflow-y-auto custom-scroll">
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in border border-gray-100">
+                        <h2 class="text-base font-semibold text-gray-800 mb-3">📝 Historial</h2>
+                        <div class="space-y-2 max-h-[360px] overflow-y-auto custom-scroll">
                             ${getFilteredExpenses().length === 0 ? `
-                                <p class="text-gray-400 text-center py-8">No hay gastos</p>
+                                <p class="text-gray-400 text-center py-8 text-sm">Sin gastos registrados</p>
                             ` : getFilteredExpenses().slice(0, 20).map(exp => `
-                                <div class="expense-item flex items-center justify-between p-2 rounded-lg transition">
+                                <div class="expense-item flex items-center justify-between p-2.5 rounded-lg">
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2 mb-1">
+                                        <div class="flex items-center gap-2 mb-0.5">
                                             <span class="px-2 py-0.5 rounded-full text-xs font-medium ${categoryColors[exp.category]} truncate">
                                                 ${exp.category.split(' ')[0]}
                                             </span>
                                             <span class="font-medium text-gray-800 text-sm truncate">${exp.description}</span>
                                         </div>
-                                        <span class="text-xs text-gray-500">${exp.date}</span>
+                                        <span class="text-xs text-gray-400">${exp.date}</span>
                                     </div>
                                     <div class="flex items-center gap-1 flex-shrink-0">
-                                        <span class="font-bold text-sm text-gray-800">${formatEuro(exp.amount)}</span>
-                                        <button onclick="editExpense(${exp.id})" class="text-blue-500 hover:text-blue-700 transition p-1 hover:bg-blue-50 rounded" title="Editar">✏️</button>
-                                        <button onclick="handleDeleteExpense(${exp.id})" class="text-red-500 hover:text-red-700 transition p-1 hover:bg-red-50 rounded" title="Eliminar">🗑️</button>
+                                        <span class="font-semibold text-sm text-gray-800">${formatEuro(exp.amount)}</span>
+                                        <button onclick="editExpense(${exp.id})" class="text-gray-400 hover:text-blue-500 transition p-1.5 hover:bg-blue-50 rounded-lg" title="Editar">✏️</button>
+                                        <button onclick="handleDeleteExpense(${exp.id})" class="text-gray-400 hover:text-red-500 transition p-1.5 hover:bg-red-50 rounded-lg" title="Eliminar">🗑️</button>
                                     </div>
                                 </div>
                             `).join('')}
                         </div>
                         
                         ${getFilteredExpenses().length > 0 ? `
-                            <div class="mt-3 pt-3 border-t-2 border-gray-200">
-                                <div class="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-lg border-2 border-indigo-200">
-                                    <span class="text-sm font-bold text-gray-800">💰 TOTAL:</span>
-                                    <span class="amount-display-large font-bold text-indigo-700">${formatEuro(monthTotal)}</span>
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <span class="text-sm font-medium text-gray-600">Total</span>
+                                    <span class="amount-display-large text-blue-600">${formatEuro(monthTotal)}</span>
                                 </div>
                             </div>
                         ` : ''}
@@ -1360,33 +1392,42 @@
                 <!-- Secciones colapsables -->
                 <div class="grid md:grid-cols-3 gap-4">
                     <!-- Ahorros -->
-                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in-right">
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100">
                         <button onclick="toggleSection('showSavingsSection')" class="w-full flex justify-between items-center mb-3">
-                            <h2 class="text-lg font-bold text-gray-800">💸 Ahorros</h2>
-                            <span id="showSavingsSectionBtn" class="toggle-btn text-xl ${state.showSavingsSection ? 'open' : ''}">▼</span>
+                            <h2 class="text-base font-semibold text-gray-800">💸 Ahorros</h2>
+                            <span id="showSavingsSectionBtn" class="toggle-btn text-lg ${state.showSavingsSection ? 'open' : ''}">▼</span>
                         </button>
                         <div id="showSavingsSection" class="collapsible-content ${state.showSavingsSection ? 'open' : ''} custom-scroll">
-                            <div class="mb-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
-                                <p class="text-xs text-gray-600">Total: <span class="font-bold text-emerald-700">${formatEuro(typeTotals.ahorro)}</span></p>
-                                <p class="text-xs text-gray-600">Retiros: <span class="font-bold text-red-600">-${formatEuro(getTotalWithdrawals())}</span></p>
-                                <p class="text-sm font-bold text-emerald-700 mt-1">Disponible: ${formatEuro(getNetSavings())}</p>
+                            <div class="mb-3 p-3 bg-emerald-50 rounded-lg">
+                                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                    <span>Total ahorrado</span>
+                                    <span class="font-semibold text-emerald-700">${formatEuro(typeTotals.ahorro)}</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-600 mb-2">
+                                    <span>Retiros</span>
+                                    <span class="font-semibold text-red-600">-${formatEuro(getTotalWithdrawals())}</span>
+                                </div>
+                                <div class="flex justify-between border-t border-emerald-200 pt-2">
+                                    <span class="text-sm font-medium text-gray-700">Disponible</span>
+                                    <span class="text-sm font-bold text-emerald-700">${formatEuro(getNetSavings())}</span>
+                                </div>
                             </div>
                             <div class="space-y-2 mb-3">
-                                <input type="text" id="withdrawalDescription" value="${state.withdrawalDescription}" placeholder="Motivo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 text-sm transition" />
-                                <input type="number" id="withdrawalAmount" value="${state.withdrawalAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 text-sm transition" />
-                                <button onclick="addWithdrawal()" class="w-full bg-gradient-to-r from-red-500 to-orange-600 text-white py-2 rounded-lg hover:from-red-600 hover:to-orange-700 transition shadow-md text-sm">➖ Registrar Retiro</button>
+                                <input type="text" id="withdrawalDescription" value="${state.withdrawalDescription}" placeholder="Motivo" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <input type="number" id="withdrawalAmount" value="${state.withdrawalAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <button onclick="addWithdrawal()" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition text-sm">− Registrar Retiro</button>
                             </div>
                             ${state.savingsWithdrawals.length > 0 ? `
                                 <div class="space-y-2">
                                     ${state.savingsWithdrawals.map(w => `
-                                        <div class="flex justify-between items-center p-2 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+                                        <div class="flex justify-between items-center p-2 bg-red-50 rounded-lg">
                                             <div class="flex-1 min-w-0">
-                                                <p class="font-medium text-xs truncate">${w.description}</p>
-                                                <p class="text-xs text-gray-500">${w.date}</p>
+                                                <p class="font-medium text-xs text-gray-800 truncate">${w.description}</p>
+                                                <p class="text-xs text-gray-400">${w.date}</p>
                                             </div>
                                             <div class="flex items-center gap-1">
-                                                <span class="font-bold text-red-600 text-sm">-${formatEuro(w.amount)}</span>
-                                                <button onclick="handleDeleteWithdrawal(${w.id})" class="text-red-500 hover:text-red-700 p-1">🗑️</button>
+                                                <span class="font-semibold text-red-600 text-sm">-${formatEuro(w.amount)}</span>
+                                                <button onclick="handleDeleteWithdrawal(${w.id})" class="text-gray-400 hover:text-red-500 p-1">🗑️</button>
                                             </div>
                                         </div>
                                     `).join('')}
@@ -1396,33 +1437,33 @@
                     </div>
 
                     <!-- Deudas -->
-                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in-right" style="animation-delay: 0.1s;">
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100" style="animation-delay: 0.05s;">
                         <button onclick="toggleSection('showDebtorsSection')" class="w-full flex justify-between items-center mb-3">
-                            <h2 class="text-lg font-bold text-gray-800">💵 Deudas</h2>
-                            <span id="showDebtorsSectionBtn" class="toggle-btn text-xl ${state.showDebtorsSection ? 'open' : ''}">▼</span>
+                            <h2 class="text-base font-semibold text-gray-800">💵 Me Deben</h2>
+                            <span id="showDebtorsSectionBtn" class="toggle-btn text-lg ${state.showDebtorsSection ? 'open' : ''}">▼</span>
                         </button>
                         <div id="showDebtorsSection" class="collapsible-content ${state.showDebtorsSection ? 'open' : ''} custom-scroll">
-                            <div class="mb-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
-                                <p class="text-xs text-gray-600">Total que me deben:</p>
-                                <p class="text-lg font-bold text-emerald-700">${formatEuro(getTotalOwed())}</p>
+                            <div class="mb-3 p-3 bg-blue-50 rounded-lg text-center">
+                                <p class="text-xs text-gray-500 mb-1">Total pendiente</p>
+                                <p class="text-xl font-bold text-blue-600">${formatEuro(getTotalOwed())}</p>
                             </div>
                             <div class="space-y-2 mb-3">
-                                <input type="text" id="debtorName" value="${state.debtorName}" placeholder="Nombre" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 text-sm transition" />
-                                <input type="number" id="debtorAmount" value="${state.debtorAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 text-sm transition" />
-                                <button onclick="addDebtor()" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white py-2 rounded-lg hover:from-emerald-600 hover:to-green-700 transition shadow-md text-sm">➕ Añadir Deudor</button>
+                                <input type="text" id="debtorName" value="${state.debtorName}" placeholder="Nombre" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <input type="number" id="debtorAmount" value="${state.debtorAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <button onclick="addDebtor()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition text-sm">+ Añadir</button>
                             </div>
                             ${state.debtors.length > 0 ? `
                                 <div class="space-y-2">
                                     ${state.debtors.map(d => `
-                                        <div class="flex justify-between items-center p-2 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
+                                        <div class="flex justify-between items-center p-2 bg-blue-50 rounded-lg">
                                             <div class="flex-1 min-w-0">
-                                                <p class="font-medium text-xs truncate">${d.name}</p>
-                                                <p class="text-xs text-gray-500">${d.date}</p>
+                                                <p class="font-medium text-xs text-gray-800 truncate">${d.name}</p>
+                                                <p class="text-xs text-gray-400">${d.date}</p>
                                             </div>
                                             <div class="flex items-center gap-1">
-                                                <span class="font-bold text-emerald-700 text-sm">${formatEuro(d.amount)}</span>
-                                                <button onclick="remindDebtorWhatsApp('${d.name}', ${d.amount})" class="text-green-600 hover:text-green-800 p-1" title="WhatsApp">📱</button>
-                                                <button onclick="handleDeleteDebtor(${d.id})" class="text-red-500 hover:text-red-700 p-1">🗑️</button>
+                                                <span class="font-semibold text-blue-600 text-sm">${formatEuro(d.amount)}</span>
+                                                <button onclick="remindDebtorWhatsApp('${d.name}', ${d.amount})" class="text-gray-400 hover:text-green-500 p-1" title="WhatsApp">📱</button>
+                                                <button onclick="handleDeleteDebtor(${d.id})" class="text-gray-400 hover:text-red-500 p-1">🗑️</button>
                                             </div>
                                         </div>
                                     `).join('')}
@@ -1432,33 +1473,33 @@
                     </div>
 
                     <!-- Proyecciones -->
-                    <div class="bg-white rounded-xl shadow-lg p-5 card animate-slide-in-right" style="animation-delay: 0.2s;">
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100" style="animation-delay: 0.1s;">
                         <button onclick="toggleSection('showProjectionsSection')" class="w-full flex justify-between items-center mb-3">
-                            <h2 class="text-lg font-bold text-gray-800">📈 Proyecciones</h2>
-                            <span id="showProjectionsSectionBtn" class="toggle-btn text-xl ${state.showProjectionsSection ? 'open' : ''}">▼</span>
+                            <h2 class="text-base font-semibold text-gray-800">📈 Proyecciones</h2>
+                            <span id="showProjectionsSectionBtn" class="toggle-btn text-lg ${state.showProjectionsSection ? 'open' : ''}">▼</span>
                         </button>
                         <div id="showProjectionsSection" class="collapsible-content ${state.showProjectionsSection ? 'open' : ''} custom-scroll">
                             <div class="space-y-2 mb-3">
-                                <input type="number" id="projectionMonths" value="${state.projectionMonths}" placeholder="Meses" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 text-sm transition" />
-                                <input type="number" id="monthlySavingsPlan" value="${state.monthlySavingsPlan}" placeholder="Ahorro mensual" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 text-sm transition" />
+                                <input type="number" id="projectionMonths" value="${state.projectionMonths}" placeholder="Meses" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <input type="number" id="monthlySavingsPlan" value="${state.monthlySavingsPlan}" placeholder="Ahorro mensual" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
                             </div>
                             ${state.projectionMonths && state.monthlySavingsPlan ? `
                                 <div class="grid grid-cols-2 gap-2">
-                                    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-2 rounded-lg border border-blue-200">
-                                        <p class="text-xs font-semibold text-blue-800">Desde cero</p>
-                                        <p class="amount-display font-bold text-blue-900">${formatEuro(projections.fromZero)}</p>
+                                    <div class="bg-blue-50 p-3 rounded-lg">
+                                        <p class="text-xs text-blue-600 mb-1">Desde cero</p>
+                                        <p class="text-sm font-bold text-blue-800">${formatEuro(projections.fromZero)}</p>
                                     </div>
-                                    <div class="bg-gradient-to-br from-emerald-50 to-green-50 p-2 rounded-lg border border-emerald-200">
-                                        <p class="text-xs font-semibold text-emerald-800">Con actual</p>
-                                        <p class="amount-display font-bold text-emerald-900">${formatEuro(projections.withCurrent)}</p>
+                                    <div class="bg-emerald-50 p-3 rounded-lg">
+                                        <p class="text-xs text-emerald-600 mb-1">Con actual</p>
+                                        <p class="text-sm font-bold text-emerald-800">${formatEuro(projections.withCurrent)}</p>
                                     </div>
-                                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-2 rounded-lg border border-purple-200">
-                                        <p class="text-xs font-semibold text-purple-800">Sin prestado</p>
-                                        <p class="amount-display font-bold text-purple-900">${formatEuro(projections.withoutOwed)}</p>
+                                    <div class="bg-violet-50 p-3 rounded-lg">
+                                        <p class="text-xs text-violet-600 mb-1">Sin prestado</p>
+                                        <p class="text-sm font-bold text-violet-800">${formatEuro(projections.withoutOwed)}</p>
                                     </div>
-                                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-2 rounded-lg border border-amber-200">
-                                        <p class="text-xs font-semibold text-amber-800">Si pagan</p>
-                                        <p class="amount-display font-bold text-amber-900">${formatEuro(projections.withOwed)}</p>
+                                    <div class="bg-amber-50 p-3 rounded-lg">
+                                        <p class="text-xs text-amber-600 mb-1">Si pagan</p>
+                                        <p class="text-sm font-bold text-amber-800">${formatEuro(projections.withOwed)}</p>
                                     </div>
                                 </div>
                             ` : '<p class="text-gray-400 text-xs text-center py-3">Completa los campos</p>'}
@@ -1501,9 +1542,9 @@
 
         function renderCategorySections(totals) {
             const sections = [
-                { title: 'Esenciales', type: 'esencial', color: 'green' },
+                { title: 'Esenciales', type: 'esencial', color: 'emerald' },
                 { title: 'Salidas', type: 'salida', color: 'pink' },
-                { title: 'Ahorro', type: 'ahorro', color: 'emerald' },
+                { title: 'Ahorro', type: 'ahorro', color: 'blue' },
                 { title: 'Bizums', type: 'bizum', color: 'indigo' },
                 { title: 'Transferencias', type: 'transferencia', color: 'violet' },
                 { title: 'Otros', type: 'otros', color: 'gray' }
@@ -1515,15 +1556,15 @@
                 if (!hasExpenses) return '';
 
                 return `
-                    <div class="mb-3">
-                        <h3 class="text-xs font-semibold text-${section.color}-700 mb-2 uppercase">${section.title}</h3>
-                        <div class="space-y-1">
+                    <div class="mb-4">
+                        <h3 class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">${section.title}</h3>
+                        <div class="space-y-1.5">
                             ${categoryList.map(cat => {
                                 if (totals[cat.name] <= 0) return '';
                                 return `
-                                    <div class="category-item flex items-center justify-between p-2 bg-gradient-to-r from-${section.color}-50 to-white rounded-lg">
-                                        <span class="text-xs font-medium truncate">${cat.icon} ${cat.displayName}</span>
-                                        <span class="font-bold text-gray-800 text-sm">${formatEuro(totals[cat.name])}</span>
+                                    <div class="category-item flex items-center justify-between p-2.5 bg-gray-50 rounded-lg">
+                                        <span class="text-sm text-gray-700">${cat.icon} ${cat.displayName}</span>
+                                        <span class="font-semibold text-gray-800 text-sm">${formatEuro(totals[cat.name])}</span>
                                     </div>
                                 `;
                             }).join('')}
