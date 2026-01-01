@@ -80,6 +80,15 @@
         body.dark-mode .gradient-bg { background: #0f172a; }
         body.dark-mode .total-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
         body.dark-mode .card { background: #1e293b; border: 1px solid #334155; }
+        body.dark-mode #detailModal > div { background: #1e293b; }
+        body.dark-mode #detailModal h3 { color: #e2e8f0; }
+        body.dark-mode #detailModal .bg-gray-50 { background: #0f172a; }
+        body.dark-mode #detailModal .bg-gray-100 { background: #334155; }
+        body.dark-mode #detailModal .text-gray-800 { color: #e2e8f0; }
+        body.dark-mode #detailModal .text-gray-600 { color: #94a3b8; }
+        body.dark-mode #detailModal .text-gray-500 { color: #64748b; }
+        body.dark-mode #detailModal .text-gray-400 { color: #64748b; }
+        body.dark-mode #detailModal .border-gray-100 { border-color: #334155; }
         
         /* Filtros de tiempo */
         .time-filter {
@@ -287,10 +296,11 @@
         let state = {
             expenses: [],
             savingsWithdrawals: [],
+            savingsDeposits: [],
             debtors: [],
+            loans: [],
             monthlyIncome: '',
             creditCardIncome: '',
-            monthlyBudget: '',
             owedMoney: '',
             projectionMonths: '',
             monthlySavingsPlan: '',
@@ -300,8 +310,15 @@
             date: new Date().toISOString().split('T')[0],
             withdrawalDescription: '',
             withdrawalAmount: '',
+            depositDescription: '',
+            depositAmount: '',
             debtorName: '',
             debtorAmount: '',
+            loanName: '',
+            loanAmount: '',
+            loanMonths: '',
+            loanPaid: '',
+            loanStartDate: '',
             editingExpenseId: null,
             darkMode: false,
             timeFilter: 'month',
@@ -310,6 +327,7 @@
             showSavingsSection: false,
             showDebtorsSection: false,
             showProjectionsSection: false,
+            showLoansSection: false,
             userId: null,
             lastSync: null
         };
@@ -327,7 +345,7 @@
             { name: '💰 Ahorro', displayName: 'Ahorro', type: 'ahorro', icon: '💰' },
             { name: '📈 Inversiones', displayName: 'Inversiones', type: 'ahorro', icon: '📈' },
             { name: '💸 Bizum', displayName: 'Bizum', type: 'bizum', icon: '💸' },
-            { name: '🏦 Transferencias', displayName: 'Transferencias', type: 'transferencia', icon: '🏦' },
+            { name: '🔄 Suscripciones', displayName: 'Suscripciones', type: 'suscripcion', icon: '🔄' },
             { name: '📦 Otros Gastos', displayName: 'Otros Gastos', type: 'otros', icon: '📦' },
             { name: '🔧 Varios', displayName: 'Varios', type: 'otros', icon: '🔧' }
         ];
@@ -345,7 +363,7 @@
             '💰 Ahorro': 'bg-emerald-100 text-emerald-800',
             '📈 Inversiones': 'bg-teal-100 text-teal-800',
             '💸 Bizum': 'bg-indigo-100 text-indigo-800',
-            '🏦 Transferencias': 'bg-violet-100 text-violet-800',
+            '🔄 Suscripciones': 'bg-violet-100 text-violet-800',
             '📦 Otros Gastos': 'bg-gray-100 text-gray-800',
             '🔧 Varios': 'bg-slate-100 text-slate-800'
         };
@@ -473,7 +491,6 @@
                 if (!configError && config) {
                     state.monthlyIncome = config.monthly_income || '';
                     state.creditCardIncome = config.credit_card_income || '';
-                    state.monthlyBudget = config.monthly_budget || '';
                     state.projectionMonths = config.projection_months || '';
                     state.monthlySavingsPlan = config.monthly_savings_plan || '';
                     state.darkMode = config.dark_mode || false;
@@ -631,10 +648,11 @@
                 const data = JSON.parse(savedData);
                 state.expenses = data.expenses || [];
                 state.savingsWithdrawals = data.savingsWithdrawals || [];
+                state.savingsDeposits = data.savingsDeposits || [];
                 state.debtors = data.debtors || [];
+                state.loans = data.loans || [];
                 state.monthlyIncome = data.monthlyIncome || '';
                 state.creditCardIncome = data.creditCardIncome || '';
-                state.monthlyBudget = data.monthlyBudget || '';
                 state.owedMoney = data.owedMoney || '';
                 state.projectionMonths = data.projectionMonths || '';
                 state.monthlySavingsPlan = data.monthlySavingsPlan || '';
@@ -652,10 +670,11 @@
             const dataToSave = {
                 expenses: state.expenses,
                 savingsWithdrawals: state.savingsWithdrawals,
+                savingsDeposits: state.savingsDeposits,
                 debtors: state.debtors,
+                loans: state.loans,
                 monthlyIncome: state.monthlyIncome,
                 creditCardIncome: state.creditCardIncome,
-                monthlyBudget: state.monthlyBudget,
                 owedMoney: state.owedMoney,
                 projectionMonths: state.projectionMonths,
                 monthlySavingsPlan: state.monthlySavingsPlan,
@@ -677,7 +696,6 @@
                     id: 1, // ID fijo para configuración pública
                     monthly_income: parseFloat(state.monthlyIncome) || 0,
                     credit_card_income: parseFloat(state.creditCardIncome) || 0,
-                    monthly_budget: parseFloat(state.monthlyBudget) || 0,
                     projection_months: parseInt(state.projectionMonths) || 0,
                     monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0,
                     dark_mode: state.darkMode,
@@ -695,7 +713,6 @@
                 debtors: state.debtors,
                 monthlyIncome: state.monthlyIncome,
                 creditCardIncome: state.creditCardIncome,
-                monthlyBudget: state.monthlyBudget,
                 owedMoney: state.owedMoney,
                 projectionMonths: state.projectionMonths,
                 monthlySavingsPlan: state.monthlySavingsPlan,
@@ -727,7 +744,6 @@
                     state.debtors = data.debtors || [];
                     state.monthlyIncome = data.monthlyIncome || '';
                     state.creditCardIncome = data.creditCardIncome || '';
-                    state.monthlyBudget = data.monthlyBudget || '';
                     state.owedMoney = data.owedMoney || '';
                     state.projectionMonths = data.projectionMonths || '';
                     state.monthlySavingsPlan = data.monthlySavingsPlan || '';
@@ -866,7 +882,7 @@
                 salida: 0,
                 ahorro: 0,
                 bizum: 0,
-                transferencia: 0,
+                suscripcion: 0,
                 otros: 0
             };
             const filtered = getFilteredExpenses();
@@ -900,9 +916,13 @@
             return state.savingsWithdrawals.reduce((sum, withdrawal) => sum + withdrawal.amount, 0);
         }
 
+        function getTotalDeposits() {
+            return state.savingsDeposits.reduce((sum, deposit) => sum + deposit.amount, 0);
+        }
+
         function getNetSavings() {
             const typeTotals = getTotalByType();
-            return typeTotals.ahorro - getTotalWithdrawals();
+            return typeTotals.ahorro + getTotalDeposits() - getTotalWithdrawals();
         }
 
         // ========== FUNCIONES DE RETIROS ==========
@@ -946,6 +966,39 @@
             showNotification('🗑️ Retiro eliminado');
         }
 
+        // ========== FUNCIONES DE DEPÓSITOS DE AHORRO ==========
+        function addDeposit() {
+            if (!state.depositDescription || !state.depositAmount || parseFloat(state.depositAmount) <= 0) {
+                showNotification('❌ Completa todos los campos correctamente', true);
+                return;
+            }
+
+            const newDeposit = {
+                id: Date.now(),
+                description: state.depositDescription,
+                amount: parseFloat(state.depositAmount),
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            state.savingsDeposits.unshift(newDeposit);
+            saveToSupabase('savings_deposits', newDeposit);
+            state.depositDescription = '';
+            state.depositAmount = '';
+            
+            checkBadges();
+            saveDataLocal();
+            render();
+            showNotification('✅ Ingreso registrado');
+        }
+
+        function deleteDeposit(id) {
+            state.savingsDeposits = state.savingsDeposits.filter(d => d.id !== id);
+            deleteFromSupabase('savings_deposits', id);
+            saveDataLocal();
+            render();
+            showNotification('🗑️ Ingreso eliminado');
+        }
+
         // ========== FUNCIONES DE DEUDORES ==========
         function getTotalOwed() {
             return state.debtors.reduce((sum, debtor) => sum + debtor.amount, 0);
@@ -986,6 +1039,221 @@
             const message = `Hola ${name}, te recuerdo que me debes ${formatEuro(amount)}. ¡Gracias! 😊`;
             const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
             window.open(url, '_blank');
+        }
+
+        // ========== FUNCIONES DE PRÉSTAMOS ==========
+        function getTotalLoans() {
+            return state.loans.reduce((sum, loan) => sum + loan.pendingAmount, 0);
+        }
+
+        function getTotalMonthlyLoanPayments() {
+            const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+            return state.loans.reduce((sum, loan) => {
+                // Solo contar si el préstamo está activo (fecha de inicio <= mes actual)
+                if (loan.startDate && loan.startDate > currentMonth) {
+                    return sum; // Préstamo programado para el futuro, no descontar
+                }
+                return sum + loan.monthlyPayment;
+            }, 0);
+        }
+
+        function isLoanActive(loan) {
+            if (!loan.startDate) return true; // Si no tiene fecha, está activo
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            return loan.startDate <= currentMonth;
+        }
+
+        function addLoan() {
+            if (!state.loanName || !state.loanAmount || !state.loanMonths || 
+                parseFloat(state.loanAmount) <= 0 || parseInt(state.loanMonths) <= 0) {
+                showNotification('❌ Completa todos los campos correctamente', true);
+                return;
+            }
+
+            const totalAmount = parseFloat(state.loanAmount);
+            const months = parseInt(state.loanMonths);
+            const paidAmount = parseFloat(state.loanPaid) || 0;
+            const pendingAmount = totalAmount - paidAmount;
+            const remainingMonths = Math.ceil(pendingAmount / (totalAmount / months));
+            const monthlyPayment = pendingAmount / remainingMonths;
+            const startDate = state.loanStartDate || new Date().toISOString().slice(0, 7); // Si no hay fecha, mes actual
+
+            const newLoan = {
+                id: Date.now(),
+                name: state.loanName,
+                totalAmount: totalAmount,
+                pendingAmount: pendingAmount,
+                paidAmount: paidAmount,
+                totalMonths: months,
+                remainingMonths: remainingMonths,
+                monthlyPayment: monthlyPayment,
+                startDate: startDate,
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            state.loans.unshift(newLoan);
+            
+            // Mapear a snake_case para Supabase
+            saveToSupabase('loans', {
+                id: newLoan.id,
+                name: newLoan.name,
+                total_amount: newLoan.totalAmount,
+                pending_amount: newLoan.pendingAmount,
+                paid_amount: newLoan.paidAmount,
+                total_months: newLoan.totalMonths,
+                remaining_months: newLoan.remainingMonths,
+                monthly_payment: newLoan.monthlyPayment,
+                start_date: newLoan.startDate,
+                date: newLoan.date
+            });
+            
+            state.loanName = '';
+            state.loanAmount = '';
+            state.loanMonths = '';
+            state.loanPaid = '';
+            state.loanStartDate = '';
+            
+            saveDataLocal();
+            render();
+            
+            const isActive = isLoanActive(newLoan);
+            showNotification(isActive ? '✅ Préstamo añadido' : `✅ Préstamo programado para ${newLoan.startDate}`);
+        }
+
+        function payLoan(id, amount) {
+            const loan = state.loans.find(l => l.id === id);
+            if (!loan) return;
+
+            // Verificar si el préstamo está activo
+            if (!isLoanActive(loan)) {
+                showNotification('❌ Este préstamo no está activo aún', true);
+                return;
+            }
+
+            const paymentAmount = parseFloat(amount) || loan.monthlyPayment;
+            
+            if (paymentAmount > loan.pendingAmount) {
+                showNotification('❌ El pago excede la deuda pendiente', true);
+                return;
+            }
+
+            loan.paidAmount += paymentAmount;
+            loan.pendingAmount -= paymentAmount;
+            
+            if (loan.pendingAmount <= 0) {
+                loan.pendingAmount = 0;
+                loan.remainingMonths = 0;
+                showNotification('🎉 ¡Préstamo liquidado!');
+            } else {
+                loan.remainingMonths = Math.ceil(loan.pendingAmount / loan.monthlyPayment);
+                showNotification('✅ Pago registrado');
+            }
+
+            // Mapear a snake_case para Supabase
+            saveToSupabase('loans', {
+                id: loan.id,
+                name: loan.name,
+                total_amount: loan.totalAmount,
+                pending_amount: loan.pendingAmount,
+                paid_amount: loan.paidAmount,
+                total_months: loan.totalMonths,
+                remaining_months: loan.remainingMonths,
+                monthly_payment: loan.monthlyPayment,
+                start_date: loan.startDate,
+                date: loan.date
+            });
+            
+            saveDataLocal();
+            render();
+        }
+
+        function deleteLoan(id) {
+            state.loans = state.loans.filter(l => l.id !== id);
+            deleteFromSupabase('loans', id);
+            saveDataLocal();
+            render();
+            showNotification('🗑️ Préstamo eliminado');
+        }
+
+        function amortizeLoan(id) {
+            const input = document.getElementById(`amortize-${id}`);
+            const amount = parseFloat(input?.value) || 0;
+            
+            if (amount <= 0) {
+                showNotification('❌ Introduce una cantidad válida', true);
+                return;
+            }
+            
+            const loan = state.loans.find(l => l.id === id);
+            if (!loan) return;
+            
+            if (amount > loan.pendingAmount) {
+                showNotification('❌ La cantidad excede la deuda pendiente', true);
+                return;
+            }
+            
+            loan.paidAmount += amount;
+            loan.pendingAmount -= amount;
+            
+            if (loan.pendingAmount <= 0) {
+                loan.pendingAmount = 0;
+                loan.remainingMonths = 0;
+                loan.monthlyPayment = 0;
+                showNotification('🎉 ¡Préstamo liquidado!');
+            } else {
+                // Recalcular meses restantes manteniendo la cuota
+                loan.remainingMonths = Math.ceil(loan.pendingAmount / loan.monthlyPayment);
+                showNotification(`✅ Amortización de ${formatEuro(amount)} realizada`);
+            }
+            
+            // Guardar en Supabase
+            saveToSupabase('loans', {
+                id: loan.id,
+                name: loan.name,
+                total_amount: loan.totalAmount,
+                pending_amount: loan.pendingAmount,
+                paid_amount: loan.paidAmount,
+                total_months: loan.totalMonths,
+                remaining_months: loan.remainingMonths,
+                monthly_payment: loan.monthlyPayment,
+                start_date: loan.startDate,
+                date: loan.date
+            });
+            
+            saveDataLocal();
+            render();
+        }
+
+        function amortizeLoanFull(id) {
+            const loan = state.loans.find(l => l.id === id);
+            if (!loan) return;
+            
+            if (!confirm(`¿Liquidar completamente "${loan.name}" por ${formatEuro(loan.pendingAmount)}?`)) {
+                return;
+            }
+            
+            loan.paidAmount = loan.totalAmount;
+            loan.pendingAmount = 0;
+            loan.remainingMonths = 0;
+            loan.monthlyPayment = 0;
+            
+            // Guardar en Supabase
+            saveToSupabase('loans', {
+                id: loan.id,
+                name: loan.name,
+                total_amount: loan.totalAmount,
+                pending_amount: loan.pendingAmount,
+                paid_amount: loan.paidAmount,
+                total_months: loan.totalMonths,
+                remaining_months: loan.remainingMonths,
+                monthly_payment: loan.monthlyPayment,
+                start_date: loan.startDate,
+                date: loan.date
+            });
+            
+            saveDataLocal();
+            render();
+            showNotification('🎉 ¡Préstamo liquidado completamente!');
         }
 
         // ========== FUNCIONES DE PROYECCIONES ==========
@@ -1054,20 +1322,6 @@
             }
             
             return messages;
-        }
-
-        function getBudgetProgress() {
-            const budget = parseFloat(state.monthlyBudget) || 0;
-            if (budget === 0) return { percentage: 0, color: 'bg-gray-300' };
-            
-            const spent = getTotalMonth();
-            const percentage = Math.min((spent / budget) * 100, 100);
-            
-            let color = 'bg-green-500';
-            if (percentage >= 90) color = 'bg-red-500';
-            else if (percentage >= 70) color = 'bg-yellow-500';
-            
-            return { percentage, color, spent, budget };
         }
 
         // ========== GRÁFICO ==========
@@ -1152,9 +1406,10 @@
             const typeTotals = getTotalByType();
             const totals = getTotalByCategory();
             const monthTotal = getTotalMonth();
-            const remainingBalance = getTotalIncome() - monthTotal;
+            const totalLoans = getTotalLoans();
+            const monthlyLoanPayments = getTotalMonthlyLoanPayments();
+            const remainingBalance = getTotalIncome() - monthTotal - monthlyLoanPayments;
             const projections = calculateProjections();
-            const budgetProgress = getBudgetProgress();
             const prediction = calculateMonthEndPrediction();
             const healthMessages = getFinancialHealthMessage();
             const earnedBadges = badgeDefinitions.filter(b => state.badges.includes(b.id));
@@ -1230,18 +1485,14 @@
                         </div>
                     ` : ''}
                     
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                         <div>
                             <label class="text-xs font-medium text-gray-500 block mb-1.5">Ingresos del mes</label>
                             <input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
                         </div>
                         <div>
-                            <label class="text-xs font-medium text-gray-500 block mb-1.5">Ingresos tarjeta</label>
+                            <label class="text-xs font-medium text-gray-500 block mb-1.5">Donaciones</label>
                             <input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-gray-500 block mb-1.5">Presupuesto</label>
-                            <input type="number" id="monthlyBudget" value="${state.monthlyBudget}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
                         </div>
                         <div>
                             <label class="text-xs font-medium text-gray-500 block mb-1.5">Me deben</label>
@@ -1250,18 +1501,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    ${state.monthlyBudget ? `
-                        <div class="mb-4 p-3 bg-gray-50 rounded-xl">
-                            <div class="flex justify-between mb-2">
-                                <span class="text-xs font-medium text-gray-600">Presupuesto</span>
-                                <span class="text-xs font-semibold text-gray-800">${formatEuro(budgetProgress.spent)} / ${formatEuro(budgetProgress.budget)}</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                                <div class="progress-bar h-2 rounded-full ${budgetProgress.color}" style="width: ${budgetProgress.percentage}%"></div>
-                            </div>
-                        </div>
-                    ` : ''}
                     
                     <div class="p-3 rounded-xl ${prediction >= 0 ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}">
                         <div class="flex flex-wrap justify-between items-center gap-2">
@@ -1282,36 +1521,48 @@
                         <p class="saldo-display amount-display-large ${remainingBalance >= 0 ? 'text-emerald-600' : 'text-red-600'}">
                             ${formatEuro(remainingBalance)}
                         </p>
+                        ${monthlyLoanPayments > 0 ? `<p class="text-xs text-gray-400 mt-1">Incluye -${formatEuro(monthlyLoanPayments)} préstamos</p>` : ''}
                     </div>
 
-                    <div class="total-card rounded-xl p-3 border-l-4 border-green-400 animate-slide-in">
+                    <div class="total-card rounded-xl p-3 border-l-4 border-green-400 animate-slide-in cursor-pointer hover:bg-green-50 transition" onclick="showExpensesByType('esencial', 'Esenciales')">
                         <p class="text-gray-400 text-xs">Esenciales</p>
                         <p class="amount-display text-gray-800">${formatEuro(typeTotals.esencial)}</p>
                     </div>
 
-                    <div class="total-card rounded-xl p-3 border-l-4 border-pink-400 animate-slide-in">
+                    <div class="total-card rounded-xl p-3 border-l-4 border-pink-400 animate-slide-in cursor-pointer hover:bg-pink-50 transition" onclick="showExpensesByType('salida', 'Salidas')">
                         <p class="text-gray-400 text-xs">Salidas</p>
                         <p class="amount-display text-gray-800">${formatEuro(typeTotals.salida)}</p>
                     </div>
 
-                    <div class="total-card rounded-xl p-3 border-l-4 border-emerald-400 animate-slide-in">
+                    <div class="total-card rounded-xl p-3 border-l-4 border-emerald-400 animate-slide-in cursor-pointer hover:bg-emerald-50 transition" onclick="showSavingsDetail()">
                         <p class="text-gray-400 text-xs">Ahorro Neto</p>
                         <p class="amount-display text-emerald-600">${formatEuro(getNetSavings())}</p>
                     </div>
 
-                    <div class="total-card rounded-xl p-3 border-l-4 border-indigo-400 animate-slide-in">
+                    <div class="total-card rounded-xl p-3 border-l-4 border-indigo-400 animate-slide-in cursor-pointer hover:bg-indigo-50 transition" onclick="showExpensesByType('bizum', 'Bizums')">
                         <p class="text-gray-400 text-xs">Bizums</p>
                         <p class="amount-display text-gray-800">${formatEuro(typeTotals.bizum)}</p>
                     </div>
 
-                    <div class="total-card rounded-xl p-3 border-l-4 border-violet-400 animate-slide-in">
-                        <p class="text-gray-400 text-xs">Transfer.</p>
-                        <p class="amount-display text-gray-800">${formatEuro(typeTotals.transferencia)}</p>
+                    <div class="total-card rounded-xl p-3 border-l-4 border-violet-400 animate-slide-in cursor-pointer hover:bg-violet-50 transition" onclick="showExpensesByType('suscripcion', 'Suscripciones')">
+                        <p class="text-gray-400 text-xs">Suscrip.</p>
+                        <p class="amount-display text-gray-800">${formatEuro(typeTotals.suscripcion)}</p>
                     </div>
 
-                    <div class="total-card rounded-xl p-3 border-l-4 border-gray-400 animate-slide-in">
-                        <p class="text-gray-400 text-xs">Otros</p>
-                        <p class="amount-display text-gray-800">${formatEuro(typeTotals.otros)}</p>
+                    <div class="total-card rounded-xl p-3 border-l-4 border-orange-400 animate-slide-in cursor-pointer hover:bg-orange-50 transition" onclick="showLoansDetail()">
+                        <p class="text-gray-400 text-xs">Préstamos</p>
+                        <p class="amount-display text-orange-600">${formatEuro(totalLoans)}</p>
+                    </div>
+                </div>
+                
+                <!-- Modal de detalles -->
+                <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onclick="closeDetailModal(event)">
+                    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
+                        <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                            <h3 id="modalTitle" class="text-lg font-semibold text-gray-800"></h3>
+                            <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                        </div>
+                        <div id="modalContent" class="p-4 overflow-y-auto max-h-[60vh] custom-scroll"></div>
                     </div>
                 </div>
 
@@ -1390,7 +1641,7 @@
                 </div>
 
                 <!-- Secciones colapsables -->
-                <div class="grid md:grid-cols-3 gap-4">
+                <div class="grid md:grid-cols-4 gap-4">
                     <!-- Ahorros -->
                     <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100">
                         <button onclick="toggleSection('showSavingsSection')" class="w-full flex justify-between items-center mb-3">
@@ -1400,8 +1651,12 @@
                         <div id="showSavingsSection" class="collapsible-content ${state.showSavingsSection ? 'open' : ''} custom-scroll">
                             <div class="mb-3 p-3 bg-emerald-50 rounded-lg">
                                 <div class="flex justify-between text-xs text-gray-600 mb-1">
-                                    <span>Total ahorrado</span>
+                                    <span>Por categoría</span>
                                     <span class="font-semibold text-emerald-700">${formatEuro(typeTotals.ahorro)}</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                    <span>Ingresos extras</span>
+                                    <span class="font-semibold text-emerald-700">+${formatEuro(getTotalDeposits())}</span>
                                 </div>
                                 <div class="flex justify-between text-xs text-gray-600 mb-2">
                                     <span>Retiros</span>
@@ -1412,13 +1667,43 @@
                                     <span class="text-sm font-bold text-emerald-700">${formatEuro(getNetSavings())}</span>
                                 </div>
                             </div>
-                            <div class="space-y-2 mb-3">
-                                <input type="text" id="withdrawalDescription" value="${state.withdrawalDescription}" placeholder="Motivo" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-                                <input type="number" id="withdrawalAmount" value="${state.withdrawalAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-                                <button onclick="addWithdrawal()" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition text-sm">− Registrar Retiro</button>
-                            </div>
-                            ${state.savingsWithdrawals.length > 0 ? `
+                            
+                            <!-- Ingreso -->
+                            <div class="mb-3 p-3 bg-blue-50 rounded-lg">
+                                <p class="text-xs font-semibold text-blue-700 mb-2">➕ Añadir ingreso</p>
                                 <div class="space-y-2">
+                                    <input type="text" id="depositDescription" value="${state.depositDescription}" placeholder="Concepto" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                    <input type="number" id="depositAmount" value="${state.depositAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                    <button onclick="addDeposit()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg transition text-sm">+ Ingresar</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Retiro -->
+                            <div class="mb-3 p-3 bg-red-50 rounded-lg">
+                                <p class="text-xs font-semibold text-red-700 mb-2">➖ Registrar retiro</p>
+                                <div class="space-y-2">
+                                    <input type="text" id="withdrawalDescription" value="${state.withdrawalDescription}" placeholder="Motivo" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                    <input type="number" id="withdrawalAmount" value="${state.withdrawalAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                    <button onclick="addWithdrawal()" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition text-sm">− Retirar</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Historial -->
+                            ${(state.savingsDeposits.length > 0 || state.savingsWithdrawals.length > 0) ? `
+                                <div class="space-y-2">
+                                    <p class="text-xs font-semibold text-gray-500 uppercase">Historial</p>
+                                    ${state.savingsDeposits.map(d => `
+                                        <div class="flex justify-between items-center p-2 bg-emerald-50 rounded-lg">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="font-medium text-xs text-gray-800 truncate">${d.description}</p>
+                                                <p class="text-xs text-gray-400">${d.date}</p>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <span class="font-semibold text-emerald-600 text-sm">+${formatEuro(d.amount)}</span>
+                                                <button onclick="handleDeleteDeposit(${d.id})" class="text-gray-400 hover:text-red-500 p-1">🗑️</button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
                                     ${state.savingsWithdrawals.map(w => `
                                         <div class="flex justify-between items-center p-2 bg-red-50 rounded-lg">
                                             <div class="flex-1 min-w-0">
@@ -1432,12 +1717,94 @@
                                         </div>
                                     `).join('')}
                                 </div>
-                            ` : '<p class="text-gray-400 text-xs text-center py-3">Sin retiros</p>'}
+                            ` : '<p class="text-gray-400 text-xs text-center py-2">Sin movimientos</p>'}
+                        </div>
+                    </div>
+
+                    <!-- Préstamos -->
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100" style="animation-delay: 0.05s;">
+                        <button onclick="toggleSection('showLoansSection')" class="w-full flex justify-between items-center mb-3">
+                            <h2 class="text-base font-semibold text-gray-800">🏦 Préstamos</h2>
+                            <span id="showLoansSectionBtn" class="toggle-btn text-lg ${state.showLoansSection ? 'open' : ''}">▼</span>
+                        </button>
+                        <div id="showLoansSection" class="collapsible-content ${state.showLoansSection ? 'open' : ''} custom-scroll">
+                            <div class="mb-3 p-3 bg-orange-50 rounded-lg">
+                                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                    <span>Deuda total</span>
+                                    <span class="font-semibold text-orange-700">${formatEuro(totalLoans)}</span>
+                                </div>
+                                <div class="flex justify-between border-t border-orange-200 pt-2">
+                                    <span class="text-sm font-medium text-gray-700">Cuota mensual</span>
+                                    <span class="text-sm font-bold text-orange-700">${formatEuro(monthlyLoanPayments)}</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2 mb-3">
+                                <input type="text" id="loanName" value="${state.loanName}" placeholder="Nombre del préstamo" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <input type="number" id="loanAmount" value="${state.loanAmount}" placeholder="Capital total" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <input type="number" id="loanMonths" value="${state.loanMonths}" placeholder="Nº de meses" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <input type="number" id="loanPaid" value="${state.loanPaid}" placeholder="Ya pagado (opcional)" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <div>
+                                    <label class="text-xs text-gray-500 mb-1 block">1ª cuota a descontar</label>
+                                    <input type="month" id="loanStartDate" value="${state.loanStartDate}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                </div>
+                                <button onclick="addLoan()" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg transition text-sm">+ Añadir Préstamo</button>
+                            </div>
+                            ${state.loans.length > 0 ? `
+                                <div class="space-y-3">
+                                    ${state.loans.map(l => {
+                                        const active = isLoanActive(l);
+                                        return `
+                                        <div class="p-3 ${active ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200'} rounded-lg border">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <p class="font-semibold text-sm text-gray-800 truncate">${l.name}</p>
+                                                        ${!active ? `<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">📅 ${l.startDate}</span>` : ''}
+                                                    </div>
+                                                    <p class="text-xs text-gray-500">${l.remainingMonths} meses restantes</p>
+                                                </div>
+                                                <button onclick="handleDeleteLoan(${l.id})" class="text-gray-400 hover:text-red-500 p-1">🗑️</button>
+                                            </div>
+                                            <div class="flex justify-between text-xs mb-1">
+                                                <span class="text-gray-500">Pendiente</span>
+                                                <span class="font-bold text-orange-700">${formatEuro(l.pendingAmount)}</span>
+                                            </div>
+                                            <div class="flex justify-between text-xs mb-2">
+                                                <span class="text-gray-500">Cuota mensual</span>
+                                                <span class="font-semibold text-gray-700">${formatEuro(l.monthlyPayment)} ${!active ? '(no activa)' : ''}</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-3">
+                                                <div class="${active ? 'bg-orange-500' : 'bg-gray-400'} h-1.5 rounded-full" style="width: ${(l.paidAmount / l.totalAmount) * 100}%"></div>
+                                            </div>
+                                            
+                                            <!-- Botones de pago -->
+                                            <div class="space-y-2">
+                                                <button onclick="payLoan(${l.id})" class="w-full ${active ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-gray-400'} text-white py-1.5 rounded text-xs transition" ${!active ? 'disabled title="Préstamo no activo aún"' : ''}>
+                                                    ✓ Pagar cuota (${formatEuro(l.monthlyPayment)})
+                                                </button>
+                                                
+                                                <!-- Amortización parcial -->
+                                                <div class="flex gap-1">
+                                                    <input type="number" id="amortize-${l.id}" placeholder="Cantidad" step="0.01" class="flex-1 px-2 py-1.5 border border-gray-200 rounded text-xs" />
+                                                    <button onclick="amortizeLoan(${l.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-xs transition">
+                                                        Amortizar
+                                                    </button>
+                                                </div>
+                                                
+                                                <!-- Amortización total -->
+                                                <button onclick="amortizeLoanFull(${l.id})" class="w-full bg-violet-500 hover:bg-violet-600 text-white py-1.5 rounded text-xs transition">
+                                                    💰 Liquidar todo (${formatEuro(l.pendingAmount)})
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `}).join('')}
+                                </div>
+                            ` : '<p class="text-gray-400 text-xs text-center py-3">Sin préstamos</p>'}
                         </div>
                     </div>
 
                     <!-- Deudas -->
-                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100" style="animation-delay: 0.05s;">
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100" style="animation-delay: 0.1s;">
                         <button onclick="toggleSection('showDebtorsSection')" class="w-full flex justify-between items-center mb-3">
                             <h2 class="text-base font-semibold text-gray-800">💵 Me Deben</h2>
                             <span id="showDebtorsSectionBtn" class="toggle-btn text-lg ${state.showDebtorsSection ? 'open' : ''}">▼</span>
@@ -1473,7 +1840,7 @@
                     </div>
 
                     <!-- Proyecciones -->
-                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100" style="animation-delay: 0.1s;">
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100" style="animation-delay: 0.15s;">
                         <button onclick="toggleSection('showProjectionsSection')" class="w-full flex justify-between items-center mb-3">
                             <h2 class="text-base font-semibold text-gray-800">📈 Proyecciones</h2>
                             <span id="showProjectionsSectionBtn" class="toggle-btn text-lg ${state.showProjectionsSection ? 'open' : ''}">▼</span>
@@ -1506,15 +1873,22 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Botón Reset -->
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <button onclick="resetMonth()" class="w-full bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 py-3 rounded-xl transition text-sm font-medium border border-gray-200 hover:border-red-200">
+                        🔄 Reset (nuevo mes)
+                    </button>
+                    <p class="text-xs text-gray-400 text-center mt-2">Borra gastos, ingresos y donaciones. Mantiene ahorros, préstamos, deudores y proyecciones.</p>
+                </div>
             `;
 
             // Event listeners
-            ['monthlyIncome', 'creditCardIncome', 'monthlyBudget'].forEach(id => {
+            ['monthlyIncome', 'creditCardIncome'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('input', (e) => {
                     state[id] = e.target.value;
-                    if (id !== 'monthlyBudget') updateTotalsOnly();
-                    else render();
+                    updateTotalsOnly();
                 });
             });
 
@@ -1526,7 +1900,7 @@
                 });
             });
 
-            ['description', 'amount', 'withdrawalDescription', 'withdrawalAmount', 'debtorName', 'debtorAmount'].forEach(id => {
+            ['description', 'amount', 'withdrawalDescription', 'withdrawalAmount', 'depositDescription', 'depositAmount', 'debtorName', 'debtorAmount', 'loanName', 'loanAmount', 'loanMonths', 'loanPaid', 'loanStartDate'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('input', (e) => state[id] = e.target.value);
             });
@@ -1546,7 +1920,7 @@
                 { title: 'Salidas', type: 'salida', color: 'pink' },
                 { title: 'Ahorro', type: 'ahorro', color: 'blue' },
                 { title: 'Bizums', type: 'bizum', color: 'indigo' },
-                { title: 'Transferencias', type: 'transferencia', color: 'violet' },
+                { title: 'Suscripciones', type: 'suscripcion', color: 'violet' },
                 { title: 'Otros', type: 'otros', color: 'gray' }
             ];
 
@@ -1582,8 +1956,217 @@
             if (confirm('¿Eliminar este retiro?')) deleteWithdrawal(id);
         }
 
+        function handleDeleteDeposit(id) {
+            if (confirm('¿Eliminar este ingreso?')) deleteDeposit(id);
+        }
+
         function handleDeleteDebtor(id) {
             if (confirm('¿Eliminar este deudor?')) deleteDebtor(id);
+        }
+
+        function handleDeleteLoan(id) {
+            if (confirm('¿Eliminar este préstamo?')) deleteLoan(id);
+        }
+
+        // ========== FUNCIONES DE MODAL DE DETALLES ==========
+        function showExpensesByType(type, title) {
+            const filtered = getFilteredExpenses().filter(exp => getCategoryType(exp.category) === type);
+            const total = filtered.reduce((sum, exp) => sum + exp.amount, 0);
+            
+            let content = '';
+            if (filtered.length === 0) {
+                content = '<p class="text-gray-400 text-center py-8">No hay gastos en esta categoría</p>';
+            } else {
+                content = `
+                    <div class="mb-4 p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+                        <span class="text-sm text-gray-600">${filtered.length} gasto${filtered.length !== 1 ? 's' : ''}</span>
+                        <span class="font-bold text-gray-800">${formatEuro(total)}</span>
+                    </div>
+                    <div class="space-y-2">
+                        ${filtered.map(exp => `
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-sm text-gray-800 truncate">${exp.description}</p>
+                                    <p class="text-xs text-gray-400">${exp.category} • ${exp.date}</p>
+                                </div>
+                                <span class="font-semibold text-gray-800 ml-3">${formatEuro(exp.amount)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function showSavingsDetail() {
+            const savingsExpenses = getFilteredExpenses().filter(exp => getCategoryType(exp.category) === 'ahorro');
+            const totalFromExpenses = savingsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const totalDeposits = getTotalDeposits();
+            const totalWithdrawals = getTotalWithdrawals();
+            const netSavings = getNetSavings();
+            
+            let content = `
+                <div class="space-y-3 mb-4">
+                    <div class="p-3 bg-emerald-50 rounded-lg flex justify-between items-center">
+                        <span class="text-sm text-emerald-700">Por categorías</span>
+                        <span class="font-bold text-emerald-800">${formatEuro(totalFromExpenses)}</span>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-lg flex justify-between items-center">
+                        <span class="text-sm text-blue-700">Ingresos extras</span>
+                        <span class="font-bold text-blue-800">+${formatEuro(totalDeposits)}</span>
+                    </div>
+                    <div class="p-3 bg-red-50 rounded-lg flex justify-between items-center">
+                        <span class="text-sm text-red-700">Retiros</span>
+                        <span class="font-bold text-red-800">-${formatEuro(totalWithdrawals)}</span>
+                    </div>
+                    <div class="p-3 bg-gray-100 rounded-lg flex justify-between items-center border-t-2 border-emerald-500">
+                        <span class="text-sm font-semibold text-gray-700">Ahorro Neto</span>
+                        <span class="font-bold text-emerald-700">${formatEuro(netSavings)}</span>
+                    </div>
+                </div>
+            `;
+            
+            if (savingsExpenses.length > 0) {
+                content += `
+                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Gastos de ahorro</p>
+                    <div class="space-y-2">
+                        ${savingsExpenses.map(exp => `
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-sm text-gray-800 truncate">${exp.description}</p>
+                                    <p class="text-xs text-gray-400">${exp.category} • ${exp.date}</p>
+                                </div>
+                                <span class="font-semibold text-emerald-700 ml-3">${formatEuro(exp.amount)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            if (state.savingsDeposits.length > 0) {
+                content += `
+                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2 mt-4">Ingresos extras</p>
+                    <div class="space-y-2">
+                        ${state.savingsDeposits.map(d => `
+                            <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-sm text-gray-800 truncate">${d.description}</p>
+                                    <p class="text-xs text-gray-400">${d.date}</p>
+                                </div>
+                                <span class="font-semibold text-blue-700 ml-3">+${formatEuro(d.amount)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            if (state.savingsWithdrawals.length > 0) {
+                content += `
+                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2 mt-4">Retiros</p>
+                    <div class="space-y-2">
+                        ${state.savingsWithdrawals.map(w => `
+                            <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-sm text-gray-800 truncate">${w.description}</p>
+                                    <p class="text-xs text-gray-400">${w.date}</p>
+                                </div>
+                                <span class="font-semibold text-red-600 ml-3">-${formatEuro(w.amount)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('modalTitle').textContent = 'Ahorro Neto';
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function showLoansDetail() {
+            const activeLoans = state.loans.filter(l => l.pendingAmount > 0);
+            const totalPending = getTotalLoans();
+            const monthlyPayments = getTotalMonthlyLoanPayments();
+            
+            let content = '';
+            if (activeLoans.length === 0) {
+                content = '<p class="text-gray-400 text-center py-8">No hay préstamos activos</p>';
+            } else {
+                content = `
+                    <div class="space-y-3 mb-4">
+                        <div class="p-3 bg-orange-50 rounded-lg flex justify-between items-center">
+                            <span class="text-sm text-orange-700">Deuda total</span>
+                            <span class="font-bold text-orange-800">${formatEuro(totalPending)}</span>
+                        </div>
+                        <div class="p-3 bg-gray-100 rounded-lg flex justify-between items-center">
+                            <span class="text-sm text-gray-700">Cuota mensual total</span>
+                            <span class="font-bold text-gray-800">${formatEuro(monthlyPayments)}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        ${activeLoans.map(l => {
+                            const active = isLoanActive(l);
+                            return `
+                                <div class="p-3 ${active ? 'bg-orange-50' : 'bg-gray-50'} rounded-lg">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p class="font-medium text-sm text-gray-800">${l.name}</p>
+                                            <p class="text-xs text-gray-500">${l.remainingMonths} meses restantes</p>
+                                        </div>
+                                        ${!active ? `<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">📅 ${l.startDate}</span>` : ''}
+                                    </div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-gray-500">Pendiente</span>
+                                        <span class="font-bold text-orange-700">${formatEuro(l.pendingAmount)}</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-gray-500">Cuota mensual</span>
+                                        <span class="font-semibold text-gray-700">${formatEuro(l.monthlyPayment)}${!active ? ' (no activa)' : ''}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                                        <div class="${active ? 'bg-orange-500' : 'bg-gray-400'} h-1.5 rounded-full" style="width: ${(l.paidAmount / l.totalAmount) * 100}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('modalTitle').textContent = 'Préstamos';
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetailModal(event) {
+            if (!event || event.target.id === 'detailModal') {
+                document.getElementById('detailModal').classList.add('hidden');
+            }
+        }
+
+        // ========== FUNCIÓN RESET MENSUAL ==========
+        function resetMonth() {
+            if (!confirm('⚠️ ¿Estás seguro?\n\nSe borrarán:\n• Todos los gastos\n• Ingresos del mes\n• Donaciones\n\nSe mantendrán:\n• Ahorros (ingresos y retiros)\n• Préstamos\n• Deudores\n• Badges\n• Proyecciones')) {
+                return;
+            }
+
+            // Borrar gastos de Supabase
+            if (supabaseClient) {
+                state.expenses.forEach(exp => {
+                    deleteFromSupabase('expenses', exp.id);
+                });
+            }
+
+            // Limpiar solo lo necesario
+            state.expenses = [];
+            state.monthlyIncome = '';
+            state.creditCardIncome = '';
+
+            saveDataLocal();
+            render();
+            showNotification('🔄 Mes reiniciado correctamente');
         }
 
         // Exponer funciones globalmente para API externa
@@ -1650,6 +2233,13 @@
                     .order('date', { ascending: false });
                 
                 if (!withError && withdrawals) state.savingsWithdrawals = withdrawals;
+
+                const { data: deposits, error: depError } = await supabaseClient
+                    .from('savings_deposits')
+                    .select('*')
+                    .order('date', { ascending: false });
+                
+                if (!depError && deposits) state.savingsDeposits = deposits;
                 
                 const { data: debtors, error: debtError } = await supabaseClient
                     .from('debtors')
@@ -1657,6 +2247,27 @@
                     .order('date', { ascending: false });
                 
                 if (!debtError && debtors) state.debtors = debtors;
+
+                const { data: loans, error: loansError } = await supabaseClient
+                    .from('loans')
+                    .select('*')
+                    .order('date', { ascending: false });
+                
+                if (!loansError && loans) {
+                    // Mapear de snake_case a camelCase
+                    state.loans = loans.map(l => ({
+                        id: l.id,
+                        name: l.name,
+                        totalAmount: l.total_amount,
+                        pendingAmount: l.pending_amount,
+                        paidAmount: l.paid_amount,
+                        totalMonths: l.total_months,
+                        remainingMonths: l.remaining_months,
+                        monthlyPayment: l.monthly_payment,
+                        startDate: l.start_date || l.date?.slice(0, 7),
+                        date: l.date
+                    }));
+                }
                 
                 const { data: config, error: configError } = await supabaseClient
                     .from('user_config')
@@ -1667,7 +2278,6 @@
                 if (!configError && config) {
                     state.monthlyIncome = config.monthly_income || '';
                     state.creditCardIncome = config.credit_card_income || '';
-                    state.monthlyBudget = config.monthly_budget || '';
                     state.projectionMonths = config.projection_months || '';
                     state.monthlySavingsPlan = config.monthly_savings_plan || '';
                     state.darkMode = config.dark_mode || false;
