@@ -373,7 +373,7 @@
             { id: 'save_100', name: 'Ahorrador Novato', icon: '💵', condition: () => getTotalByType().ahorro >= 100 },
             { id: 'save_500', name: 'Ahorrador Experto', icon: '💎', condition: () => getTotalByType().ahorro >= 500 },
             { id: 'save_1000', name: 'Maestro del Ahorro', icon: '👑', condition: () => getTotalByType().ahorro >= 1000 },
-            { id: 'positive_balance', name: 'Balance Positivo', icon: '✅', condition: () => (getTotalIncome() - getTotalMonth()) > 0 },
+            { id: 'positive_balance', name: 'Balance Positivo', icon: '✅', condition: () => (getTotalIncome() - getTotalMonth() - getTotalMonthlyLoanPayments()) > 0 },
             { id: 'no_luxury_3days', name: '3 Días Sin Caprichos', icon: '🎯', condition: () => checkNoDaysNoLuxury(3) },
             { id: 'month_complete', name: 'Mes Completado', icon: '📅', condition: () => state.expenses.length >= 10 }
         ];
@@ -1262,7 +1262,7 @@
             const monthlySavings = parseFloat(state.monthlySavingsPlan) || 0;
             const currentSavings = getNetSavings();
             const owed = getTotalOwed();
-            const remainingBalance = getTotalIncome() - getTotalMonth();
+            const remainingBalance = getTotalIncome() - getTotalMonth() - getTotalMonthlyLoanPayments();
             
             const validMonthlySavings = monthlySavings <= remainingBalance ? monthlySavings : remainingBalance;
             
@@ -1378,11 +1378,12 @@
 
         function updateTotalsOnly() {
             const monthTotal = getTotalMonth();
-            const remainingBalance = getTotalIncome() - monthTotal;
+            const monthlyLoanPayments = getTotalMonthlyLoanPayments();
+            const remainingBalance = getTotalIncome() - monthTotal - monthlyLoanPayments;
 
             const saldoElement = document.querySelector('.saldo-display');
             if (saldoElement) {
-                saldoElement.className = `saldo-display amount-display-large font-bold ${remainingBalance >= 0 ? 'text-green-600' : 'text-red-600'}`;
+                saldoElement.className = `saldo-display amount-display-large font-bold ${remainingBalance >= 0 ? 'text-emerald-600' : 'text-red-600'}`;
                 saldoElement.textContent = formatEuro(remainingBalance);
             }
         }
@@ -2157,7 +2158,26 @@
 
         // Auto-inicializar con Supabase
         async function autoInit() {
-            loadData();
+            // Cargar datos locales primero (sin render aún)
+            const savedData = localStorage.getItem('expenseTrackerData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                state.expenses = data.expenses || [];
+                state.savingsWithdrawals = data.savingsWithdrawals || [];
+                state.savingsDeposits = data.savingsDeposits || [];
+                state.debtors = data.debtors || [];
+                state.loans = data.loans || [];
+                state.monthlyIncome = data.monthlyIncome || '';
+                state.creditCardIncome = data.creditCardIncome || '';
+                state.owedMoney = data.owedMoney || '';
+                state.projectionMonths = data.projectionMonths || '';
+                state.monthlySavingsPlan = data.monthlySavingsPlan || '';
+                state.darkMode = data.darkMode || false;
+                state.badges = data.badges || [];
+                state.lastMonthSavings = data.lastMonthSavings || 0;
+                syncQueue = data.syncQueue || [];
+            }
+            document.body.classList.toggle('dark-mode', state.darkMode);
             
             if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
                 try {
@@ -2179,13 +2199,19 @@
                     // Cargar datos desde Supabase
                     await loadDataFromSupabasePublic();
                     
+                    checkBadges();
                     render();
                     showNotification('✅ Conectado a Supabase');
                 } catch (error) {
                     console.error('Error auto-init:', error);
                     isOnline = false;
+                    checkBadges();
                     render();
                 }
+            } else {
+                // Sin Supabase, solo render con datos locales
+                checkBadges();
+                render();
             }
         }
 
