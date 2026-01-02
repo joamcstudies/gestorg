@@ -281,6 +281,23 @@
             border-color: #334155;
         }
         
+        /* Estilos de autenticación en modo oscuro */
+        body.dark-mode .auth-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        body.dark-mode .auth-card input {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+        body.dark-mode .auth-card h2 {
+            color: #f1f5f9;
+        }
+        body.dark-mode .auth-card p {
+            color: #94a3b8;
+        }
+        
         /* Filtros de tiempo */
         .time-filter {
             background: white;
@@ -535,6 +552,19 @@
         let isOnline = false;
         let syncQueue = [];
         let shownMotivations = new Set();
+        
+        // ========== ESTADO DE AUTENTICACIÓN ==========
+        let authState = {
+            isAuthenticated: false,
+            user: null,
+            loading: true,
+            authView: 'login', // 'login', 'register', 'forgot'
+            email: '',
+            password: '',
+            confirmPassword: '',
+            authError: '',
+            authSuccess: ''
+        };
 
         // ========== ESTADO DE LA APLICACIÓN ==========
         let state = {
@@ -760,6 +790,317 @@
             saveData();
         }
 
+        // ========== FUNCIONES DE AUTENTICACIÓN ==========
+        async function handleLogin() {
+            if (!authState.email || !authState.password) {
+                authState.authError = 'Por favor, completa todos los campos';
+                renderAuth();
+                return;
+            }
+            
+            authState.authError = '';
+            authState.loading = true;
+            renderAuth();
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: authState.email,
+                    password: authState.password
+                });
+                
+                if (error) throw error;
+                
+                authState.isAuthenticated = true;
+                authState.user = data.user;
+                currentUser = data.user;
+                state.userId = data.user.id;
+                
+                // Cargar datos del usuario
+                await loadDataFromSupabasePublic();
+                
+                authState.loading = false;
+                authState.email = '';
+                authState.password = '';
+                
+                render();
+                showNotification('✅ ¡Bienvenido de nuevo!');
+            } catch (error) {
+                authState.loading = false;
+                authState.authError = getAuthErrorMessage(error.message);
+                renderAuth();
+            }
+        }
+        
+        async function handleRegister() {
+            if (!authState.email || !authState.password || !authState.confirmPassword) {
+                authState.authError = 'Por favor, completa todos los campos';
+                renderAuth();
+                return;
+            }
+            
+            if (authState.password !== authState.confirmPassword) {
+                authState.authError = 'Las contraseñas no coinciden';
+                renderAuth();
+                return;
+            }
+            
+            if (authState.password.length < 6) {
+                authState.authError = 'La contraseña debe tener al menos 6 caracteres';
+                renderAuth();
+                return;
+            }
+            
+            authState.authError = '';
+            authState.loading = true;
+            renderAuth();
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: authState.email,
+                    password: authState.password
+                });
+                
+                if (error) throw error;
+                
+                authState.loading = false;
+                authState.authSuccess = '✅ Cuenta creada correctamente. Revisa tu email para confirmar.';
+                authState.authView = 'login';
+                authState.password = '';
+                authState.confirmPassword = '';
+                renderAuth();
+            } catch (error) {
+                authState.loading = false;
+                authState.authError = getAuthErrorMessage(error.message);
+                renderAuth();
+            }
+        }
+        
+        async function handleForgotPassword() {
+            if (!authState.email) {
+                authState.authError = 'Por favor, introduce tu email';
+                renderAuth();
+                return;
+            }
+            
+            authState.authError = '';
+            authState.loading = true;
+            renderAuth();
+            
+            try {
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(authState.email, {
+                    redirectTo: window.location.origin
+                });
+                
+                if (error) throw error;
+                
+                authState.loading = false;
+                authState.authSuccess = '✅ Te hemos enviado un email para restablecer tu contraseña';
+                authState.authView = 'login';
+                renderAuth();
+            } catch (error) {
+                authState.loading = false;
+                authState.authError = getAuthErrorMessage(error.message);
+                renderAuth();
+            }
+        }
+        
+        async function handleLogout() {
+            try {
+                await supabaseClient.auth.signOut();
+                authState.isAuthenticated = false;
+                authState.user = null;
+                currentUser = null;
+                state.userId = null;
+                
+                // Limpiar datos locales
+                state.expenses = [];
+                state.savingsWithdrawals = [];
+                state.savingsDeposits = [];
+                state.debtors = [];
+                state.loans = [];
+                state.monthlyIncome = '';
+                state.creditCardIncome = '';
+                
+                renderAuth();
+                showNotification('👋 Sesión cerrada');
+            } catch (error) {
+                showNotification('❌ Error al cerrar sesión', true);
+            }
+        }
+        
+        function getAuthErrorMessage(message) {
+            const errorMessages = {
+                'Invalid login credentials': 'Email o contraseña incorrectos',
+                'Email not confirmed': 'Por favor, confirma tu email antes de iniciar sesión',
+                'User already registered': 'Este email ya está registrado',
+                'Password should be at least 6 characters': 'La contraseña debe tener al menos 6 caracteres',
+                'Unable to validate email address: invalid format': 'Formato de email inválido',
+                'Email rate limit exceeded': 'Demasiados intentos. Espera unos minutos.'
+            };
+            return errorMessages[message] || message;
+        }
+        
+        function setAuthView(view) {
+            authState.authView = view;
+            authState.authError = '';
+            authState.authSuccess = '';
+            renderAuth();
+        }
+        
+        function updateAuthField(field, value) {
+            authState[field] = value;
+        }
+        
+        // ========== RENDER DE AUTENTICACIÓN ==========
+        function renderAuth() {
+            const app = document.getElementById('app');
+            
+            if (authState.loading && !authState.isAuthenticated) {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                            <p class="text-gray-500">Cargando...</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            let formContent = '';
+            
+            if (authState.authView === 'login') {
+                formContent = `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Iniciar Sesión</h2>
+                    <p class="text-gray-500 text-sm mb-6">Accede a tu organizador de gastos</p>
+                    
+                    ${authState.authSuccess ? `<div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">${authState.authSuccess}</div>` : ''}
+                    ${authState.authError ? `<div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">${authState.authError}</div>` : ''}
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="authEmail" value="${authState.email}" placeholder="tu@email.com" 
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                            <input type="password" id="authPassword" value="${authState.password}" placeholder="••••••••" 
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+                        </div>
+                        <button onclick="handleLogin()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-medium transition transform hover:scale-[1.02] active:scale-[0.98]">
+                            Entrar
+                        </button>
+                    </div>
+                    
+                    <div class="mt-6 text-center space-y-2">
+                        <button onclick="setAuthView('forgot')" class="text-blue-500 hover:text-blue-600 text-sm">¿Olvidaste tu contraseña?</button>
+                        <p class="text-gray-500 text-sm">¿No tienes cuenta? <button onclick="setAuthView('register')" class="text-blue-500 hover:text-blue-600 font-medium">Regístrate</button></p>
+                    </div>
+                `;
+            } else if (authState.authView === 'register') {
+                formContent = `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Crear Cuenta</h2>
+                    <p class="text-gray-500 text-sm mb-6">Empieza a organizar tus finanzas</p>
+                    
+                    ${authState.authError ? `<div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">${authState.authError}</div>` : ''}
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="authEmail" value="${authState.email}" placeholder="tu@email.com" 
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                            <input type="password" id="authPassword" value="${authState.password}" placeholder="Mínimo 6 caracteres" 
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+                            <input type="password" id="authConfirmPassword" value="${authState.confirmPassword}" placeholder="Repite la contraseña" 
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+                        </div>
+                        <button onclick="handleRegister()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium transition transform hover:scale-[1.02] active:scale-[0.98]">
+                            Crear Cuenta
+                        </button>
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <p class="text-gray-500 text-sm">¿Ya tienes cuenta? <button onclick="setAuthView('login')" class="text-blue-500 hover:text-blue-600 font-medium">Inicia sesión</button></p>
+                    </div>
+                `;
+            } else if (authState.authView === 'forgot') {
+                formContent = `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Recuperar Contraseña</h2>
+                    <p class="text-gray-500 text-sm mb-6">Te enviaremos un email para restablecerla</p>
+                    
+                    ${authState.authError ? `<div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">${authState.authError}</div>` : ''}
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="authEmail" value="${authState.email}" placeholder="tu@email.com" 
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+                        </div>
+                        <button onclick="handleForgotPassword()" class="w-full bg-violet-500 hover:bg-violet-600 text-white py-3 rounded-xl font-medium transition transform hover:scale-[1.02] active:scale-[0.98]">
+                            Enviar Email
+                        </button>
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <button onclick="setAuthView('login')" class="text-blue-500 hover:text-blue-600 text-sm">← Volver al login</button>
+                    </div>
+                `;
+            }
+            
+            app.innerHTML = `
+                <div class="min-h-screen flex items-center justify-center p-4">
+                    <div class="w-full max-w-md">
+                        <div class="text-center mb-8">
+                            <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <span class="text-4xl">💰</span>
+                            </div>
+                            <h1 class="text-3xl font-bold text-gray-800">Organizador de Gastos</h1>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                            ${formContent}
+                        </div>
+                        
+                        <p class="text-center text-gray-400 text-xs mt-6">Tus datos están seguros y encriptados</p>
+                    </div>
+                </div>
+            `;
+            
+            // Event listeners para los campos de autenticación
+            const emailInput = document.getElementById('authEmail');
+            const passwordInput = document.getElementById('authPassword');
+            const confirmPasswordInput = document.getElementById('authConfirmPassword');
+            
+            if (emailInput) {
+                emailInput.addEventListener('input', (e) => updateAuthField('email', e.target.value));
+                emailInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        if (authState.authView === 'login') handleLogin();
+                        else if (authState.authView === 'forgot') handleForgotPassword();
+                    }
+                });
+            }
+            if (passwordInput) {
+                passwordInput.addEventListener('input', (e) => updateAuthField('password', e.target.value));
+                passwordInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && authState.authView === 'login') handleLogin();
+                });
+            }
+            if (confirmPasswordInput) {
+                confirmPasswordInput.addEventListener('input', (e) => updateAuthField('confirmPassword', e.target.value));
+                confirmPasswordInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && authState.authView === 'register') handleRegister();
+                });
+            }
+        }
+
         function toggleSection(section) {
             state[section] = !state[section];
             const element = document.getElementById(section);
@@ -845,9 +1186,9 @@
         function saveData() {
             saveDataLocal();
             
-            if (supabaseClient) {
+            if (supabaseClient && state.userId) {
                 saveToSupabase('user_config', {
-                    id: 1,
+                    user_id: state.userId,
                     monthly_income: parseFloat(state.monthlyIncome) || 0,
                     credit_card_income: parseFloat(state.creditCardIncome) || 0,
                     projection_months: parseInt(state.projectionMonths) || 0,
@@ -959,6 +1300,7 @@
                 if (index !== -1) {
                     const updatedExpense = {
                         id: state.editingExpenseId,
+                        user_id: state.userId,
                         description: state.description,
                         amount: parseFloat(state.amount),
                         category: state.category,
@@ -972,6 +1314,7 @@
             } else {
                 const newExpense = {
                     id: Date.now(),
+                    user_id: state.userId,
                     description: state.description,
                     amount: parseFloat(state.amount),
                     category: state.category,
@@ -1090,6 +1433,7 @@
 
             const newWithdrawal = {
                 id: Date.now(),
+                user_id: state.userId,
                 description: state.withdrawalDescription,
                 amount: parseFloat(state.withdrawalAmount),
                 date: new Date().toISOString().split('T')[0]
@@ -1122,6 +1466,7 @@
 
             const newDeposit = {
                 id: Date.now(),
+                user_id: state.userId,
                 description: state.depositDescription,
                 amount: parseFloat(state.depositAmount),
                 date: new Date().toISOString().split('T')[0]
@@ -1159,6 +1504,7 @@
 
             const newDebtor = {
                 id: Date.now(),
+                user_id: state.userId,
                 name: state.debtorName,
                 amount: parseFloat(state.debtorAmount),
                 date: new Date().toISOString().split('T')[0]
@@ -1224,6 +1570,7 @@
 
             const newLoan = {
                 id: Date.now(),
+                user_id: state.userId,
                 name: state.loanName,
                 totalAmount: totalAmount,
                 pendingAmount: pendingAmount,
@@ -1239,6 +1586,7 @@
             
             saveToSupabase('loans', {
                 id: newLoan.id,
+                user_id: state.userId,
                 name: newLoan.name,
                 total_amount: newLoan.totalAmount,
                 pending_amount: newLoan.pendingAmount,
@@ -1291,7 +1639,7 @@
             }
 
             saveToSupabase('loans', {
-                id: loan.id, name: loan.name, total_amount: loan.totalAmount,
+                id: loan.id, user_id: state.userId, name: loan.name, total_amount: loan.totalAmount,
                 pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
                 total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
                 monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
@@ -1338,7 +1686,7 @@
             }
             
             saveToSupabase('loans', {
-                id: loan.id, name: loan.name, total_amount: loan.totalAmount,
+                id: loan.id, user_id: state.userId, name: loan.name, total_amount: loan.totalAmount,
                 pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
                 total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
                 monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
@@ -1360,7 +1708,7 @@
             loan.monthlyPayment = 0;
             
             saveToSupabase('loans', {
-                id: loan.id, name: loan.name, total_amount: loan.totalAmount,
+                id: loan.id, user_id: state.userId, name: loan.name, total_amount: loan.totalAmount,
                 pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
                 total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
                 monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
@@ -1517,7 +1865,7 @@
             app.innerHTML = `
                 <!-- Header Compacto -->
                 <div class="header-card rounded-2xl shadow-sm p-4 mb-4 animate-slide-in">
-                    <!-- Fila 1: Título + Acciones -->
+                    <!-- Fila 1: Título + Usuario + Acciones -->
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-3">
                             <h1 class="text-xl md:text-2xl font-bold text-gray-800">💰 Organizador de Gastos</h1>
@@ -1526,14 +1874,23 @@
                                 ${isOnline ? 'Sync' : 'Local'}
                             </div>
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="toggleDarkMode()" class="action-btn bg-gray-100 hover:bg-gray-200">${state.darkMode ? '☀️' : '🌙'}</button>
-                            <button onclick="saveData()" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white">💾</button>
-                            <button onclick="exportData()" class="action-btn bg-blue-500 hover:bg-blue-600 text-white">📥</button>
-                            <label class="action-btn bg-violet-500 hover:bg-violet-600 text-white cursor-pointer">
-                                📤
-                                <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
-                            </label>
+                        <div class="flex items-center gap-3">
+                            ${authState.user ? `
+                                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg">
+                                    <span class="text-xs text-gray-500">👤</span>
+                                    <span class="text-xs text-gray-600 font-medium truncate max-w-[150px]">${authState.user.email}</span>
+                                </div>
+                            ` : ''}
+                            <div class="flex gap-2">
+                                <button onclick="toggleDarkMode()" class="action-btn bg-gray-100 hover:bg-gray-200">${state.darkMode ? '☀️' : '🌙'}</button>
+                                <button onclick="saveData()" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white">💾</button>
+                                <button onclick="exportData()" class="action-btn bg-blue-500 hover:bg-blue-600 text-white">📥</button>
+                                <label class="action-btn bg-violet-500 hover:bg-violet-600 text-white cursor-pointer">
+                                    📤
+                                    <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
+                                </label>
+                                <button onclick="handleLogout()" class="action-btn bg-red-500 hover:bg-red-600 text-white" title="Cerrar sesión">🚪</button>
+                            </div>
                         </div>
                     </div>
                     
@@ -2060,6 +2417,7 @@
         window.ExpenseTracker = { initSupabase, getState: () => state, saveData, exportData };
 
         async function autoInit() {
+            // Cargar datos locales primero
             const savedData = localStorage.getItem('expenseTrackerData');
             if (savedData) {
                 const data = JSON.parse(savedData);
@@ -2081,6 +2439,7 @@
             }
             document.body.classList.toggle('dark-mode', state.darkMode);
             
+            // Inicializar Supabase
             if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
                 try {
                     if (!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
@@ -2088,45 +2447,105 @@
                     supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
                     SUPABASE_CONFIG.initialized = true;
                     isOnline = true;
-                    state.userId = 'public-user';
-                    currentUser = { id: 'public-user' };
                     
-                    await loadDataFromSupabasePublic();
-                    checkBadges();
-                    render();
-                    setTimeout(() => showMotivationMessages(), 1500);
-                    showNotification('✅ Conectado');
+                    // Verificar sesión existente
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    
+                    if (session && session.user) {
+                        // Usuario autenticado
+                        authState.isAuthenticated = true;
+                        authState.user = session.user;
+                        authState.loading = false;
+                        currentUser = session.user;
+                        state.userId = session.user.id;
+                        
+                        // Cargar datos del usuario desde Supabase
+                        await loadDataFromSupabasePublic();
+                        checkBadges();
+                        render();
+                        setTimeout(() => showMotivationMessages(), 1500);
+                        showNotification('✅ Conectado');
+                    } else {
+                        // No hay sesión, mostrar login
+                        authState.isAuthenticated = false;
+                        authState.loading = false;
+                        renderAuth();
+                    }
+                    
+                    // Escuchar cambios en la autenticación
+                    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                        if (event === 'SIGNED_IN' && session) {
+                            authState.isAuthenticated = true;
+                            authState.user = session.user;
+                            currentUser = session.user;
+                            state.userId = session.user.id;
+                            await loadDataFromSupabasePublic();
+                            checkBadges();
+                            render();
+                        } else if (event === 'SIGNED_OUT') {
+                            authState.isAuthenticated = false;
+                            authState.user = null;
+                            currentUser = null;
+                            state.userId = null;
+                            renderAuth();
+                        }
+                    });
+                    
                 } catch (error) {
                     console.error('Error auto-init:', error);
                     isOnline = false;
-                    checkBadges();
-                    render();
-                    setTimeout(() => showMotivationMessages(), 1500);
+                    authState.loading = false;
+                    // Si falla Supabase, mostrar login de todas formas
+                    renderAuth();
                 }
             } else {
-                checkBadges();
-                render();
-                setTimeout(() => showMotivationMessages(), 1500);
+                authState.loading = false;
+                renderAuth();
             }
         }
 
         async function loadDataFromSupabasePublic() {
-            if (!supabaseClient) return;
+            if (!supabaseClient || !state.userId) return;
             
             try {
-                const { data: expenses } = await supabaseClient.from('expenses').select('*').order('date', { ascending: false });
+                // Cargar gastos del usuario
+                const { data: expenses } = await supabaseClient
+                    .from('expenses')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .order('date', { ascending: false });
                 if (expenses) state.expenses = expenses;
                 
-                const { data: withdrawals } = await supabaseClient.from('savings_withdrawals').select('*').order('date', { ascending: false });
+                // Cargar retiros del usuario
+                const { data: withdrawals } = await supabaseClient
+                    .from('savings_withdrawals')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .order('date', { ascending: false });
                 if (withdrawals) state.savingsWithdrawals = withdrawals;
 
-                const { data: deposits } = await supabaseClient.from('savings_deposits').select('*').order('date', { ascending: false });
+                // Cargar depósitos del usuario
+                const { data: deposits } = await supabaseClient
+                    .from('savings_deposits')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .order('date', { ascending: false });
                 if (deposits) state.savingsDeposits = deposits;
                 
-                const { data: debtors } = await supabaseClient.from('debtors').select('*').order('date', { ascending: false });
+                // Cargar deudores del usuario
+                const { data: debtors } = await supabaseClient
+                    .from('debtors')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .order('date', { ascending: false });
                 if (debtors) state.debtors = debtors;
 
-                const { data: loans } = await supabaseClient.from('loans').select('*').order('date', { ascending: false });
+                // Cargar préstamos del usuario
+                const { data: loans } = await supabaseClient
+                    .from('loans')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .order('date', { ascending: false });
                 if (loans) {
                     state.loans = loans.map(l => ({
                         id: l.id, name: l.name, totalAmount: l.total_amount, pendingAmount: l.pending_amount,
@@ -2135,7 +2554,12 @@
                     }));
                 }
                 
-                const { data: config } = await supabaseClient.from('user_config').select('*').limit(1).single();
+                // Cargar configuración del usuario
+                const { data: config } = await supabaseClient
+                    .from('user_config')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .single();
                 if (config) {
                     state.monthlyIncome = config.monthly_income || '';
                     state.creditCardIncome = config.credit_card_income || '';
