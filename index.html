@@ -1455,7 +1455,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } },
+                        legend: { position: 'bottom', labels: { padding: 10, font: { size: 10 } } },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -1511,6 +1511,7 @@
             const remainingBalance = getTotalIncome() - monthTotal - monthlyLoanPayments;
             const projections = calculateProjections();
             const earnedBadges = badgeDefinitions.filter(b => state.badges.includes(b.id));
+            const hasExpenses = Object.values(totals).some(v => v > 0);
 
             const app = document.getElementById('app');
             app.innerHTML = `
@@ -1619,8 +1620,8 @@
                     </div>
                 </div>
 
-                <!-- Grid Principal: Formulario + Historial -->
-                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                <!-- ========== NUEVA FILA: Formulario | Distribución | Historial ========== -->
+                <div class="grid md:grid-cols-3 gap-4 mb-4">
                     <!-- Formulario -->
                     <div class="bg-white rounded-xl p-5 card animate-slide-in border ${state.editingExpenseId ? 'border-amber-300 ring-2 ring-amber-100' : 'border-gray-100'}">
                         <h2 class="text-base font-semibold text-gray-800 mb-4">${state.editingExpenseId ? '✏️ Editar Gasto' : '➕ Nuevo Gasto'}</h2>
@@ -1642,16 +1643,30 @@
                         </div>
                     </div>
 
+                    <!-- Gráfico de Distribución -->
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in border border-gray-100">
+                        <h2 class="text-base font-semibold text-gray-800 mb-3">📊 Distribución</h2>
+                        ${hasExpenses ? `
+                            <div style="height: 220px; position: relative;">
+                                <canvas id="expenseChart"></canvas>
+                            </div>
+                        ` : `
+                            <div class="flex items-center justify-center h-[220px] text-gray-400 text-sm">
+                                Sin gastos registrados
+                            </div>
+                        `}
+                    </div>
+
                     <!-- Historial de Gastos -->
                     <div class="bg-white rounded-xl p-5 card animate-slide-in border border-gray-100">
                         <div class="flex justify-between items-center mb-3">
                             <h2 class="text-base font-semibold text-gray-800">📝 Historial</h2>
                             ${getFilteredExpenses().length > 0 ? `<span class="text-xs text-gray-400">${getFilteredExpenses().length} gastos</span>` : ''}
                         </div>
-                        <div class="space-y-2 max-h-[280px] overflow-y-auto custom-scroll">
+                        <div class="space-y-2 max-h-[200px] overflow-y-auto custom-scroll">
                             ${getFilteredExpenses().length === 0 ? `
                                 <p class="text-gray-400 text-center py-8 text-sm">Sin gastos registrados</p>
-                            ` : getFilteredExpenses().slice(0, 15).map(exp => `
+                            ` : getFilteredExpenses().slice(0, 10).map(exp => `
                                 <div class="expense-item flex items-center justify-between p-2.5 rounded-lg">
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 mb-0.5">
@@ -1682,17 +1697,7 @@
                     </div>
                 </div>
 
-                <!-- Gráfico -->
-                ${Object.values(totals).some(v => v > 0) ? `
-                    <div class="bg-white rounded-xl p-5 card animate-slide-in mb-4 border border-gray-100">
-                        <h2 class="text-base font-semibold text-gray-800 mb-3">📊 Distribución</h2>
-                        <div style="height: 240px; position: relative;">
-                            <canvas id="expenseChart"></canvas>
-                        </div>
-                    </div>
-                ` : ''}
-
-                <!-- Secciones Colapsables (antes "Por Categoría") -->
+                <!-- Secciones Colapsables -->
                 <div class="grid md:grid-cols-4 gap-4 mb-4">
                     <!-- Ahorros -->
                     <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100">
