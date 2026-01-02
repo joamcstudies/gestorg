@@ -44,16 +44,225 @@
             100% { background-position: 0% 50%; }
         }
         
+        /* Animación para toasts de motivación */
+        @keyframes slideInFromRight {
+            from { 
+                opacity: 0; 
+                transform: translateX(100%) scale(0.8);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0) scale(1);
+            }
+        }
+        @keyframes slideOutToRight {
+            from { 
+                opacity: 1; 
+                transform: translateX(0) scale(1);
+            }
+            to { 
+                opacity: 0; 
+                transform: translateX(100%) scale(0.8);
+            }
+        }
+        @keyframes floatBubble {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        /* Animaciones para badges */
+        @keyframes badgePopIn {
+            0% { 
+                opacity: 0; 
+                transform: scale(0) rotate(-10deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(5deg);
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1) rotate(0);
+            }
+        }
+        @keyframes badgeShine {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
+        }
+        @keyframes iconBounce {
+            0%, 100% { transform: translateY(0); }
+            25% { transform: translateY(-3px) rotate(-5deg); }
+            75% { transform: translateY(-3px) rotate(5deg); }
+        }
+        
         .animate-slide-in { animation: slideIn 0.25s ease-out; }
         .animate-slide-in-right { animation: slideInRight 0.25s ease-out; }
         .animate-pulse-once { animation: pulse 0.4s ease-in-out; }
         .animate-fade-in { animation: fadeIn 0.25s ease-out; }
-        .badge-glow { 
-            background: linear-gradient(90deg, #fef3c7, #fde68a, #fef3c7);
-            background-size: 200% 100%;
-            animation: shimmer 3s ease-in-out infinite;
-        }
         .progress-bar { transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s; }
+        
+        /* Toast de motivación */
+        .motivation-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 100;
+            max-width: 320px;
+            animation: slideInFromRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), floatBubble 3s ease-in-out infinite 0.4s;
+        }
+        .motivation-toast.hiding {
+            animation: slideOutToRight 0.3s ease-in forwards;
+        }
+        .motivation-toast-content {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.15), 0 4px 12px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .motivation-toast-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4, #3b82f6);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+        }
+        .motivation-toast .close-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .motivation-toast .close-btn:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        .motivation-toast .progress-bar-toast {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            border-radius: 0 0 16px 16px;
+            transition: width 0.1s linear;
+        }
+        
+        /* Badges dinámicos */
+        .badges-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 4px 0;
+        }
+        .badge-item {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #475569;
+            cursor: default;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            opacity: 0;
+            animation: badgePopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .badge-item:nth-child(1) { animation-delay: 0.1s; }
+        .badge-item:nth-child(2) { animation-delay: 0.2s; }
+        .badge-item:nth-child(3) { animation-delay: 0.3s; }
+        .badge-item:nth-child(4) { animation-delay: 0.4s; }
+        .badge-item:nth-child(5) { animation-delay: 0.5s; }
+        .badge-item:nth-child(6) { animation-delay: 0.6s; }
+        .badge-item:nth-child(7) { animation-delay: 0.7s; }
+        
+        .badge-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            transition: left 0.5s;
+        }
+        .badge-item:hover::before {
+            animation: badgeShine 0.6s ease-out;
+        }
+        .badge-item:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            border-color: #fbbf24;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+        .badge-item .badge-icon {
+            font-size: 1rem;
+            transition: transform 0.3s;
+        }
+        .badge-item:hover .badge-icon {
+            animation: iconBounce 0.5s ease-in-out;
+        }
+        .badge-item.new-badge {
+            animation: badgePopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, badgePulse 2s ease-in-out 0.5s;
+            border-color: #fbbf24;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+        
+        /* Tooltip para badges */
+        .badge-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            padding: 6px 10px;
+            background: #1e293b;
+            color: white;
+            font-size: 0.65rem;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .badge-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #1e293b;
+        }
+        .badge-item:hover .badge-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-4px);
+        }
         
         /* Fondo suave */
         .gradient-bg {
@@ -89,6 +298,22 @@
         body.dark-mode #detailModal .text-gray-500 { color: #64748b; }
         body.dark-mode #detailModal .text-gray-400 { color: #64748b; }
         body.dark-mode #detailModal .border-gray-100 { border-color: #334155; }
+        body.dark-mode .badge-item {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+        body.dark-mode .badge-item:hover {
+            background: linear-gradient(135deg, #422006 0%, #78350f 100%);
+            border-color: #fbbf24;
+        }
+        body.dark-mode .motivation-toast-content {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-color: #334155;
+        }
+        body.dark-mode .motivation-toast-content p {
+            color: #e2e8f0;
+        }
         
         /* Filtros de tiempo */
         .time-filter {
@@ -172,6 +397,11 @@
         @media (max-width: 768px) {
             .totals-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            .motivation-toast {
+                right: 12px;
+                left: 12px;
+                max-width: none;
             }
         }
         
@@ -277,6 +507,9 @@
 </head>
 <body class="min-h-screen gradient-bg">
     
+    <!-- Contenedor para toasts de motivación -->
+    <div id="motivationToasts"></div>
+    
     <div id="app" class="p-4 max-w-7xl mx-auto"></div>
 
     <script>
@@ -291,6 +524,8 @@
         let currentUser = null;
         let isOnline = false;
         let syncQueue = [];
+        let motivationToastTimeout = null;
+        let shownMotivations = new Set(); // Para no repetir motivaciones en la misma sesión
 
         // ========== ESTADO DE LA APLICACIÓN ==========
         let state = {
@@ -369,13 +604,13 @@
         };
 
         const badgeDefinitions = [
-            { id: 'first_saving', name: 'Primer Ahorro', icon: '🌱', condition: () => getTotalByType().ahorro > 0 },
-            { id: 'save_100', name: 'Ahorrador Novato', icon: '💵', condition: () => getTotalByType().ahorro >= 100 },
-            { id: 'save_500', name: 'Ahorrador Experto', icon: '💎', condition: () => getTotalByType().ahorro >= 500 },
-            { id: 'save_1000', name: 'Maestro del Ahorro', icon: '👑', condition: () => getTotalByType().ahorro >= 1000 },
-            { id: 'positive_balance', name: 'Balance Positivo', icon: '✅', condition: () => (getTotalIncome() - getTotalMonth() - getTotalMonthlyLoanPayments()) > 0 },
-            { id: 'no_luxury_3days', name: '3 Días Sin Caprichos', icon: '🎯', condition: () => checkNoDaysNoLuxury(3) },
-            { id: 'month_complete', name: 'Mes Completado', icon: '📅', condition: () => state.expenses.length >= 10 }
+            { id: 'first_saving', name: 'Primer Ahorro', icon: '🌱', description: 'Registraste tu primer ahorro', condition: () => getTotalByType().ahorro > 0 },
+            { id: 'save_100', name: 'Ahorrador Novato', icon: '💵', description: 'Ahorraste más de 100€', condition: () => getTotalByType().ahorro >= 100 },
+            { id: 'save_500', name: 'Ahorrador Experto', icon: '💎', description: 'Ahorraste más de 500€', condition: () => getTotalByType().ahorro >= 500 },
+            { id: 'save_1000', name: 'Maestro del Ahorro', icon: '👑', description: 'Ahorraste más de 1000€', condition: () => getTotalByType().ahorro >= 1000 },
+            { id: 'positive_balance', name: 'Balance Positivo', icon: '✅', description: 'Tu saldo es positivo', condition: () => (getTotalIncome() - getTotalMonth() - getTotalMonthlyLoanPayments()) > 0 },
+            { id: 'no_luxury_3days', name: '3 Días Sin Caprichos', icon: '🎯', description: '3 días sin gastos innecesarios', condition: () => checkNoDaysNoLuxury(3) },
+            { id: 'month_complete', name: 'Mes Completado', icon: '📅', description: 'Registraste 10+ gastos', condition: () => state.expenses.length >= 10 }
         ];
 
         // ========== FUNCIONES DE FORMATO ==========
@@ -388,7 +623,6 @@
             return formattedInteger + ',' + decimalPart + '€';
         }
 
-        // Formato compacto para números muy grandes
         function formatEuroCompact(amount) {
             const num = Math.abs(parseFloat(amount));
             if (num >= 1000000) {
@@ -399,6 +633,64 @@
             return formatEuro(amount);
         }
 
+        // ========== FUNCIONES DE MOTIVACIÓN (TOAST) ==========
+        function showMotivationToast(message, duration = 6000) {
+            // Evitar mostrar la misma motivación dos veces en la sesión
+            if (shownMotivations.has(message)) return;
+            shownMotivations.add(message);
+            
+            const container = document.getElementById('motivationToasts');
+            
+            // Crear el toast
+            const toast = document.createElement('div');
+            toast.className = 'motivation-toast';
+            toast.innerHTML = `
+                <div class="motivation-toast-content">
+                    <button class="close-btn" onclick="closeMotivationToast(this.parentElement.parentElement)">✕</button>
+                    <p class="text-sm text-blue-800 pr-4">${message}</p>
+                    <div class="progress-bar-toast" style="width: 100%"></div>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Animar la barra de progreso
+            const progressBar = toast.querySelector('.progress-bar-toast');
+            let width = 100;
+            const interval = setInterval(() => {
+                width -= (100 / (duration / 100));
+                progressBar.style.width = width + '%';
+                if (width <= 0) {
+                    clearInterval(interval);
+                }
+            }, 100);
+            
+            // Auto-cerrar después del tiempo
+            setTimeout(() => {
+                closeMotivationToast(toast);
+            }, duration);
+        }
+        
+        function closeMotivationToast(toast) {
+            if (!toast || toast.classList.contains('hiding')) return;
+            toast.classList.add('hiding');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }
+        
+        function showMotivationMessages() {
+            const messages = getFinancialHealthMessage();
+            if (messages.length > 0) {
+                // Mostrar solo un mensaje a la vez, con delay entre cada uno
+                messages.forEach((msg, index) => {
+                    setTimeout(() => {
+                        showMotivationToast(msg, 6000);
+                    }, index * 2000); // 2 segundos entre cada mensaje
+                });
+            }
+        }
+
         // ========== FUNCIONES DE SUPABASE ==========
         async function initSupabase(url, anonKey) {
             if (!url || !anonKey) {
@@ -407,7 +699,6 @@
             }
             
             try {
-                // Cargar Supabase JS desde CDN
                 if (!window.supabase) {
                     await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
                 }
@@ -418,7 +709,6 @@
                 SUPABASE_CONFIG.initialized = true;
                 isOnline = true;
                 
-                // Escuchar cambios de autenticación
                 supabaseClient.auth.onAuthStateChange((event, session) => {
                     if (session) {
                         currentUser = session.user;
@@ -454,7 +744,6 @@
             if (!supabaseClient || !currentUser) return;
             
             try {
-                // Cargar gastos
                 const { data: expenses, error: expError } = await supabaseClient
                     .from('expenses')
                     .select('*')
@@ -463,7 +752,6 @@
                 
                 if (!expError && expenses) state.expenses = expenses;
                 
-                // Cargar retiros
                 const { data: withdrawals, error: withError } = await supabaseClient
                     .from('savings_withdrawals')
                     .select('*')
@@ -472,7 +760,6 @@
                 
                 if (!withError && withdrawals) state.savingsWithdrawals = withdrawals;
                 
-                // Cargar deudores
                 const { data: debtors, error: debtError } = await supabaseClient
                     .from('debtors')
                     .select('*')
@@ -481,7 +768,6 @@
                 
                 if (!debtError && debtors) state.debtors = debtors;
                 
-                // Cargar configuración del usuario
                 const { data: config, error: configError } = await supabaseClient
                     .from('user_config')
                     .select('*')
@@ -691,9 +977,8 @@
             saveDataLocal();
             
             if (supabaseClient) {
-                // Guardar configuración en Supabase (modo público)
                 saveToSupabase('user_config', {
-                    id: 1, // ID fijo para configuración pública
+                    id: 1,
                     monthly_income: parseFloat(state.monthlyIncome) || 0,
                     credit_card_income: parseFloat(state.creditCardIncome) || 0,
                     projection_months: parseInt(state.projectionMonths) || 0,
@@ -1047,18 +1332,17 @@
         }
 
         function getTotalMonthlyLoanPayments() {
-            const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+            const currentMonth = new Date().toISOString().slice(0, 7);
             return state.loans.reduce((sum, loan) => {
-                // Solo contar si el préstamo está activo (fecha de inicio <= mes actual)
                 if (loan.startDate && loan.startDate > currentMonth) {
-                    return sum; // Préstamo programado para el futuro, no descontar
+                    return sum;
                 }
                 return sum + loan.monthlyPayment;
             }, 0);
         }
 
         function isLoanActive(loan) {
-            if (!loan.startDate) return true; // Si no tiene fecha, está activo
+            if (!loan.startDate) return true;
             const currentMonth = new Date().toISOString().slice(0, 7);
             return loan.startDate <= currentMonth;
         }
@@ -1076,7 +1360,7 @@
             const pendingAmount = totalAmount - paidAmount;
             const remainingMonths = Math.ceil(pendingAmount / (totalAmount / months));
             const monthlyPayment = pendingAmount / remainingMonths;
-            const startDate = state.loanStartDate || new Date().toISOString().slice(0, 7); // Si no hay fecha, mes actual
+            const startDate = state.loanStartDate || new Date().toISOString().slice(0, 7);
 
             const newLoan = {
                 id: Date.now(),
@@ -1093,7 +1377,6 @@
 
             state.loans.unshift(newLoan);
             
-            // Mapear a snake_case para Supabase
             saveToSupabase('loans', {
                 id: newLoan.id,
                 name: newLoan.name,
@@ -1124,7 +1407,6 @@
             const loan = state.loans.find(l => l.id === id);
             if (!loan) return;
 
-            // Verificar si el préstamo está activo
             if (!isLoanActive(loan)) {
                 showNotification('❌ Este préstamo no está activo aún', true);
                 return;
@@ -1149,7 +1431,6 @@
                 showNotification('✅ Pago registrado');
             }
 
-            // Mapear a snake_case para Supabase
             saveToSupabase('loans', {
                 id: loan.id,
                 name: loan.name,
@@ -1201,12 +1482,10 @@
                 loan.monthlyPayment = 0;
                 showNotification('🎉 ¡Préstamo liquidado!');
             } else {
-                // Recalcular meses restantes manteniendo la cuota
                 loan.remainingMonths = Math.ceil(loan.pendingAmount / loan.monthlyPayment);
                 showNotification(`✅ Amortización de ${formatEuro(amount)} realizada`);
             }
             
-            // Guardar en Supabase
             saveToSupabase('loans', {
                 id: loan.id,
                 name: loan.name,
@@ -1237,7 +1516,6 @@
             loan.remainingMonths = 0;
             loan.monthlyPayment = 0;
             
-            // Guardar en Supabase
             saveToSupabase('loans', {
                 id: loan.id,
                 name: loan.name,
@@ -1388,6 +1666,25 @@
             }
         }
 
+        // ========== RENDER DE BADGES ==========
+        function renderBadges() {
+            const earnedBadges = badgeDefinitions.filter(b => state.badges.includes(b.id));
+            
+            if (earnedBadges.length === 0) return '';
+            
+            return `
+                <div class="badges-container">
+                    ${earnedBadges.map(badge => `
+                        <div class="badge-item">
+                            <span class="badge-icon">${badge.icon}</span>
+                            <span>${badge.name}</span>
+                            <div class="badge-tooltip">${badge.description}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
         // ========== RENDER PRINCIPAL ==========
         function render() {
             const typeTotals = getTotalByType();
@@ -1397,7 +1694,6 @@
             const monthlyLoanPayments = getTotalMonthlyLoanPayments();
             const remainingBalance = getTotalIncome() - monthTotal - monthlyLoanPayments;
             const projections = calculateProjections();
-            const healthMessages = getFinancialHealthMessage();
             const earnedBadges = badgeDefinitions.filter(b => state.badges.includes(b.id));
 
             const app = document.getElementById('app');
@@ -1449,25 +1745,12 @@
                     </div>
                     
                     ${earnedBadges.length > 0 ? `
-                        <div class="mb-4 p-3 bg-amber-50 rounded-xl border border-amber-200 animate-fade-in">
-                            <h3 class="text-xs font-semibold text-amber-800 mb-2 uppercase tracking-wide">🏆 Logros</h3>
-                            <div class="flex gap-2 flex-wrap">
-                                ${earnedBadges.map(badge => `
-                                    <div class="badge-glow px-3 py-1.5 bg-white rounded-full border border-amber-300 text-xs font-medium text-amber-800" title="${badge.name}">
-                                        ${badge.icon} ${badge.name}
-                                    </div>
-                                `).join('')}
+                        <div class="mb-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-sm font-medium text-gray-500">🏆 Logros</span>
+                                <span class="text-xs text-gray-400">(${earnedBadges.length}/${badgeDefinitions.length})</span>
                             </div>
-                        </div>
-                    ` : ''}
-                    
-                    ${healthMessages.length > 0 ? `
-                        <div class="mb-4 space-y-2 animate-fade-in">
-                            ${healthMessages.map(msg => `
-                                <div class="p-2.5 bg-blue-50 border-l-3 border-blue-400 rounded-r-lg">
-                                    <p class="text-xs text-blue-800">${msg}</p>
-                                </div>
-                            `).join('')}
+                            ${renderBadges()}
                         </div>
                     ` : ''}
                     
@@ -2127,14 +2410,12 @@
                 return;
             }
 
-            // Borrar gastos de Supabase
             if (supabaseClient) {
                 state.expenses.forEach(exp => {
                     deleteFromSupabase('expenses', exp.id);
                 });
             }
 
-            // Limpiar solo lo necesario
             state.expenses = [];
             state.monthlyIncome = '';
             state.creditCardIncome = '';
@@ -2158,7 +2439,6 @@
 
         // Auto-inicializar con Supabase
         async function autoInit() {
-            // Cargar datos locales primero (sin render aún)
             const savedData = localStorage.getItem('expenseTrackerData');
             if (savedData) {
                 const data = JSON.parse(savedData);
@@ -2192,26 +2472,39 @@
                     SUPABASE_CONFIG.initialized = true;
                     isOnline = true;
                     
-                    // Usar ID público fijo para modo sin autenticación
                     state.userId = 'public-user';
                     currentUser = { id: 'public-user' };
                     
-                    // Cargar datos desde Supabase
                     await loadDataFromSupabasePublic();
                     
                     checkBadges();
                     render();
+                    
+                    // Mostrar motivaciones después de cargar los datos
+                    setTimeout(() => {
+                        showMotivationMessages();
+                    }, 1500);
+                    
                     showNotification('✅ Conectado a Supabase');
                 } catch (error) {
                     console.error('Error auto-init:', error);
                     isOnline = false;
                     checkBadges();
                     render();
+                    
+                    // Mostrar motivaciones incluso sin Supabase
+                    setTimeout(() => {
+                        showMotivationMessages();
+                    }, 1500);
                 }
             } else {
-                // Sin Supabase, solo render con datos locales
                 checkBadges();
                 render();
+                
+                // Mostrar motivaciones
+                setTimeout(() => {
+                    showMotivationMessages();
+                }, 1500);
             }
         }
 
@@ -2254,7 +2547,6 @@
                     .order('date', { ascending: false });
                 
                 if (!loansError && loans) {
-                    // Mapear de snake_case a camelCase
                     state.loans = loans.map(l => ({
                         id: l.id,
                         name: l.name,
