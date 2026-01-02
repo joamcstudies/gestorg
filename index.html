@@ -503,14 +503,14 @@
         
         /* Action buttons */
         .action-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
-            font-size: 1.2rem;
+            font-size: 1rem;
             flex-shrink: 0;
         }
         .action-btn:hover {
@@ -1887,40 +1887,36 @@
             const app = document.getElementById('app');
             app.innerHTML = `
                 <!-- Header Compacto -->
-                <div class="header-card rounded-2xl shadow-sm p-4 mb-4 animate-slide-in">
-                    <!-- Fila 1: Título + Botones -->
-                    <div class="flex items-start justify-between mb-3 gap-3">
-                        <div class="flex flex-col gap-1 min-w-0 flex-1">
-                            <div class="flex items-center gap-2">
-                                <h1 class="text-lg md:text-2xl font-bold text-gray-800 truncate">💰 Organizador de Gastos</h1>
-                            </div>
-                            <div class="connection-status ${isOnline ? 'online' : 'offline'} w-fit">
-                                <span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>
-                                ${isOnline ? 'Sincronizado' : 'Local'}
-                            </div>
-                            ${authState.user ? `
-                                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg w-fit mt-1">
-                                    <span class="text-xs text-gray-500">👤</span>
-                                    <span class="text-xs text-gray-600 font-medium truncate max-w-[150px]">${authState.user.email}</span>
-                                </div>
-                            ` : ''}
+                <div class="header-card rounded-2xl shadow-sm p-4 mb-4 animate-slide-in relative">
+                    <!-- Botones: posición absoluta arriba derecha -->
+                    <div class="absolute top-4 right-4 grid grid-cols-2 gap-1.5 sm:flex sm:flex-row sm:gap-2">
+                        <button onclick="toggleDarkMode()" class="action-btn bg-gray-100 hover:bg-gray-200">${state.darkMode ? '☀️' : '🌙'}</button>
+                        <button onclick="saveData()" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white">💾</button>
+                        <button onclick="exportData()" class="action-btn bg-blue-500 hover:bg-blue-600 text-white">📥</button>
+                        <label class="action-btn bg-violet-500 hover:bg-violet-600 text-white cursor-pointer">
+                            📤
+                            <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
+                        </label>
+                        <button onclick="handleLogout()" class="action-btn bg-red-500 hover:bg-red-600 text-white" title="Cerrar sesión">🚪</button>
+                    </div>
+                    
+                    <!-- Contenido principal -->
+                    <div class="pr-24 sm:pr-56">
+                        <h1 class="text-lg md:text-2xl font-bold text-gray-800">💰 Organizador de Gastos</h1>
+                        <div class="connection-status ${isOnline ? 'online' : 'offline'} w-fit mt-1">
+                            <span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>
+                            ${isOnline ? 'Sincronizado' : 'Local'}
                         </div>
-                        
-                        <!-- Botones: grid 2x3 en móvil, fila en escritorio -->
-                        <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-row flex-shrink-0">
-                            <button onclick="toggleDarkMode()" class="action-btn bg-gray-100 hover:bg-gray-200">${state.darkMode ? '☀️' : '🌙'}</button>
-                            <button onclick="saveData()" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white">💾</button>
-                            <button onclick="exportData()" class="action-btn bg-blue-500 hover:bg-blue-600 text-white">📥</button>
-                            <label class="action-btn bg-violet-500 hover:bg-violet-600 text-white cursor-pointer">
-                                📤
-                                <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
-                            </label>
-                            <button onclick="handleLogout()" class="action-btn bg-red-500 hover:bg-red-600 text-white" title="Cerrar sesión">🚪</button>
-                        </div>
+                        ${authState.user ? `
+                            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg w-fit mt-2">
+                                <span class="text-xs text-gray-500">👤</span>
+                                <span class="text-xs text-gray-600 font-medium truncate max-w-[150px]">${authState.user.email}</span>
+                            </div>
+                        ` : ''}
                     </div>
                     
                     <!-- Fila 2: Filtros + Badges -->
-                    <div class="flex flex-wrap items-center gap-4 mb-4">
+                    <div class="flex flex-wrap items-center gap-4 mb-4 mt-3">
                         <div class="flex gap-2">
                             <button onclick="setTimeFilter('week')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'week' ? 'time-filter-active' : 'text-gray-600'}">Semana</button>
                             <button onclick="setTimeFilter('month')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'month' ? 'time-filter-active' : 'text-gray-600'}">Mes</button>
