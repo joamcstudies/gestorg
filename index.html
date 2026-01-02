@@ -38,32 +38,15 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
         
         /* Animación para toasts de motivación */
         @keyframes slideInFromRight {
-            from { 
-                opacity: 0; 
-                transform: translateX(100%) scale(0.8);
-            }
-            to { 
-                opacity: 1; 
-                transform: translateX(0) scale(1);
-            }
+            from { opacity: 0; transform: translateX(100%) scale(0.8); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
         }
         @keyframes slideOutToRight {
-            from { 
-                opacity: 1; 
-                transform: translateX(0) scale(1);
-            }
-            to { 
-                opacity: 0; 
-                transform: translateX(100%) scale(0.8);
-            }
+            from { opacity: 1; transform: translateX(0) scale(1); }
+            to { opacity: 0; transform: translateX(100%) scale(0.8); }
         }
         @keyframes floatBubble {
             0%, 100% { transform: translateY(0); }
@@ -72,25 +55,13 @@
         
         /* Animaciones para badges */
         @keyframes badgePopIn {
-            0% { 
-                opacity: 0; 
-                transform: scale(0) rotate(-10deg);
-            }
-            50% {
-                transform: scale(1.2) rotate(5deg);
-            }
-            100% { 
-                opacity: 1; 
-                transform: scale(1) rotate(0);
-            }
+            0% { opacity: 0; transform: scale(0) rotate(-10deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0); }
         }
         @keyframes badgeShine {
             0% { left: -100%; }
             100% { left: 200%; }
-        }
-        @keyframes badgePulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
         }
         @keyframes iconBounce {
             0%, 100% { transform: translateY(0); }
@@ -168,22 +139,16 @@
         }
         
         /* Badges dinámicos */
-        .badges-container {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            padding: 4px 0;
-        }
         .badge-item {
             position: relative;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
+            gap: 4px;
+            padding: 4px 10px;
             background: white;
             border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            border-radius: 16px;
+            font-size: 0.7rem;
             font-weight: 500;
             color: #475569;
             cursor: default;
@@ -193,12 +158,12 @@
             animation: badgePopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
         .badge-item:nth-child(1) { animation-delay: 0.1s; }
-        .badge-item:nth-child(2) { animation-delay: 0.2s; }
-        .badge-item:nth-child(3) { animation-delay: 0.3s; }
-        .badge-item:nth-child(4) { animation-delay: 0.4s; }
-        .badge-item:nth-child(5) { animation-delay: 0.5s; }
-        .badge-item:nth-child(6) { animation-delay: 0.6s; }
-        .badge-item:nth-child(7) { animation-delay: 0.7s; }
+        .badge-item:nth-child(2) { animation-delay: 0.15s; }
+        .badge-item:nth-child(3) { animation-delay: 0.2s; }
+        .badge-item:nth-child(4) { animation-delay: 0.25s; }
+        .badge-item:nth-child(5) { animation-delay: 0.3s; }
+        .badge-item:nth-child(6) { animation-delay: 0.35s; }
+        .badge-item:nth-child(7) { animation-delay: 0.4s; }
         
         .badge-item::before {
             content: '';
@@ -208,28 +173,22 @@
             width: 50%;
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-            transition: left 0.5s;
         }
         .badge-item:hover::before {
             animation: badgeShine 0.6s ease-out;
         }
         .badge-item:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             border-color: #fbbf24;
             background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
         }
         .badge-item .badge-icon {
-            font-size: 1rem;
+            font-size: 0.85rem;
             transition: transform 0.3s;
         }
         .badge-item:hover .badge-icon {
             animation: iconBounce 0.5s ease-in-out;
-        }
-        .badge-item.new-badge {
-            animation: badgePopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, badgePulse 2s ease-in-out 0.5s;
-            border-color: #fbbf24;
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
         }
         
         /* Tooltip para badges */
@@ -241,7 +200,7 @@
             padding: 6px 10px;
             background: #1e293b;
             color: white;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             border-radius: 6px;
             white-space: nowrap;
             opacity: 0;
@@ -255,7 +214,7 @@
             top: 100%;
             left: 50%;
             transform: translateX(-50%);
-            border: 5px solid transparent;
+            border: 4px solid transparent;
             border-top-color: #1e293b;
         }
         .badge-item:hover .badge-tooltip {
@@ -314,10 +273,17 @@
         body.dark-mode .motivation-toast-content p {
             color: #e2e8f0;
         }
+        body.dark-mode .header-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        body.dark-mode .income-card {
+            background: #0f172a;
+            border-color: #334155;
+        }
         
         /* Filtros de tiempo */
         .time-filter {
-            background: #f8fafc;
+            background: white;
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
         }
@@ -341,6 +307,45 @@
         }
         .card:hover { 
             box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        
+        /* Header card especial */
+        .header-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* Income cards */
+        .income-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            transition: all 0.2s;
+        }
+        .income-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+        .income-card:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .income-card input {
+            border: none !important;
+            padding: 0 !important;
+            background: transparent !important;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .income-card input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        .income-card input::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
         }
         
         /* Tarjetas de totales */
@@ -452,24 +457,14 @@
             border-color: #bae6fd;
         }
         
-        /* Categorías */
-        .category-item {
-            transition: all 0.15s ease;
-            border: 1px solid #f1f5f9;
-        }
-        .category-item:hover {
-            background: #f8fafc;
-            border-color: #e2e8f0;
-        }
-        
         /* Indicador de conexión */
         .connection-status {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.375rem;
             padding: 0.25rem 0.625rem;
             border-radius: 9999px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 500;
             letter-spacing: 0.01em;
         }
@@ -482,12 +477,27 @@
             color: #991b1b;
         }
         .connection-dot {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
         }
         .connection-dot.online { background: #22c55e; }
         .connection-dot.offline { background: #ef4444; }
+        
+        /* Action buttons */
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
         
         /* Inputs mejorados */
         input, select {
@@ -524,8 +534,7 @@
         let currentUser = null;
         let isOnline = false;
         let syncQueue = [];
-        let motivationToastTimeout = null;
-        let shownMotivations = new Set(); // Para no repetir motivaciones en la misma sesión
+        let shownMotivations = new Set();
 
         // ========== ESTADO DE LA APLICACIÓN ==========
         let state = {
@@ -635,13 +644,11 @@
 
         // ========== FUNCIONES DE MOTIVACIÓN (TOAST) ==========
         function showMotivationToast(message, duration = 6000) {
-            // Evitar mostrar la misma motivación dos veces en la sesión
             if (shownMotivations.has(message)) return;
             shownMotivations.add(message);
             
             const container = document.getElementById('motivationToasts');
             
-            // Crear el toast
             const toast = document.createElement('div');
             toast.className = 'motivation-toast';
             toast.innerHTML = `
@@ -654,49 +661,35 @@
             
             container.appendChild(toast);
             
-            // Animar la barra de progreso
             const progressBar = toast.querySelector('.progress-bar-toast');
             let width = 100;
             const interval = setInterval(() => {
                 width -= (100 / (duration / 100));
                 progressBar.style.width = width + '%';
-                if (width <= 0) {
-                    clearInterval(interval);
-                }
+                if (width <= 0) clearInterval(interval);
             }, 100);
             
-            // Auto-cerrar después del tiempo
-            setTimeout(() => {
-                closeMotivationToast(toast);
-            }, duration);
+            setTimeout(() => closeMotivationToast(toast), duration);
         }
         
         function closeMotivationToast(toast) {
             if (!toast || toast.classList.contains('hiding')) return;
             toast.classList.add('hiding');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
+            setTimeout(() => toast.remove(), 300);
         }
         
         function showMotivationMessages() {
             const messages = getFinancialHealthMessage();
             if (messages.length > 0) {
-                // Mostrar solo un mensaje a la vez, con delay entre cada uno
                 messages.forEach((msg, index) => {
-                    setTimeout(() => {
-                        showMotivationToast(msg, 6000);
-                    }, index * 2000); // 2 segundos entre cada mensaje
+                    setTimeout(() => showMotivationToast(msg, 6000), index * 2000);
                 });
             }
         }
 
         // ========== FUNCIONES DE SUPABASE ==========
         async function initSupabase(url, anonKey) {
-            if (!url || !anonKey) {
-                console.log('Supabase no configurado - usando localStorage');
-                return false;
-            }
+            if (!url || !anonKey) return false;
             
             try {
                 if (!window.supabase) {
@@ -708,18 +701,6 @@
                 SUPABASE_CONFIG.anonKey = anonKey;
                 SUPABASE_CONFIG.initialized = true;
                 isOnline = true;
-                
-                supabaseClient.auth.onAuthStateChange((event, session) => {
-                    if (session) {
-                        currentUser = session.user;
-                        state.userId = session.user.id;
-                        loadDataFromSupabase();
-                    } else {
-                        currentUser = null;
-                        state.userId = null;
-                    }
-                    render();
-                });
                 
                 showNotification('✅ Conectado a Supabase');
                 return true;
@@ -740,58 +721,6 @@
             });
         }
 
-        async function loadDataFromSupabase() {
-            if (!supabaseClient || !currentUser) return;
-            
-            try {
-                const { data: expenses, error: expError } = await supabaseClient
-                    .from('expenses')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('date', { ascending: false });
-                
-                if (!expError && expenses) state.expenses = expenses;
-                
-                const { data: withdrawals, error: withError } = await supabaseClient
-                    .from('savings_withdrawals')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('date', { ascending: false });
-                
-                if (!withError && withdrawals) state.savingsWithdrawals = withdrawals;
-                
-                const { data: debtors, error: debtError } = await supabaseClient
-                    .from('debtors')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('date', { ascending: false });
-                
-                if (!debtError && debtors) state.debtors = debtors;
-                
-                const { data: config, error: configError } = await supabaseClient
-                    .from('user_config')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .single();
-                
-                if (!configError && config) {
-                    state.monthlyIncome = config.monthly_income || '';
-                    state.creditCardIncome = config.credit_card_income || '';
-                    state.projectionMonths = config.projection_months || '';
-                    state.monthlySavingsPlan = config.monthly_savings_plan || '';
-                    state.darkMode = config.dark_mode || false;
-                    state.badges = config.badges || [];
-                }
-                
-                state.lastSync = new Date().toISOString();
-                render();
-                showNotification('✅ Datos sincronizados');
-            } catch (error) {
-                console.error('Error cargando datos:', error);
-                showNotification('❌ Error al sincronizar', true);
-            }
-        }
-
         async function saveToSupabase(table, data) {
             if (!supabaseClient) {
                 syncQueue.push({ table, data, action: 'upsert' });
@@ -800,10 +729,7 @@
             }
             
             try {
-                const { error } = await supabaseClient
-                    .from(table)
-                    .upsert(data);
-                
+                const { error } = await supabaseClient.from(table).upsert(data);
                 if (error) throw error;
             } catch (error) {
                 console.error('Error guardando en Supabase:', error);
@@ -819,68 +745,11 @@
             }
             
             try {
-                const { error } = await supabaseClient
-                    .from(table)
-                    .delete()
-                    .eq('id', id);
-                
+                const { error } = await supabaseClient.from(table).delete().eq('id', id);
                 if (error) throw error;
             } catch (error) {
                 console.error('Error eliminando de Supabase:', error);
                 syncQueue.push({ table, id, action: 'delete' });
-            }
-        }
-
-        // ========== FUNCIONES DE AUTENTICACIÓN ==========
-        async function signUp(email, password) {
-            if (!supabaseClient) {
-                showNotification('❌ Supabase no configurado', true);
-                return;
-            }
-            
-            try {
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email,
-                    password
-                });
-                
-                if (error) throw error;
-                showNotification('✅ Cuenta creada. Verifica tu email.');
-            } catch (error) {
-                showNotification('❌ ' + error.message, true);
-            }
-        }
-
-        async function signIn(email, password) {
-            if (!supabaseClient) {
-                showNotification('❌ Supabase no configurado', true);
-                return;
-            }
-            
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email,
-                    password
-                });
-                
-                if (error) throw error;
-                showNotification('✅ Sesión iniciada');
-            } catch (error) {
-                showNotification('❌ ' + error.message, true);
-            }
-        }
-
-        async function signOut() {
-            if (!supabaseClient) return;
-            
-            try {
-                await supabaseClient.auth.signOut();
-                currentUser = null;
-                state.userId = null;
-                showNotification('👋 Sesión cerrada');
-                render();
-            } catch (error) {
-                showNotification('❌ Error al cerrar sesión', true);
             }
         }
 
@@ -1162,14 +1031,7 @@
         }
 
         function getTotalByType() {
-            const totals = {
-                esencial: 0,
-                salida: 0,
-                ahorro: 0,
-                bizum: 0,
-                suscripcion: 0,
-                otros: 0
-            };
+            const totals = { esencial: 0, salida: 0, ahorro: 0, bizum: 0, suscripcion: 0, otros: 0 };
             const filtered = getFilteredExpenses();
             filtered.forEach(exp => {
                 const type = getCategoryType(exp.category);
@@ -1334,9 +1196,7 @@
         function getTotalMonthlyLoanPayments() {
             const currentMonth = new Date().toISOString().slice(0, 7);
             return state.loans.reduce((sum, loan) => {
-                if (loan.startDate && loan.startDate > currentMonth) {
-                    return sum;
-                }
+                if (loan.startDate && loan.startDate > currentMonth) return sum;
                 return sum + loan.monthlyPayment;
             }, 0);
         }
@@ -1399,8 +1259,7 @@
             saveDataLocal();
             render();
             
-            const isActive = isLoanActive(newLoan);
-            showNotification(isActive ? '✅ Préstamo añadido' : `✅ Préstamo programado para ${newLoan.startDate}`);
+            showNotification(isLoanActive(newLoan) ? '✅ Préstamo añadido' : `✅ Préstamo programado para ${newLoan.startDate}`);
         }
 
         function payLoan(id, amount) {
@@ -1432,16 +1291,10 @@
             }
 
             saveToSupabase('loans', {
-                id: loan.id,
-                name: loan.name,
-                total_amount: loan.totalAmount,
-                pending_amount: loan.pendingAmount,
-                paid_amount: loan.paidAmount,
-                total_months: loan.totalMonths,
-                remaining_months: loan.remainingMonths,
-                monthly_payment: loan.monthlyPayment,
-                start_date: loan.startDate,
-                date: loan.date
+                id: loan.id, name: loan.name, total_amount: loan.totalAmount,
+                pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
+                total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
+                monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
             });
             
             saveDataLocal();
@@ -1466,9 +1319,7 @@
             }
             
             const loan = state.loans.find(l => l.id === id);
-            if (!loan) return;
-            
-            if (amount > loan.pendingAmount) {
+            if (!loan || amount > loan.pendingAmount) {
                 showNotification('❌ La cantidad excede la deuda pendiente', true);
                 return;
             }
@@ -1487,16 +1338,10 @@
             }
             
             saveToSupabase('loans', {
-                id: loan.id,
-                name: loan.name,
-                total_amount: loan.totalAmount,
-                pending_amount: loan.pendingAmount,
-                paid_amount: loan.paidAmount,
-                total_months: loan.totalMonths,
-                remaining_months: loan.remainingMonths,
-                monthly_payment: loan.monthlyPayment,
-                start_date: loan.startDate,
-                date: loan.date
+                id: loan.id, name: loan.name, total_amount: loan.totalAmount,
+                pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
+                total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
+                monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
             });
             
             saveDataLocal();
@@ -1507,9 +1352,7 @@
             const loan = state.loans.find(l => l.id === id);
             if (!loan) return;
             
-            if (!confirm(`¿Liquidar completamente "${loan.name}" por ${formatEuro(loan.pendingAmount)}?`)) {
-                return;
-            }
+            if (!confirm(`¿Liquidar completamente "${loan.name}" por ${formatEuro(loan.pendingAmount)}?`)) return;
             
             loan.paidAmount = loan.totalAmount;
             loan.pendingAmount = 0;
@@ -1517,16 +1360,10 @@
             loan.monthlyPayment = 0;
             
             saveToSupabase('loans', {
-                id: loan.id,
-                name: loan.name,
-                total_amount: loan.totalAmount,
-                pending_amount: loan.pendingAmount,
-                paid_amount: loan.paidAmount,
-                total_months: loan.totalMonths,
-                remaining_months: loan.remainingMonths,
-                monthly_payment: loan.monthlyPayment,
-                start_date: loan.startDate,
-                date: loan.date
+                id: loan.id, name: loan.name, total_amount: loan.totalAmount,
+                pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
+                total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
+                monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
             });
             
             saveDataLocal();
@@ -1548,19 +1385,12 @@
             const projectionWithCurrent = currentSavings + projectionFromZero;
             const projectionWithOwed = projectionWithCurrent + owed;
             
-            return {
-                fromZero: projectionFromZero,
-                withCurrent: projectionWithCurrent,
-                withoutOwed: projectionWithCurrent,
-                withOwed: projectionWithOwed,
-                validMonthlySavings
-            };
+            return { fromZero: projectionFromZero, withCurrent: projectionWithCurrent, withoutOwed: projectionWithCurrent, withOwed: projectionWithOwed, validMonthlySavings };
         }
 
         function getFinancialHealthMessage() {
             const netSavings = getNetSavings();
             const totalIncome = getTotalIncome();
-            const totalExpenses = getTotalMonth();
             const savingsRate = totalIncome > 0 ? (netSavings / totalIncome) * 100 : 0;
             const typeTotals = getTotalByType();
             
@@ -1613,32 +1443,19 @@
                 }
             });
             
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
+            if (chartInstance) chartInstance.destroy();
             
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors,
-                        borderWidth: 2,
-                        borderColor: '#fff'
-                    }]
+                    datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 12,
-                                font: { size: 11 }
-                            }
-                        },
+                        legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -1669,11 +1486,10 @@
         // ========== RENDER DE BADGES ==========
         function renderBadges() {
             const earnedBadges = badgeDefinitions.filter(b => state.badges.includes(b.id));
-            
             if (earnedBadges.length === 0) return '';
             
             return `
-                <div class="badges-container">
+                <div class="flex gap-2 flex-wrap">
                     ${earnedBadges.map(badge => `
                         <div class="badge-item">
                             <span class="badge-icon">${badge.icon}</span>
@@ -1698,76 +1514,57 @@
 
             const app = document.getElementById('app');
             app.innerHTML = `
-                <!-- Header -->
-                <div class="bg-white rounded-2xl shadow-sm p-5 mb-4 card animate-slide-in border border-gray-100">
-                    <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
-                        <div class="flex-1 min-w-[280px]">
-                            <div class="flex items-center gap-3 mb-1">
-                                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">
-                                    💰 Organizador de Gastos
-                                </h1>
-                                <div class="connection-status ${isOnline ? 'online' : 'offline'}">
-                                    <span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>
-                                    ${isOnline ? 'Sincronizado' : 'Local'}
-                                </div>
-                            </div>
-                            <p class="text-gray-500 text-sm mb-4">Controla tus finanzas de forma simple</p>
-                            
-                            <!-- Filtros de tiempo -->
-                            <div class="flex flex-wrap gap-2">
-                                <button onclick="setTimeFilter('week')" class="time-filter px-4 py-2 rounded-lg text-sm ${state.timeFilter === 'week' ? 'time-filter-active' : 'text-gray-600'}">
-                                    Semana
-                                </button>
-                                <button onclick="setTimeFilter('month')" class="time-filter px-4 py-2 rounded-lg text-sm ${state.timeFilter === 'month' ? 'time-filter-active' : 'text-gray-600'}">
-                                    Mes
-                                </button>
-                                <button onclick="setTimeFilter('year')" class="time-filter px-4 py-2 rounded-lg text-sm ${state.timeFilter === 'year' ? 'time-filter-active' : 'text-gray-600'}">
-                                    Año
-                                </button>
+                <!-- Header Compacto -->
+                <div class="header-card rounded-2xl shadow-sm p-4 mb-4 animate-slide-in">
+                    <!-- Fila 1: Título + Acciones -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <h1 class="text-xl md:text-2xl font-bold text-gray-800">💰 Organizador de Gastos</h1>
+                            <div class="connection-status ${isOnline ? 'online' : 'offline'}">
+                                <span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>
+                                ${isOnline ? 'Sync' : 'Local'}
                             </div>
                         </div>
-                        
-                        <div class="flex flex-wrap gap-2">
-                            <button onclick="toggleDarkMode()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition text-sm">
-                                ${state.darkMode ? '☀️' : '🌙'}
-                            </button>
-                            <button onclick="saveData()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg transition text-sm">
-                                💾
-                            </button>
-                            <button onclick="exportData()" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg transition text-sm">
-                                📥
-                            </button>
-                            <label class="bg-violet-500 hover:bg-violet-600 text-white px-3 py-2 rounded-lg transition cursor-pointer text-sm">
+                        <div class="flex gap-2">
+                            <button onclick="toggleDarkMode()" class="action-btn bg-gray-100 hover:bg-gray-200">${state.darkMode ? '☀️' : '🌙'}</button>
+                            <button onclick="saveData()" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white">💾</button>
+                            <button onclick="exportData()" class="action-btn bg-blue-500 hover:bg-blue-600 text-white">📥</button>
+                            <label class="action-btn bg-violet-500 hover:bg-violet-600 text-white cursor-pointer">
                                 📤
                                 <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
                             </label>
                         </div>
                     </div>
                     
-                    ${earnedBadges.length > 0 ? `
-                        <div class="mb-4">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-sm font-medium text-gray-500">🏆 Logros</span>
-                                <span class="text-xs text-gray-400">(${earnedBadges.length}/${badgeDefinitions.length})</span>
-                            </div>
-                            ${renderBadges()}
+                    <!-- Fila 2: Filtros + Badges -->
+                    <div class="flex flex-wrap items-center gap-4 mb-4">
+                        <div class="flex gap-2">
+                            <button onclick="setTimeFilter('week')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'week' ? 'time-filter-active' : 'text-gray-600'}">Semana</button>
+                            <button onclick="setTimeFilter('month')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'month' ? 'time-filter-active' : 'text-gray-600'}">Mes</button>
+                            <button onclick="setTimeFilter('year')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'year' ? 'time-filter-active' : 'text-gray-600'}">Año</button>
                         </div>
-                    ` : ''}
+                        
+                        ${earnedBadges.length > 0 ? `
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-400">🏆 ${earnedBadges.length}/${badgeDefinitions.length}</span>
+                                ${renderBadges()}
+                            </div>
+                        ` : ''}
+                    </div>
                     
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-                        <div>
-                            <label class="text-xs font-medium text-gray-500 block mb-1.5">Ingresos del mes</label>
-                            <input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
+                    <!-- Fila 3: Inputs de Ingresos -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="income-card">
+                            <label class="text-xs text-gray-400 block mb-1">💵 Ingresos</label>
+                            <input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0,00€" step="0.01" />
                         </div>
-                        <div>
-                            <label class="text-xs font-medium text-gray-500 block mb-1.5">Donaciones</label>
-                            <input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
+                        <div class="income-card">
+                            <label class="text-xs text-gray-400 block mb-1">🎁 Donaciones</label>
+                            <input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0,00€" step="0.01" />
                         </div>
-                        <div>
-                            <label class="text-xs font-medium text-gray-500 block mb-1.5">Me deben</label>
-                            <div class="px-3 py-2.5 bg-emerald-50 border border-emerald-200 rounded-lg font-semibold text-emerald-700 text-sm">
-                                ${formatEuro(getTotalOwed())}
-                            </div>
+                        <div class="income-card" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0;">
+                            <label class="text-xs text-emerald-600 block mb-1">🤝 Me deben</label>
+                            <div class="text-lg font-bold text-emerald-700">${formatEuro(getTotalOwed())}</div>
                         </div>
                     </div>
                 </div>
@@ -1776,10 +1573,8 @@
                 <div class="totals-grid mb-4">
                     <div class="total-card rounded-xl p-4 border-l-4 border-blue-500 animate-slide-in col-span-2 md:col-span-1">
                         <p class="text-gray-500 text-xs mb-1">Saldo Disponible</p>
-                        <p class="saldo-display amount-display-large ${remainingBalance >= 0 ? 'text-emerald-600' : 'text-red-600'}">
-                            ${formatEuro(remainingBalance)}
-                        </p>
-                        ${monthlyLoanPayments > 0 ? `<p class="text-xs text-gray-400 mt-1">Incluye -${formatEuro(monthlyLoanPayments)} préstamos</p>` : ''}
+                        <p class="saldo-display amount-display-large ${remainingBalance >= 0 ? 'text-emerald-600' : 'text-red-600'}">${formatEuro(remainingBalance)}</p>
+                        ${monthlyLoanPayments > 0 ? `<p class="text-xs text-gray-400 mt-1">-${formatEuro(monthlyLoanPayments)} préstamos</p>` : ''}
                     </div>
 
                     <div class="total-card rounded-xl p-3 border-l-4 border-green-400 animate-slide-in cursor-pointer hover:bg-green-50 transition" onclick="showExpensesByType('esencial', 'Esenciales')">
@@ -1824,28 +1619,20 @@
                     </div>
                 </div>
 
-                <!-- Gráfico de distribución -->
-                ${Object.values(totals).some(v => v > 0) ? `
-                    <div class="bg-white rounded-xl p-5 card animate-slide-in mb-4 border border-gray-100">
-                        <h2 class="text-base font-semibold text-gray-800 mb-3">📊 Distribución</h2>
-                        <div style="height: 260px; position: relative;">
-                            <canvas id="expenseChart"></canvas>
-                        </div>
-                    </div>
-                ` : ''}
-
-                <!-- Fila principal: Formulario | Categorías | Historial -->
-                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                <!-- Grid Principal: Formulario + Historial -->
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
                     <!-- Formulario -->
                     <div class="bg-white rounded-xl p-5 card animate-slide-in border ${state.editingExpenseId ? 'border-amber-300 ring-2 ring-amber-100' : 'border-gray-100'}">
                         <h2 class="text-base font-semibold text-gray-800 mb-4">${state.editingExpenseId ? '✏️ Editar Gasto' : '➕ Nuevo Gasto'}</h2>
                         <div class="space-y-3">
                             <input type="text" id="description" value="${state.description}" placeholder="Descripción" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
-                            <input type="number" id="amount" value="${state.amount}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="number" id="amount" value="${state.amount}" placeholder="0.00" step="0.01" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
+                                <input type="date" id="date" value="${state.date}" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
+                            </div>
                             <select id="category" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm">
                                 ${categories.map(cat => `<option value="${cat.name}" ${state.category === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
                             </select>
-                            <input type="date" id="date" value="${state.date}" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg transition text-sm" />
                             <div class="flex gap-2">
                                 <button onclick="addExpense()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-lg transition text-sm">
                                     ${state.editingExpenseId ? '✓ Actualizar' : '+ Agregar'}
@@ -1854,20 +1641,17 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Gastos por Categoría -->
-                    <div class="bg-white rounded-xl p-5 max-h-[480px] overflow-y-auto custom-scroll card animate-slide-in border border-gray-100">
-                        <h2 class="text-base font-semibold text-gray-800 mb-3">📋 Por Categoría</h2>
-                        ${renderCategorySections(totals)}
-                    </div>
 
                     <!-- Historial de Gastos -->
                     <div class="bg-white rounded-xl p-5 card animate-slide-in border border-gray-100">
-                        <h2 class="text-base font-semibold text-gray-800 mb-3">📝 Historial</h2>
-                        <div class="space-y-2 max-h-[360px] overflow-y-auto custom-scroll">
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-base font-semibold text-gray-800">📝 Historial</h2>
+                            ${getFilteredExpenses().length > 0 ? `<span class="text-xs text-gray-400">${getFilteredExpenses().length} gastos</span>` : ''}
+                        </div>
+                        <div class="space-y-2 max-h-[280px] overflow-y-auto custom-scroll">
                             ${getFilteredExpenses().length === 0 ? `
                                 <p class="text-gray-400 text-center py-8 text-sm">Sin gastos registrados</p>
-                            ` : getFilteredExpenses().slice(0, 20).map(exp => `
+                            ` : getFilteredExpenses().slice(0, 15).map(exp => `
                                 <div class="expense-item flex items-center justify-between p-2.5 rounded-lg">
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 mb-0.5">
@@ -1890,7 +1674,7 @@
                         ${getFilteredExpenses().length > 0 ? `
                             <div class="mt-3 pt-3 border-t border-gray-100">
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <span class="text-sm font-medium text-gray-600">Total</span>
+                                    <span class="text-sm font-medium text-gray-600">Total Gastos</span>
                                     <span class="amount-display-large text-blue-600">${formatEuro(monthTotal)}</span>
                                 </div>
                             </div>
@@ -1898,8 +1682,18 @@
                     </div>
                 </div>
 
-                <!-- Secciones colapsables -->
-                <div class="grid md:grid-cols-4 gap-4">
+                <!-- Gráfico -->
+                ${Object.values(totals).some(v => v > 0) ? `
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in mb-4 border border-gray-100">
+                        <h2 class="text-base font-semibold text-gray-800 mb-3">📊 Distribución</h2>
+                        <div style="height: 240px; position: relative;">
+                            <canvas id="expenseChart"></canvas>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Secciones Colapsables (antes "Por Categoría") -->
+                <div class="grid md:grid-cols-4 gap-4 mb-4">
                     <!-- Ahorros -->
                     <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100">
                         <button onclick="toggleSection('showSavingsSection')" class="w-full flex justify-between items-center mb-3">
@@ -1926,7 +1720,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Ingreso -->
                             <div class="mb-3 p-3 bg-blue-50 rounded-lg">
                                 <p class="text-xs font-semibold text-blue-700 mb-2">➕ Añadir ingreso</p>
                                 <div class="space-y-2">
@@ -1936,7 +1729,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Retiro -->
                             <div class="mb-3 p-3 bg-red-50 rounded-lg">
                                 <p class="text-xs font-semibold text-red-700 mb-2">➖ Registrar retiro</p>
                                 <div class="space-y-2">
@@ -1946,7 +1738,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Historial -->
                             ${(state.savingsDeposits.length > 0 || state.savingsWithdrawals.length > 0) ? `
                                 <div class="space-y-2">
                                     <p class="text-xs font-semibold text-gray-500 uppercase">Historial</p>
@@ -1997,15 +1788,17 @@
                                 </div>
                             </div>
                             <div class="space-y-2 mb-3">
-                                <input type="text" id="loanName" value="${state.loanName}" placeholder="Nombre del préstamo" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-                                <input type="number" id="loanAmount" value="${state.loanAmount}" placeholder="Capital total" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-                                <input type="number" id="loanMonths" value="${state.loanMonths}" placeholder="Nº de meses" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <input type="text" id="loanName" value="${state.loanName}" placeholder="Nombre préstamo" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" id="loanAmount" value="${state.loanAmount}" placeholder="Capital" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                    <input type="number" id="loanMonths" value="${state.loanMonths}" placeholder="Meses" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                </div>
                                 <input type="number" id="loanPaid" value="${state.loanPaid}" placeholder="Ya pagado (opcional)" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
                                 <div>
-                                    <label class="text-xs text-gray-500 mb-1 block">1ª cuota a descontar</label>
+                                    <label class="text-xs text-gray-500 mb-1 block">1ª cuota</label>
                                     <input type="month" id="loanStartDate" value="${state.loanStartDate}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
                                 </div>
-                                <button onclick="addLoan()" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg transition text-sm">+ Añadir Préstamo</button>
+                                <button onclick="addLoan()" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg transition text-sm">+ Añadir</button>
                             </div>
                             ${state.loans.length > 0 ? `
                                 <div class="space-y-3">
@@ -2015,45 +1808,21 @@
                                         <div class="p-3 ${active ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200'} rounded-lg border">
                                             <div class="flex justify-between items-start mb-2">
                                                 <div class="flex-1 min-w-0">
-                                                    <div class="flex items-center gap-2">
-                                                        <p class="font-semibold text-sm text-gray-800 truncate">${l.name}</p>
-                                                        ${!active ? `<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">📅 ${l.startDate}</span>` : ''}
-                                                    </div>
-                                                    <p class="text-xs text-gray-500">${l.remainingMonths} meses restantes</p>
+                                                    <p class="font-semibold text-sm text-gray-800 truncate">${l.name}</p>
+                                                    <p class="text-xs text-gray-500">${l.remainingMonths} meses</p>
                                                 </div>
                                                 <button onclick="handleDeleteLoan(${l.id})" class="text-gray-400 hover:text-red-500 p-1">🗑️</button>
                                             </div>
-                                            <div class="flex justify-between text-xs mb-1">
+                                            <div class="flex justify-between text-xs mb-2">
                                                 <span class="text-gray-500">Pendiente</span>
                                                 <span class="font-bold text-orange-700">${formatEuro(l.pendingAmount)}</span>
                                             </div>
-                                            <div class="flex justify-between text-xs mb-2">
-                                                <span class="text-gray-500">Cuota mensual</span>
-                                                <span class="font-semibold text-gray-700">${formatEuro(l.monthlyPayment)} ${!active ? '(no activa)' : ''}</span>
-                                            </div>
-                                            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-3">
+                                            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-2">
                                                 <div class="${active ? 'bg-orange-500' : 'bg-gray-400'} h-1.5 rounded-full" style="width: ${(l.paidAmount / l.totalAmount) * 100}%"></div>
                                             </div>
-                                            
-                                            <!-- Botones de pago -->
-                                            <div class="space-y-2">
-                                                <button onclick="payLoan(${l.id})" class="w-full ${active ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-gray-400'} text-white py-1.5 rounded text-xs transition" ${!active ? 'disabled title="Préstamo no activo aún"' : ''}>
-                                                    ✓ Pagar cuota (${formatEuro(l.monthlyPayment)})
-                                                </button>
-                                                
-                                                <!-- Amortización parcial -->
-                                                <div class="flex gap-1">
-                                                    <input type="number" id="amortize-${l.id}" placeholder="Cantidad" step="0.01" class="flex-1 px-2 py-1.5 border border-gray-200 rounded text-xs" />
-                                                    <button onclick="amortizeLoan(${l.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-xs transition">
-                                                        Amortizar
-                                                    </button>
-                                                </div>
-                                                
-                                                <!-- Amortización total -->
-                                                <button onclick="amortizeLoanFull(${l.id})" class="w-full bg-violet-500 hover:bg-violet-600 text-white py-1.5 rounded text-xs transition">
-                                                    💰 Liquidar todo (${formatEuro(l.pendingAmount)})
-                                                </button>
-                                            </div>
+                                            <button onclick="payLoan(${l.id})" class="w-full ${active ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-gray-400'} text-white py-1.5 rounded text-xs transition" ${!active ? 'disabled' : ''}>
+                                                ✓ Pagar ${formatEuro(l.monthlyPayment)}
+                                            </button>
                                         </div>
                                     `}).join('')}
                                 </div>
@@ -2061,7 +1830,7 @@
                         </div>
                     </div>
 
-                    <!-- Deudas -->
+                    <!-- Me Deben -->
                     <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100" style="animation-delay: 0.1s;">
                         <button onclick="toggleSection('showDebtorsSection')" class="w-full flex justify-between items-center mb-3">
                             <h2 class="text-base font-semibold text-gray-800">💵 Me Deben</h2>
@@ -2133,29 +1902,22 @@
                 </div>
 
                 <!-- Botón Reset -->
-                <div class="mt-6 pt-4 border-t border-gray-200">
+                <div class="pt-4 border-t border-gray-200">
                     <button onclick="resetMonth()" class="w-full bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 py-3 rounded-xl transition text-sm font-medium border border-gray-200 hover:border-red-200">
                         🔄 Reset (nuevo mes)
                     </button>
-                    <p class="text-xs text-gray-400 text-center mt-2">Borra gastos, ingresos y donaciones. Mantiene ahorros, préstamos, deudores y proyecciones.</p>
                 </div>
             `;
 
             // Event listeners
             ['monthlyIncome', 'creditCardIncome'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.addEventListener('input', (e) => {
-                    state[id] = e.target.value;
-                    updateTotalsOnly();
-                });
+                if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; updateTotalsOnly(); });
             });
 
             ['projectionMonths', 'monthlySavingsPlan'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.addEventListener('input', (e) => {
-                    state[id] = e.target.value;
-                    render();
-                });
+                if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; render(); });
             });
 
             ['description', 'amount', 'withdrawalDescription', 'withdrawalAmount', 'depositDescription', 'depositAmount', 'debtorName', 'debtorAmount', 'loanName', 'loanAmount', 'loanMonths', 'loanPaid', 'loanStartDate'].forEach(id => {
@@ -2172,87 +1934,34 @@
             setTimeout(() => renderChart(), 100);
         }
 
-        function renderCategorySections(totals) {
-            const sections = [
-                { title: 'Esenciales', type: 'esencial', color: 'emerald' },
-                { title: 'Salidas', type: 'salida', color: 'pink' },
-                { title: 'Ahorro', type: 'ahorro', color: 'blue' },
-                { title: 'Bizums', type: 'bizum', color: 'indigo' },
-                { title: 'Suscripciones', type: 'suscripcion', color: 'violet' },
-                { title: 'Otros', type: 'otros', color: 'gray' }
-            ];
+        function handleDeleteExpense(id) { if (confirm('¿Eliminar este gasto?')) deleteExpense(id); }
+        function handleDeleteWithdrawal(id) { if (confirm('¿Eliminar este retiro?')) deleteWithdrawal(id); }
+        function handleDeleteDeposit(id) { if (confirm('¿Eliminar este ingreso?')) deleteDeposit(id); }
+        function handleDeleteDebtor(id) { if (confirm('¿Eliminar este deudor?')) deleteDebtor(id); }
+        function handleDeleteLoan(id) { if (confirm('¿Eliminar este préstamo?')) deleteLoan(id); }
 
-            return sections.map(section => {
-                const categoryList = categories.filter(c => c.type === section.type);
-                const hasExpenses = categoryList.some(cat => totals[cat.name] > 0);
-                if (!hasExpenses) return '';
-
-                return `
-                    <div class="mb-4">
-                        <h3 class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">${section.title}</h3>
-                        <div class="space-y-1.5">
-                            ${categoryList.map(cat => {
-                                if (totals[cat.name] <= 0) return '';
-                                return `
-                                    <div class="category-item flex items-center justify-between p-2.5 bg-gray-50 rounded-lg">
-                                        <span class="text-sm text-gray-700">${cat.icon} ${cat.displayName}</span>
-                                        <span class="font-semibold text-gray-800 text-sm">${formatEuro(totals[cat.name])}</span>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function handleDeleteExpense(id) {
-            if (confirm('¿Eliminar este gasto?')) deleteExpense(id);
-        }
-
-        function handleDeleteWithdrawal(id) {
-            if (confirm('¿Eliminar este retiro?')) deleteWithdrawal(id);
-        }
-
-        function handleDeleteDeposit(id) {
-            if (confirm('¿Eliminar este ingreso?')) deleteDeposit(id);
-        }
-
-        function handleDeleteDebtor(id) {
-            if (confirm('¿Eliminar este deudor?')) deleteDebtor(id);
-        }
-
-        function handleDeleteLoan(id) {
-            if (confirm('¿Eliminar este préstamo?')) deleteLoan(id);
-        }
-
-        // ========== FUNCIONES DE MODAL DE DETALLES ==========
+        // ========== FUNCIONES DE MODAL ==========
         function showExpensesByType(type, title) {
             const filtered = getFilteredExpenses().filter(exp => getCategoryType(exp.category) === type);
             const total = filtered.reduce((sum, exp) => sum + exp.amount, 0);
             
-            let content = '';
-            if (filtered.length === 0) {
-                content = '<p class="text-gray-400 text-center py-8">No hay gastos en esta categoría</p>';
-            } else {
-                content = `
-                    <div class="mb-4 p-3 bg-gray-50 rounded-lg flex justify-between items-center">
-                        <span class="text-sm text-gray-600">${filtered.length} gasto${filtered.length !== 1 ? 's' : ''}</span>
-                        <span class="font-bold text-gray-800">${formatEuro(total)}</span>
-                    </div>
-                    <div class="space-y-2">
-                        ${filtered.map(exp => `
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-sm text-gray-800 truncate">${exp.description}</p>
-                                    <p class="text-xs text-gray-400">${exp.category} • ${exp.date}</p>
-                                </div>
-                                <span class="font-semibold text-gray-800 ml-3">${formatEuro(exp.amount)}</span>
+            let content = filtered.length === 0 ? '<p class="text-gray-400 text-center py-8">No hay gastos</p>' : `
+                <div class="mb-4 p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+                    <span class="text-sm text-gray-600">${filtered.length} gasto${filtered.length !== 1 ? 's' : ''}</span>
+                    <span class="font-bold text-gray-800">${formatEuro(total)}</span>
+                </div>
+                <div class="space-y-2">
+                    ${filtered.map(exp => `
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-sm text-gray-800 truncate">${exp.description}</p>
+                                <p class="text-xs text-gray-400">${exp.category} • ${exp.date}</p>
                             </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
+                            <span class="font-semibold text-gray-800 ml-3">${formatEuro(exp.amount)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
             
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalContent').innerHTML = content;
@@ -2262,9 +1971,6 @@
         function showSavingsDetail() {
             const savingsExpenses = getFilteredExpenses().filter(exp => getCategoryType(exp.category) === 'ahorro');
             const totalFromExpenses = savingsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-            const totalDeposits = getTotalDeposits();
-            const totalWithdrawals = getTotalWithdrawals();
-            const netSavings = getNetSavings();
             
             let content = `
                 <div class="space-y-3 mb-4">
@@ -2274,69 +1980,18 @@
                     </div>
                     <div class="p-3 bg-blue-50 rounded-lg flex justify-between items-center">
                         <span class="text-sm text-blue-700">Ingresos extras</span>
-                        <span class="font-bold text-blue-800">+${formatEuro(totalDeposits)}</span>
+                        <span class="font-bold text-blue-800">+${formatEuro(getTotalDeposits())}</span>
                     </div>
                     <div class="p-3 bg-red-50 rounded-lg flex justify-between items-center">
                         <span class="text-sm text-red-700">Retiros</span>
-                        <span class="font-bold text-red-800">-${formatEuro(totalWithdrawals)}</span>
+                        <span class="font-bold text-red-800">-${formatEuro(getTotalWithdrawals())}</span>
                     </div>
                     <div class="p-3 bg-gray-100 rounded-lg flex justify-between items-center border-t-2 border-emerald-500">
                         <span class="text-sm font-semibold text-gray-700">Ahorro Neto</span>
-                        <span class="font-bold text-emerald-700">${formatEuro(netSavings)}</span>
+                        <span class="font-bold text-emerald-700">${formatEuro(getNetSavings())}</span>
                     </div>
                 </div>
             `;
-            
-            if (savingsExpenses.length > 0) {
-                content += `
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Gastos de ahorro</p>
-                    <div class="space-y-2">
-                        ${savingsExpenses.map(exp => `
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-sm text-gray-800 truncate">${exp.description}</p>
-                                    <p class="text-xs text-gray-400">${exp.category} • ${exp.date}</p>
-                                </div>
-                                <span class="font-semibold text-emerald-700 ml-3">${formatEuro(exp.amount)}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            
-            if (state.savingsDeposits.length > 0) {
-                content += `
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2 mt-4">Ingresos extras</p>
-                    <div class="space-y-2">
-                        ${state.savingsDeposits.map(d => `
-                            <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-sm text-gray-800 truncate">${d.description}</p>
-                                    <p class="text-xs text-gray-400">${d.date}</p>
-                                </div>
-                                <span class="font-semibold text-blue-700 ml-3">+${formatEuro(d.amount)}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            
-            if (state.savingsWithdrawals.length > 0) {
-                content += `
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2 mt-4">Retiros</p>
-                    <div class="space-y-2">
-                        ${state.savingsWithdrawals.map(w => `
-                            <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-sm text-gray-800 truncate">${w.description}</p>
-                                    <p class="text-xs text-gray-400">${w.date}</p>
-                                </div>
-                                <span class="font-semibold text-red-600 ml-3">-${formatEuro(w.amount)}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
             
             document.getElementById('modalTitle').textContent = 'Ahorro Neto';
             document.getElementById('modalContent').innerHTML = content;
@@ -2345,53 +2000,30 @@
 
         function showLoansDetail() {
             const activeLoans = state.loans.filter(l => l.pendingAmount > 0);
-            const totalPending = getTotalLoans();
-            const monthlyPayments = getTotalMonthlyLoanPayments();
             
-            let content = '';
-            if (activeLoans.length === 0) {
-                content = '<p class="text-gray-400 text-center py-8">No hay préstamos activos</p>';
-            } else {
-                content = `
-                    <div class="space-y-3 mb-4">
-                        <div class="p-3 bg-orange-50 rounded-lg flex justify-between items-center">
-                            <span class="text-sm text-orange-700">Deuda total</span>
-                            <span class="font-bold text-orange-800">${formatEuro(totalPending)}</span>
-                        </div>
-                        <div class="p-3 bg-gray-100 rounded-lg flex justify-between items-center">
-                            <span class="text-sm text-gray-700">Cuota mensual total</span>
-                            <span class="font-bold text-gray-800">${formatEuro(monthlyPayments)}</span>
-                        </div>
+            let content = activeLoans.length === 0 ? '<p class="text-gray-400 text-center py-8">No hay préstamos</p>' : `
+                <div class="space-y-3 mb-4">
+                    <div class="p-3 bg-orange-50 rounded-lg flex justify-between items-center">
+                        <span class="text-sm text-orange-700">Deuda total</span>
+                        <span class="font-bold text-orange-800">${formatEuro(getTotalLoans())}</span>
                     </div>
-                    <div class="space-y-2">
-                        ${activeLoans.map(l => {
-                            const active = isLoanActive(l);
-                            return `
-                                <div class="p-3 ${active ? 'bg-orange-50' : 'bg-gray-50'} rounded-lg">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div>
-                                            <p class="font-medium text-sm text-gray-800">${l.name}</p>
-                                            <p class="text-xs text-gray-500">${l.remainingMonths} meses restantes</p>
-                                        </div>
-                                        ${!active ? `<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">📅 ${l.startDate}</span>` : ''}
-                                    </div>
-                                    <div class="flex justify-between text-xs mb-1">
-                                        <span class="text-gray-500">Pendiente</span>
-                                        <span class="font-bold text-orange-700">${formatEuro(l.pendingAmount)}</span>
-                                    </div>
-                                    <div class="flex justify-between text-xs">
-                                        <span class="text-gray-500">Cuota mensual</span>
-                                        <span class="font-semibold text-gray-700">${formatEuro(l.monthlyPayment)}${!active ? ' (no activa)' : ''}</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                                        <div class="${active ? 'bg-orange-500' : 'bg-gray-400'} h-1.5 rounded-full" style="width: ${(l.paidAmount / l.totalAmount) * 100}%"></div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
+                    <div class="p-3 bg-gray-100 rounded-lg flex justify-between items-center">
+                        <span class="text-sm text-gray-700">Cuota mensual</span>
+                        <span class="font-bold text-gray-800">${formatEuro(getTotalMonthlyLoanPayments())}</span>
                     </div>
-                `;
-            }
+                </div>
+                <div class="space-y-2">
+                    ${activeLoans.map(l => `
+                        <div class="p-3 bg-orange-50 rounded-lg">
+                            <p class="font-medium text-sm text-gray-800">${l.name}</p>
+                            <div class="flex justify-between text-xs mt-1">
+                                <span class="text-gray-500">Pendiente: ${formatEuro(l.pendingAmount)}</span>
+                                <span class="text-gray-500">Cuota: ${formatEuro(l.monthlyPayment)}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
             
             document.getElementById('modalTitle').textContent = 'Préstamos';
             document.getElementById('modalContent').innerHTML = content;
@@ -2404,16 +2036,11 @@
             }
         }
 
-        // ========== FUNCIÓN RESET MENSUAL ==========
         function resetMonth() {
-            if (!confirm('⚠️ ¿Estás seguro?\n\nSe borrarán:\n• Todos los gastos\n• Ingresos del mes\n• Donaciones\n\nSe mantendrán:\n• Ahorros (ingresos y retiros)\n• Préstamos\n• Deudores\n• Badges\n• Proyecciones')) {
-                return;
-            }
+            if (!confirm('⚠️ ¿Estás seguro?\n\nSe borrarán:\n• Todos los gastos\n• Ingresos del mes\n• Donaciones\n\nSe mantendrán:\n• Ahorros\n• Préstamos\n• Deudores\n• Proyecciones')) return;
 
             if (supabaseClient) {
-                state.expenses.forEach(exp => {
-                    deleteFromSupabase('expenses', exp.id);
-                });
+                state.expenses.forEach(exp => deleteFromSupabase('expenses', exp.id));
             }
 
             state.expenses = [];
@@ -2425,149 +2052,86 @@
             showNotification('🔄 Mes reiniciado correctamente');
         }
 
-        // Exponer funciones globalmente para API externa
-        window.ExpenseTracker = {
-            initSupabase,
-            signUp,
-            signIn,
-            signOut,
-            getState: () => state,
-            loadDataFromSupabase,
-            saveData,
-            exportData
-        };
+        window.ExpenseTracker = { initSupabase, getState: () => state, saveData, exportData };
 
-        // Auto-inicializar con Supabase
         async function autoInit() {
             const savedData = localStorage.getItem('expenseTrackerData');
             if (savedData) {
                 const data = JSON.parse(savedData);
-                state.expenses = data.expenses || [];
-                state.savingsWithdrawals = data.savingsWithdrawals || [];
-                state.savingsDeposits = data.savingsDeposits || [];
-                state.debtors = data.debtors || [];
-                state.loans = data.loans || [];
-                state.monthlyIncome = data.monthlyIncome || '';
-                state.creditCardIncome = data.creditCardIncome || '';
-                state.owedMoney = data.owedMoney || '';
-                state.projectionMonths = data.projectionMonths || '';
-                state.monthlySavingsPlan = data.monthlySavingsPlan || '';
-                state.darkMode = data.darkMode || false;
-                state.badges = data.badges || [];
-                state.lastMonthSavings = data.lastMonthSavings || 0;
+                Object.assign(state, {
+                    expenses: data.expenses || [],
+                    savingsWithdrawals: data.savingsWithdrawals || [],
+                    savingsDeposits: data.savingsDeposits || [],
+                    debtors: data.debtors || [],
+                    loans: data.loans || [],
+                    monthlyIncome: data.monthlyIncome || '',
+                    creditCardIncome: data.creditCardIncome || '',
+                    projectionMonths: data.projectionMonths || '',
+                    monthlySavingsPlan: data.monthlySavingsPlan || '',
+                    darkMode: data.darkMode || false,
+                    badges: data.badges || [],
+                    lastMonthSavings: data.lastMonthSavings || 0
+                });
                 syncQueue = data.syncQueue || [];
             }
             document.body.classList.toggle('dark-mode', state.darkMode);
             
             if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
                 try {
-                    if (!window.supabase) {
-                        await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
-                    }
+                    if (!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
                     
-                    supabaseClient = window.supabase.createClient(
-                        SUPABASE_CONFIG.url, 
-                        SUPABASE_CONFIG.anonKey
-                    );
+                    supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
                     SUPABASE_CONFIG.initialized = true;
                     isOnline = true;
-                    
                     state.userId = 'public-user';
                     currentUser = { id: 'public-user' };
                     
                     await loadDataFromSupabasePublic();
-                    
                     checkBadges();
                     render();
-                    
-                    // Mostrar motivaciones después de cargar los datos
-                    setTimeout(() => {
-                        showMotivationMessages();
-                    }, 1500);
-                    
-                    showNotification('✅ Conectado a Supabase');
+                    setTimeout(() => showMotivationMessages(), 1500);
+                    showNotification('✅ Conectado');
                 } catch (error) {
                     console.error('Error auto-init:', error);
                     isOnline = false;
                     checkBadges();
                     render();
-                    
-                    // Mostrar motivaciones incluso sin Supabase
-                    setTimeout(() => {
-                        showMotivationMessages();
-                    }, 1500);
+                    setTimeout(() => showMotivationMessages(), 1500);
                 }
             } else {
                 checkBadges();
                 render();
-                
-                // Mostrar motivaciones
-                setTimeout(() => {
-                    showMotivationMessages();
-                }, 1500);
+                setTimeout(() => showMotivationMessages(), 1500);
             }
         }
 
-        // Cargar datos sin autenticación
         async function loadDataFromSupabasePublic() {
             if (!supabaseClient) return;
             
             try {
-                const { data: expenses, error: expError } = await supabaseClient
-                    .from('expenses')
-                    .select('*')
-                    .order('date', { ascending: false });
+                const { data: expenses } = await supabaseClient.from('expenses').select('*').order('date', { ascending: false });
+                if (expenses) state.expenses = expenses;
                 
-                if (!expError && expenses) state.expenses = expenses;
-                
-                const { data: withdrawals, error: withError } = await supabaseClient
-                    .from('savings_withdrawals')
-                    .select('*')
-                    .order('date', { ascending: false });
-                
-                if (!withError && withdrawals) state.savingsWithdrawals = withdrawals;
+                const { data: withdrawals } = await supabaseClient.from('savings_withdrawals').select('*').order('date', { ascending: false });
+                if (withdrawals) state.savingsWithdrawals = withdrawals;
 
-                const { data: deposits, error: depError } = await supabaseClient
-                    .from('savings_deposits')
-                    .select('*')
-                    .order('date', { ascending: false });
+                const { data: deposits } = await supabaseClient.from('savings_deposits').select('*').order('date', { ascending: false });
+                if (deposits) state.savingsDeposits = deposits;
                 
-                if (!depError && deposits) state.savingsDeposits = deposits;
-                
-                const { data: debtors, error: debtError } = await supabaseClient
-                    .from('debtors')
-                    .select('*')
-                    .order('date', { ascending: false });
-                
-                if (!debtError && debtors) state.debtors = debtors;
+                const { data: debtors } = await supabaseClient.from('debtors').select('*').order('date', { ascending: false });
+                if (debtors) state.debtors = debtors;
 
-                const { data: loans, error: loansError } = await supabaseClient
-                    .from('loans')
-                    .select('*')
-                    .order('date', { ascending: false });
-                
-                if (!loansError && loans) {
+                const { data: loans } = await supabaseClient.from('loans').select('*').order('date', { ascending: false });
+                if (loans) {
                     state.loans = loans.map(l => ({
-                        id: l.id,
-                        name: l.name,
-                        totalAmount: l.total_amount,
-                        pendingAmount: l.pending_amount,
-                        paidAmount: l.paid_amount,
-                        totalMonths: l.total_months,
-                        remainingMonths: l.remaining_months,
-                        monthlyPayment: l.monthly_payment,
-                        startDate: l.start_date || l.date?.slice(0, 7),
-                        date: l.date
+                        id: l.id, name: l.name, totalAmount: l.total_amount, pendingAmount: l.pending_amount,
+                        paidAmount: l.paid_amount, totalMonths: l.total_months, remainingMonths: l.remaining_months,
+                        monthlyPayment: l.monthly_payment, startDate: l.start_date || l.date?.slice(0, 7), date: l.date
                     }));
                 }
                 
-                const { data: config, error: configError } = await supabaseClient
-                    .from('user_config')
-                    .select('*')
-                    .limit(1)
-                    .single();
-                
-                if (!configError && config) {
+                const { data: config } = await supabaseClient.from('user_config').select('*').limit(1).single();
+                if (config) {
                     state.monthlyIncome = config.monthly_income || '';
                     state.creditCardIncome = config.credit_card_income || '';
                     state.projectionMonths = config.projection_months || '';
@@ -2583,7 +2147,6 @@
             }
         }
 
-        // Inicializar
         autoInit();
     </script>
 
