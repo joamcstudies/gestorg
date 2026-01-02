@@ -1901,19 +1901,31 @@
                         <button onclick="handleLogout()" class="action-btn bg-red-500 hover:bg-red-600 text-white" title="Cerrar sesión">🚪</button>
                     </div>
                     
-                    <!-- Contenido principal -->
+                    <!-- Contenido principal - Móvil: apilado, Escritorio: en línea -->
                     <div class="pr-24 sm:pr-56">
-                        <h1 class="text-lg md:text-2xl font-bold text-gray-800">💰 Organizador de Gastos</h1>
-                        <div class="connection-status ${isOnline ? 'online' : 'offline'} w-fit mt-1">
-                            <span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>
-                            ${isOnline ? 'Sincronizado' : 'Local'}
-                        </div>
-                        ${authState.user ? `
-                            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg w-fit mt-2">
-                                <span class="text-xs text-gray-500">👤</span>
-                                <span class="text-xs text-gray-600 font-medium truncate max-w-[150px]">${authState.user.email}</span>
+                        <!-- Móvil: apilado -->
+                        <div class="sm:hidden">
+                            <h1 class="text-lg font-bold text-gray-800">💰 Organizador de Gastos</h1>
+                            <div class="connection-status ${isOnline ? 'online' : 'offline'} w-fit mt-1">
+                                <span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>
+                                ${isOnline ? 'Sincronizado' : 'Local'}
                             </div>
-                        ` : ''}
+                        </div>
+                        
+                        <!-- Escritorio: en línea -->
+                        <div class="hidden sm:flex sm:items-center sm:gap-3">
+                            <h1 class="text-2xl font-bold text-gray-800">💰 Organizador de Gastos</h1>
+                            <div class="connection-status ${isOnline ? 'online' : 'offline'}">
+                                <span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>
+                                ${isOnline ? 'Sincronizado' : 'Local'}
+                            </div>
+                            ${authState.user ? `
+                                <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg">
+                                    <span class="text-xs text-gray-500">👤</span>
+                                    <span class="text-xs text-gray-600 font-medium truncate max-w-[150px]">${authState.user.email}</span>
+                                </div>
+                            ` : ''}
+                        </div>
                     </div>
                     
                     <!-- Fila 2: Filtros + Badges -->
