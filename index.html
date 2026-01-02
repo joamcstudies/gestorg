@@ -503,40 +503,18 @@
         
         /* Action buttons */
         .action-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             flex-shrink: 0;
         }
         .action-btn:hover {
             transform: translateY(-2px);
-        }
-        
-        /* Botones en móvil - 2 en 2 */
-        .action-btn-mobile {
-            width: calc(50% - 4px);
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-        .action-btn-mobile:hover {
-            transform: translateY(-2px);
-        }
-        
-        @media (min-width: 640px) {
-            .action-btn-mobile {
-                width: 40px;
-            }
         }
         
         /* Inputs mejorados */
@@ -1910,33 +1888,35 @@
             app.innerHTML = `
                 <!-- Header Compacto -->
                 <div class="header-card rounded-2xl shadow-sm p-4 mb-4 animate-slide-in">
-                    <!-- Fila 1: Título + Estado -->
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2 min-w-0 flex-1">
-                            <h1 class="text-lg md:text-2xl font-bold text-gray-800 truncate">💰 Organizador de Gastos</h1>
-                            <div class="connection-status ${isOnline ? 'online' : 'offline'} flex-shrink-0">
+                    <!-- Fila 1: Título + Botones -->
+                    <div class="flex items-start justify-between mb-3 gap-3">
+                        <div class="flex flex-col gap-1 min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <h1 class="text-lg md:text-2xl font-bold text-gray-800 truncate">💰 Organizador de Gastos</h1>
+                            </div>
+                            <div class="connection-status ${isOnline ? 'online' : 'offline'} w-fit">
                                 <span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>
-                                <span class="hidden sm:inline">${isOnline ? 'Sync' : 'Local'}</span>
+                                ${isOnline ? 'Sincronizado' : 'Local'}
                             </div>
+                            ${authState.user ? `
+                                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg w-fit mt-1">
+                                    <span class="text-xs text-gray-500">👤</span>
+                                    <span class="text-xs text-gray-600 font-medium truncate max-w-[150px]">${authState.user.email}</span>
+                                </div>
+                            ` : ''}
                         </div>
-                        ${authState.user ? `
-                            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg flex-shrink-0">
-                                <span class="text-xs text-gray-500">👤</span>
-                                <span class="text-xs text-gray-600 font-medium truncate max-w-[150px]">${authState.user.email}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                    
-                    <!-- Fila 2: Botones - 2 en 2 en móvil, todos en fila en escritorio -->
-                    <div class="flex flex-wrap gap-2 mb-4 sm:flex-nowrap">
-                        <button onclick="toggleDarkMode()" class="action-btn-mobile sm:action-btn bg-gray-100 hover:bg-gray-200">${state.darkMode ? '☀️' : '🌙'}</button>
-                        <button onclick="saveData()" class="action-btn-mobile sm:action-btn bg-emerald-500 hover:bg-emerald-600 text-white">💾</button>
-                        <button onclick="exportData()" class="action-btn-mobile sm:action-btn bg-blue-500 hover:bg-blue-600 text-white">📥</button>
-                        <label class="action-btn-mobile sm:action-btn bg-violet-500 hover:bg-violet-600 text-white cursor-pointer">
-                            📤
-                            <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
-                        </label>
-                        <button onclick="handleLogout()" class="action-btn-mobile sm:action-btn bg-red-500 hover:bg-red-600 text-white" title="Cerrar sesión">🚪</button>
+                        
+                        <!-- Botones: grid 2x3 en móvil, fila en escritorio -->
+                        <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-row flex-shrink-0">
+                            <button onclick="toggleDarkMode()" class="action-btn bg-gray-100 hover:bg-gray-200">${state.darkMode ? '☀️' : '🌙'}</button>
+                            <button onclick="saveData()" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white">💾</button>
+                            <button onclick="exportData()" class="action-btn bg-blue-500 hover:bg-blue-600 text-white">📥</button>
+                            <label class="action-btn bg-violet-500 hover:bg-violet-600 text-white cursor-pointer">
+                                📤
+                                <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
+                            </label>
+                            <button onclick="handleLogout()" class="action-btn bg-red-500 hover:bg-red-600 text-white" title="Cerrar sesión">🚪</button>
+                        </div>
                     </div>
                     
                     <!-- Fila 2: Filtros + Badges -->
