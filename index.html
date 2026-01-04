@@ -775,35 +775,64 @@
         }
 
         async function saveToSupabase(table, data) {
-            if (!supabaseClient) {
+            if (!supabaseClient || !state.userId) {
                 syncQueue.push({ table, data, action: 'upsert' });
                 saveDataLocal();
-                return;
+                return false;
             }
             
             try {
-                const { error } = await supabaseClient.from(table).upsert(data);
+                const { error } = await supabaseClient.from(table).upsert(data, {
+                    onConflict: table === 'user_config' ? 'user_id' : 'id'
+                });
                 if (error) throw error;
+                return true;
             } catch (error) {
                 console.error('Error guardando en Supabase:', error);
                 syncQueue.push({ table, data, action: 'upsert' });
+                return false;
             }
         }
 
         async function deleteFromSupabase(table, id) {
-            if (!supabaseClient) {
+            if (!supabaseClient || !state.userId) {
                 syncQueue.push({ table, id, action: 'delete' });
                 saveDataLocal();
-                return;
+                return false;
             }
             
             try {
                 const { error } = await supabaseClient.from(table).delete().eq('id', id);
                 if (error) throw error;
+                return true;
             } catch (error) {
                 console.error('Error eliminando de Supabase:', error);
                 syncQueue.push({ table, id, action: 'delete' });
+                return false;
             }
+        }
+        
+        // Función para sincronizar cola pendiente
+        async function syncPendingQueue() {
+            if (!supabaseClient || !state.userId || syncQueue.length === 0) return;
+            
+            const queue = [...syncQueue];
+            syncQueue = [];
+            
+            for (const item of queue) {
+                try {
+                    if (item.action === 'upsert') {
+                        await supabaseClient.from(item.table).upsert(item.data);
+                    } else if (item.action === 'delete') {
+                        await supabaseClient.from(item.table).delete().eq('id', item.id);
+                    }
+                } catch (error) {
+                    console.error('Error sincronizando:', error);
+                    syncQueue.push(item);
+                }
+            }
+            
+            saveDataLocal();
         }
 
         // ========== FUNCIONES DE UI ==========
@@ -1206,11 +1235,11 @@
             localStorage.setItem('expenseTrackerData', JSON.stringify(dataToSave));
         }
 
-        function saveData() {
+        async function saveData() {
             saveDataLocal();
             
             if (supabaseClient && state.userId) {
-                saveToSupabase('user_config', {
+                await saveToSupabase('user_config', {
                     user_id: state.userId,
                     monthly_income: parseFloat(state.monthlyIncome) || 0,
                     credit_card_income: parseFloat(state.creditCardIncome) || 0,
@@ -1219,6 +1248,9 @@
                     dark_mode: state.darkMode,
                     badges: state.badges
                 });
+                
+                // Sincronizar cola pendiente
+                await syncPendingQueue();
             }
             
             showNotification('✅ Datos guardados correctamente');
@@ -1312,7 +1344,7 @@
         }
 
         // ========== FUNCIONES DE GASTOS ==========
-        function addExpense() {
+        async function addExpense() {
             if (!state.description || !state.amount || parseFloat(state.amount) <= 0) {
                 showNotification('❌ Completa todos los campos correctamente', true);
                 return;
@@ -1330,7 +1362,8 @@
                         date: state.date
                     };
                     state.expenses[index] = updatedExpense;
-                    saveToSupabase('expenses', updatedExpense);
+                    saveDataLocal();
+                    await saveToSupabase('expenses', updatedExpense);
                     showNotification('✅ Gasto actualizado');
                 }
                 state.editingExpenseId = null;
@@ -1344,7 +1377,8 @@
                     date: state.date
                 };
                 state.expenses.unshift(newExpense);
-                saveToSupabase('expenses', newExpense);
+                saveDataLocal();
+                await saveToSupabase('expenses', newExpense);
                 showNotification('✅ Gasto añadido');
             }
 
@@ -1381,11 +1415,11 @@
             render();
         }
 
-        function deleteExpense(id) {
+        async function deleteExpense(id) {
             state.expenses = state.expenses.filter(exp => exp.id !== id);
-            deleteFromSupabase('expenses', id);
-            checkBadges();
             saveDataLocal();
+            await deleteFromSupabase('expenses', id);
+            checkBadges();
             render();
             showNotification('🗑️ Gasto eliminado');
         }
@@ -1439,7 +1473,7 @@
         }
 
         // ========== FUNCIONES DE RETIROS ==========
-        function addWithdrawal() {
+        async function addWithdrawal() {
             if (!state.withdrawalDescription || !state.withdrawalAmount || parseFloat(state.withdrawalAmount) <= 0) {
                 showNotification('❌ Completa todos los campos correctamente', true);
                 return;
@@ -1463,25 +1497,25 @@
             };
 
             state.savingsWithdrawals.unshift(newWithdrawal);
-            saveToSupabase('savings_withdrawals', newWithdrawal);
+            saveDataLocal();
+            await saveToSupabase('savings_withdrawals', newWithdrawal);
             state.withdrawalDescription = '';
             state.withdrawalAmount = '';
             
-            saveDataLocal();
             render();
             showNotification('✅ Retiro registrado');
         }
 
-        function deleteWithdrawal(id) {
+        async function deleteWithdrawal(id) {
             state.savingsWithdrawals = state.savingsWithdrawals.filter(w => w.id !== id);
-            deleteFromSupabase('savings_withdrawals', id);
             saveDataLocal();
+            await deleteFromSupabase('savings_withdrawals', id);
             render();
             showNotification('🗑️ Retiro eliminado');
         }
 
         // ========== FUNCIONES DE DEPÓSITOS DE AHORRO ==========
-        function addDeposit() {
+        async function addDeposit() {
             if (!state.depositDescription || !state.depositAmount || parseFloat(state.depositAmount) <= 0) {
                 showNotification('❌ Completa todos los campos correctamente', true);
                 return;
@@ -1496,20 +1530,20 @@
             };
 
             state.savingsDeposits.unshift(newDeposit);
-            saveToSupabase('savings_deposits', newDeposit);
+            saveDataLocal();
+            await saveToSupabase('savings_deposits', newDeposit);
             state.depositDescription = '';
             state.depositAmount = '';
             
             checkBadges();
-            saveDataLocal();
             render();
             showNotification('✅ Ingreso registrado');
         }
 
-        function deleteDeposit(id) {
+        async function deleteDeposit(id) {
             state.savingsDeposits = state.savingsDeposits.filter(d => d.id !== id);
-            deleteFromSupabase('savings_deposits', id);
             saveDataLocal();
+            await deleteFromSupabase('savings_deposits', id);
             render();
             showNotification('🗑️ Ingreso eliminado');
         }
@@ -1519,7 +1553,7 @@
             return state.debtors.reduce((sum, debtor) => sum + debtor.amount, 0);
         }
 
-        function addDebtor() {
+        async function addDebtor() {
             if (!state.debtorName || !state.debtorAmount || parseFloat(state.debtorAmount) <= 0) {
                 showNotification('❌ Completa todos los campos correctamente', true);
                 return;
@@ -1534,19 +1568,19 @@
             };
 
             state.debtors.unshift(newDebtor);
-            saveToSupabase('debtors', newDebtor);
+            saveDataLocal();
+            await saveToSupabase('debtors', newDebtor);
             state.debtorName = '';
             state.debtorAmount = '';
             
-            saveDataLocal();
             render();
             showNotification('✅ Deudor añadido');
         }
 
-        function deleteDebtor(id) {
+        async function deleteDebtor(id) {
             state.debtors = state.debtors.filter(d => d.id !== id);
-            deleteFromSupabase('debtors', id);
             saveDataLocal();
+            await deleteFromSupabase('debtors', id);
             render();
             showNotification('🗑️ Deudor eliminado');
         }
@@ -1576,7 +1610,7 @@
             return loan.startDate <= currentMonth;
         }
 
-        function addLoan() {
+        async function addLoan() {
             if (!state.loanName || !state.loanAmount || !state.loanMonths || 
                 parseFloat(state.loanAmount) <= 0 || parseInt(state.loanMonths) <= 0) {
                 showNotification('❌ Completa todos los campos correctamente', true);
@@ -1606,8 +1640,9 @@
             };
 
             state.loans.unshift(newLoan);
+            saveDataLocal();
             
-            saveToSupabase('loans', {
+            await saveToSupabase('loans', {
                 id: newLoan.id,
                 user_id: state.userId,
                 name: newLoan.name,
@@ -1627,13 +1662,12 @@
             state.loanPaid = '';
             state.loanStartDate = '';
             
-            saveDataLocal();
             render();
             
             showNotification(isLoanActive(newLoan) ? '✅ Préstamo añadido' : `✅ Préstamo programado para ${newLoan.startDate}`);
         }
 
-        function payLoan(id, amount) {
+        async function payLoan(id, amount) {
             const loan = state.loans.find(l => l.id === id);
             if (!loan) return;
 
@@ -1661,7 +1695,8 @@
                 showNotification('✅ Pago registrado');
             }
 
-            saveToSupabase('loans', {
+            saveDataLocal();
+            await saveToSupabase('loans', {
                 id: loan.id, user_id: state.userId, name: loan.name, total_amount: loan.totalAmount,
                 pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
                 total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
@@ -1672,15 +1707,15 @@
             render();
         }
 
-        function deleteLoan(id) {
+        async function deleteLoan(id) {
             state.loans = state.loans.filter(l => l.id !== id);
-            deleteFromSupabase('loans', id);
             saveDataLocal();
+            await deleteFromSupabase('loans', id);
             render();
             showNotification('🗑️ Préstamo eliminado');
         }
 
-        function amortizeLoan(id) {
+        async function amortizeLoan(id) {
             const input = document.getElementById(`amortize-${id}`);
             const amount = parseFloat(input?.value) || 0;
             
@@ -1708,18 +1743,18 @@
                 showNotification(`✅ Amortización de ${formatEuro(amount)} realizada`);
             }
             
-            saveToSupabase('loans', {
+            saveDataLocal();
+            await saveToSupabase('loans', {
                 id: loan.id, user_id: state.userId, name: loan.name, total_amount: loan.totalAmount,
                 pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
                 total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
                 monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
             });
             
-            saveDataLocal();
             render();
         }
 
-        function amortizeLoanFull(id) {
+        async function amortizeLoanFull(id) {
             const loan = state.loans.find(l => l.id === id);
             if (!loan) return;
             
@@ -1730,14 +1765,14 @@
             loan.remainingMonths = 0;
             loan.monthlyPayment = 0;
             
-            saveToSupabase('loans', {
+            saveDataLocal();
+            await saveToSupabase('loans', {
                 id: loan.id, user_id: state.userId, name: loan.name, total_amount: loan.totalAmount,
                 pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
                 total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
                 monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
             });
             
-            saveDataLocal();
             render();
             showNotification('🎉 ¡Préstamo liquidado completamente!');
         }
@@ -2306,14 +2341,42 @@
             `;
 
             // Event listeners
+            // Debounce para guardado automático
+            let saveTimeout = null;
+            function debouncedSave() {
+                if (saveTimeout) clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveDataLocal();
+                    if (supabaseClient && state.userId) {
+                        saveToSupabase('user_config', {
+                            user_id: state.userId,
+                            monthly_income: parseFloat(state.monthlyIncome) || 0,
+                            credit_card_income: parseFloat(state.creditCardIncome) || 0,
+                            projection_months: parseInt(state.projectionMonths) || 0,
+                            monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0,
+                            dark_mode: state.darkMode,
+                            badges: state.badges
+                        });
+                    }
+                }, 1000);
+            }
+            
             ['monthlyIncome', 'creditCardIncome'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; updateTotalsOnly(); });
+                if (el) el.addEventListener('input', (e) => { 
+                    state[id] = e.target.value; 
+                    updateTotalsOnly(); 
+                    debouncedSave();
+                });
             });
 
             ['projectionMonths', 'monthlySavingsPlan'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; render(); });
+                if (el) el.addEventListener('input', (e) => { 
+                    state[id] = e.target.value; 
+                    render(); 
+                    debouncedSave();
+                });
             });
 
             ['description', 'amount', 'withdrawalDescription', 'withdrawalAmount', 'depositDescription', 'depositAmount', 'debtorName', 'debtorAmount', 'loanName', 'loanAmount', 'loanMonths', 'loanPaid', 'loanStartDate'].forEach(id => {
@@ -2542,13 +2605,36 @@
             if (!supabaseClient || !state.userId) return;
             
             try {
+                // Guardar datos locales antes de cargar de Supabase
+                const localExpenses = [...state.expenses];
+                const localWithdrawals = [...state.savingsWithdrawals];
+                const localDeposits = [...state.savingsDeposits];
+                const localDebtors = [...state.debtors];
+                const localLoans = [...state.loans];
+                
                 // Cargar gastos del usuario
                 const { data: expenses } = await supabaseClient
                     .from('expenses')
                     .select('*')
                     .eq('user_id', state.userId)
                     .order('date', { ascending: false });
-                if (expenses) state.expenses = expenses;
+                
+                // Merge: combinar datos de Supabase con datos locales que no estén en Supabase
+                if (expenses && expenses.length > 0) {
+                    const supabaseIds = new Set(expenses.map(e => e.id));
+                    const localOnly = localExpenses.filter(e => !supabaseIds.has(e.id) && e.user_id === state.userId);
+                    state.expenses = [...expenses, ...localOnly];
+                    // Subir los locales que faltan a Supabase
+                    for (const exp of localOnly) {
+                        await saveToSupabase('expenses', exp);
+                    }
+                } else if (localExpenses.length > 0) {
+                    // Si Supabase está vacío pero hay datos locales, subirlos
+                    state.expenses = localExpenses.filter(e => e.user_id === state.userId);
+                    for (const exp of state.expenses) {
+                        await saveToSupabase('expenses', exp);
+                    }
+                }
                 
                 // Cargar retiros del usuario
                 const { data: withdrawals } = await supabaseClient
@@ -2556,7 +2642,19 @@
                     .select('*')
                     .eq('user_id', state.userId)
                     .order('date', { ascending: false });
-                if (withdrawals) state.savingsWithdrawals = withdrawals;
+                if (withdrawals && withdrawals.length > 0) {
+                    const supabaseIds = new Set(withdrawals.map(w => w.id));
+                    const localOnly = localWithdrawals.filter(w => !supabaseIds.has(w.id) && w.user_id === state.userId);
+                    state.savingsWithdrawals = [...withdrawals, ...localOnly];
+                    for (const item of localOnly) {
+                        await saveToSupabase('savings_withdrawals', item);
+                    }
+                } else if (localWithdrawals.length > 0) {
+                    state.savingsWithdrawals = localWithdrawals.filter(w => w.user_id === state.userId);
+                    for (const item of state.savingsWithdrawals) {
+                        await saveToSupabase('savings_withdrawals', item);
+                    }
+                }
 
                 // Cargar depósitos del usuario
                 const { data: deposits } = await supabaseClient
@@ -2564,7 +2662,19 @@
                     .select('*')
                     .eq('user_id', state.userId)
                     .order('date', { ascending: false });
-                if (deposits) state.savingsDeposits = deposits;
+                if (deposits && deposits.length > 0) {
+                    const supabaseIds = new Set(deposits.map(d => d.id));
+                    const localOnly = localDeposits.filter(d => !supabaseIds.has(d.id) && d.user_id === state.userId);
+                    state.savingsDeposits = [...deposits, ...localOnly];
+                    for (const item of localOnly) {
+                        await saveToSupabase('savings_deposits', item);
+                    }
+                } else if (localDeposits.length > 0) {
+                    state.savingsDeposits = localDeposits.filter(d => d.user_id === state.userId);
+                    for (const item of state.savingsDeposits) {
+                        await saveToSupabase('savings_deposits', item);
+                    }
+                }
                 
                 // Cargar deudores del usuario
                 const { data: debtors } = await supabaseClient
@@ -2572,7 +2682,19 @@
                     .select('*')
                     .eq('user_id', state.userId)
                     .order('date', { ascending: false });
-                if (debtors) state.debtors = debtors;
+                if (debtors && debtors.length > 0) {
+                    const supabaseIds = new Set(debtors.map(d => d.id));
+                    const localOnly = localDebtors.filter(d => !supabaseIds.has(d.id) && d.user_id === state.userId);
+                    state.debtors = [...debtors, ...localOnly];
+                    for (const item of localOnly) {
+                        await saveToSupabase('debtors', item);
+                    }
+                } else if (localDebtors.length > 0) {
+                    state.debtors = localDebtors.filter(d => d.user_id === state.userId);
+                    for (const item of state.debtors) {
+                        await saveToSupabase('debtors', item);
+                    }
+                }
 
                 // Cargar préstamos del usuario
                 const { data: loans } = await supabaseClient
@@ -2580,12 +2702,33 @@
                     .select('*')
                     .eq('user_id', state.userId)
                     .order('date', { ascending: false });
-                if (loans) {
-                    state.loans = loans.map(l => ({
-                        id: l.id, name: l.name, totalAmount: l.total_amount, pendingAmount: l.pending_amount,
+                if (loans && loans.length > 0) {
+                    const mappedLoans = loans.map(l => ({
+                        id: l.id, user_id: l.user_id, name: l.name, totalAmount: l.total_amount, pendingAmount: l.pending_amount,
                         paidAmount: l.paid_amount, totalMonths: l.total_months, remainingMonths: l.remaining_months,
                         monthlyPayment: l.monthly_payment, startDate: l.start_date || l.date?.slice(0, 7), date: l.date
                     }));
+                    const supabaseIds = new Set(mappedLoans.map(l => l.id));
+                    const localOnly = localLoans.filter(l => !supabaseIds.has(l.id) && l.user_id === state.userId);
+                    state.loans = [...mappedLoans, ...localOnly];
+                    for (const loan of localOnly) {
+                        await saveToSupabase('loans', {
+                            id: loan.id, user_id: loan.user_id, name: loan.name, total_amount: loan.totalAmount,
+                            pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
+                            total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
+                            monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
+                        });
+                    }
+                } else if (localLoans.length > 0) {
+                    state.loans = localLoans.filter(l => l.user_id === state.userId);
+                    for (const loan of state.loans) {
+                        await saveToSupabase('loans', {
+                            id: loan.id, user_id: loan.user_id, name: loan.name, total_amount: loan.totalAmount,
+                            pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
+                            total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
+                            monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
+                        });
+                    }
                 }
                 
                 // Cargar configuración del usuario
@@ -2595,15 +2738,16 @@
                     .eq('user_id', state.userId)
                     .single();
                 if (config) {
-                    state.monthlyIncome = config.monthly_income || '';
-                    state.creditCardIncome = config.credit_card_income || '';
-                    state.projectionMonths = config.projection_months || '';
-                    state.monthlySavingsPlan = config.monthly_savings_plan || '';
+                    state.monthlyIncome = config.monthly_income || state.monthlyIncome || '';
+                    state.creditCardIncome = config.credit_card_income || state.creditCardIncome || '';
+                    state.projectionMonths = config.projection_months || state.projectionMonths || '';
+                    state.monthlySavingsPlan = config.monthly_savings_plan || state.monthlySavingsPlan || '';
                     state.darkMode = config.dark_mode || false;
-                    state.badges = config.badges || [];
+                    state.badges = config.badges || state.badges || [];
                 }
                 
                 state.lastSync = new Date().toISOString();
+                saveDataLocal();
                 checkBadges();
             } catch (error) {
                 console.error('Error cargando datos:', error);
