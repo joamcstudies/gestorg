@@ -6,6 +6,8 @@
     <title>Organizador de Gastos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
@@ -1257,10 +1259,350 @@
         }
 
         function exportData() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 15;
+            let y = 20;
+            
+            // Colores
+            const primaryColor = [59, 130, 246]; // Azul
+            const successColor = [16, 185, 129]; // Verde
+            const dangerColor = [239, 68, 68]; // Rojo
+            const grayColor = [107, 114, 128];
+            
+            // Función auxiliar para agregar nueva página si es necesario
+            function checkNewPage(neededHeight = 30) {
+                if (y + neededHeight > doc.internal.pageSize.getHeight() - 20) {
+                    doc.addPage();
+                    y = 20;
+                    return true;
+                }
+                return false;
+            }
+            
+            // Función para formatear fecha
+            function formatDatePDF(dateStr) {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            }
+            
+            // ========== ENCABEZADO ==========
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, pageWidth, 40, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(24);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Organizador de Gastos', pageWidth / 2, 18, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Reporte generado el ${formatDatePDF(new Date().toISOString())}`, pageWidth / 2, 30, { align: 'center' });
+            
+            y = 55;
+            
+            // ========== RESUMEN FINANCIERO ==========
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Resumen Financiero', margin, y);
+            y += 10;
+            
+            const totalIncome = getTotalIncome();
+            const totalExpenses = getTotalMonth();
+            const monthlyLoanPayments = getTotalMonthlyLoanPayments();
+            const balance = totalIncome - totalExpenses - monthlyLoanPayments;
+            const netSavings = getNetSavings();
+            const totalOwed = getTotalOwed();
+            const totalLoans = getTotalLoans();
+            const typeTotals = getTotalByType();
+            
+            // Tabla de resumen
+            doc.autoTable({
+                startY: y,
+                head: [['Concepto', 'Importe']],
+                body: [
+                    ['Ingresos del mes', formatEuro(parseFloat(state.monthlyIncome) || 0)],
+                    ['Donaciones', formatEuro(parseFloat(state.creditCardIncome) || 0)],
+                    ['Total Ingresos', formatEuro(totalIncome)],
+                    ['Total Gastos', formatEuro(totalExpenses)],
+                    ['Cuotas Prestamos', formatEuro(monthlyLoanPayments)],
+                    ['Saldo Disponible', formatEuro(balance)],
+                    ['Ahorro Neto', formatEuro(netSavings)],
+                    ['Me Deben', formatEuro(totalOwed)],
+                    ['Deuda Prestamos', formatEuro(totalLoans)]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: primaryColor, textColor: 255 },
+                columnStyles: {
+                    0: { cellWidth: 80 },
+                    1: { cellWidth: 60, halign: 'right' }
+                },
+                margin: { left: margin, right: margin }
+            });
+            
+            y = doc.lastAutoTable.finalY + 15;
+            
+            // ========== GASTOS POR TIPO ==========
+            checkNewPage(50);
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Gastos por Tipo', margin, y);
+            y += 10;
+            
+            doc.autoTable({
+                startY: y,
+                head: [['Tipo', 'Importe']],
+                body: [
+                    ['Esenciales', formatEuro(typeTotals.esencial)],
+                    ['Salidas/Ocio', formatEuro(typeTotals.salida)],
+                    ['Ahorro', formatEuro(typeTotals.ahorro)],
+                    ['Bizum', formatEuro(typeTotals.bizum)],
+                    ['Suscripciones', formatEuro(typeTotals.suscripcion)],
+                    ['Otros', formatEuro(typeTotals.otros)]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: successColor, textColor: 255 },
+                columnStyles: {
+                    0: { cellWidth: 80 },
+                    1: { cellWidth: 60, halign: 'right' }
+                },
+                margin: { left: margin, right: margin }
+            });
+            
+            y = doc.lastAutoTable.finalY + 15;
+            
+            // ========== GASTOS POR CATEGORÍA ==========
+            const categoryTotals = getTotalByCategory();
+            const categoryData = Object.entries(categoryTotals)
+                .filter(([_, amount]) => amount > 0)
+                .sort((a, b) => b[1] - a[1]);
+            
+            if (categoryData.length > 0) {
+                checkNewPage(50);
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Gastos por Categoria', margin, y);
+                y += 10;
+                
+                doc.autoTable({
+                    startY: y,
+                    head: [['Categoria', 'Importe', '% del Total']],
+                    body: categoryData.map(([cat, amount]) => [
+                        cat,
+                        formatEuro(amount),
+                        totalExpenses > 0 ? ((amount / totalExpenses) * 100).toFixed(1) + '%' : '0%'
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: [139, 92, 246], textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 70 },
+                        1: { cellWidth: 50, halign: 'right' },
+                        2: { cellWidth: 40, halign: 'right' }
+                    },
+                    margin: { left: margin, right: margin }
+                });
+                
+                y = doc.lastAutoTable.finalY + 15;
+            }
+            
+            // ========== LISTADO DE GASTOS ==========
+            const filteredExpenses = getFilteredExpenses();
+            if (filteredExpenses.length > 0) {
+                checkNewPage(50);
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Detalle de Gastos (${filteredExpenses.length})`, margin, y);
+                y += 10;
+                
+                doc.autoTable({
+                    startY: y,
+                    head: [['Fecha', 'Descripcion', 'Categoria', 'Importe']],
+                    body: filteredExpenses.map(exp => [
+                        formatDatePDF(exp.date),
+                        exp.description.substring(0, 30) + (exp.description.length > 30 ? '...' : ''),
+                        exp.category.split(' ')[1] || exp.category,
+                        formatEuro(exp.amount)
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: primaryColor, textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 25 },
+                        1: { cellWidth: 60 },
+                        2: { cellWidth: 40 },
+                        3: { cellWidth: 35, halign: 'right' }
+                    },
+                    margin: { left: margin, right: margin },
+                    styles: { fontSize: 9 }
+                });
+                
+                y = doc.lastAutoTable.finalY + 15;
+            }
+            
+            // ========== AHORROS ==========
+            if (state.savingsDeposits.length > 0 || state.savingsWithdrawals.length > 0) {
+                checkNewPage(50);
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Movimientos de Ahorro', margin, y);
+                y += 10;
+                
+                const savingsData = [
+                    ...state.savingsDeposits.map(d => ({ ...d, type: 'Ingreso', color: '+' })),
+                    ...state.savingsWithdrawals.map(w => ({ ...w, type: 'Retiro', color: '-' }))
+                ].sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                doc.autoTable({
+                    startY: y,
+                    head: [['Fecha', 'Tipo', 'Descripcion', 'Importe']],
+                    body: savingsData.map(item => [
+                        formatDatePDF(item.date),
+                        item.type,
+                        item.description,
+                        (item.color === '+' ? '+' : '-') + formatEuro(item.amount)
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: successColor, textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 25 },
+                        1: { cellWidth: 25 },
+                        2: { cellWidth: 70 },
+                        3: { cellWidth: 35, halign: 'right' }
+                    },
+                    margin: { left: margin, right: margin },
+                    styles: { fontSize: 9 }
+                });
+                
+                y = doc.lastAutoTable.finalY + 15;
+            }
+            
+            // ========== DEUDORES ==========
+            if (state.debtors.length > 0) {
+                checkNewPage(50);
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Me Deben', margin, y);
+                y += 10;
+                
+                doc.autoTable({
+                    startY: y,
+                    head: [['Fecha', 'Nombre', 'Importe']],
+                    body: state.debtors.map(d => [
+                        formatDatePDF(d.date),
+                        d.name,
+                        formatEuro(d.amount)
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: [99, 102, 241], textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 30 },
+                        1: { cellWidth: 80 },
+                        2: { cellWidth: 40, halign: 'right' }
+                    },
+                    margin: { left: margin, right: margin },
+                    foot: [['', 'Total', formatEuro(totalOwed)]],
+                    footStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' }
+                });
+                
+                y = doc.lastAutoTable.finalY + 15;
+            }
+            
+            // ========== PRÉSTAMOS ==========
+            if (state.loans.length > 0) {
+                checkNewPage(50);
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Prestamos', margin, y);
+                y += 10;
+                
+                doc.autoTable({
+                    startY: y,
+                    head: [['Nombre', 'Total', 'Pagado', 'Pendiente', 'Cuota', 'Meses']],
+                    body: state.loans.map(l => [
+                        l.name,
+                        formatEuro(l.totalAmount),
+                        formatEuro(l.paidAmount),
+                        formatEuro(l.pendingAmount),
+                        formatEuro(l.monthlyPayment),
+                        l.remainingMonths.toString()
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: [249, 115, 22], textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 40 },
+                        1: { cellWidth: 28, halign: 'right' },
+                        2: { cellWidth: 28, halign: 'right' },
+                        3: { cellWidth: 28, halign: 'right' },
+                        4: { cellWidth: 28, halign: 'right' },
+                        5: { cellWidth: 18, halign: 'center' }
+                    },
+                    margin: { left: margin, right: margin },
+                    styles: { fontSize: 9 }
+                });
+                
+                y = doc.lastAutoTable.finalY + 15;
+            }
+            
+            // ========== PROYECCIONES ==========
+            if (state.projectionMonths && state.monthlySavingsPlan) {
+                checkNewPage(50);
+                const projections = calculateProjections();
+                
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Proyecciones de Ahorro', margin, y);
+                y += 10;
+                
+                doc.autoTable({
+                    startY: y,
+                    head: [['Concepto', 'Valor']],
+                    body: [
+                        ['Meses proyectados', state.projectionMonths],
+                        ['Ahorro mensual planificado', formatEuro(parseFloat(state.monthlySavingsPlan))],
+                        ['Proyeccion desde cero', formatEuro(projections.fromZero)],
+                        ['Proyeccion con ahorro actual', formatEuro(projections.withCurrent)],
+                        ['Proyeccion si me pagan deudas', formatEuro(projections.withOwed)]
+                    ],
+                    theme: 'striped',
+                    headStyles: { fillColor: [34, 197, 94], textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 90 },
+                        1: { cellWidth: 50, halign: 'right' }
+                    },
+                    margin: { left: margin, right: margin }
+                });
+            }
+            
+            // ========== PIE DE PÁGINA EN TODAS LAS PÁGINAS ==========
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(...grayColor);
+                doc.text(
+                    `Pagina ${i} de ${pageCount} | Generado con Organizador de Gastos`,
+                    pageWidth / 2,
+                    doc.internal.pageSize.getHeight() - 10,
+                    { align: 'center' }
+                );
+            }
+            
+            // Guardar PDF
+            const fileName = `reporte_gastos_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+            
+            showNotification('📄 PDF descargado correctamente');
+        }
+        
+        function exportDataJSON() {
             const dataToExport = {
                 expenses: state.expenses,
                 savingsWithdrawals: state.savingsWithdrawals,
+                savingsDeposits: state.savingsDeposits,
                 debtors: state.debtors,
+                loans: state.loans,
                 monthlyIncome: state.monthlyIncome,
                 creditCardIncome: state.creditCardIncome,
                 owedMoney: state.owedMoney,
@@ -1278,7 +1620,7 @@
             link.click();
             URL.revokeObjectURL(url);
             
-            showNotification('📥 Archivo descargado correctamente');
+            showNotification('📥 Backup JSON descargado');
         }
 
         function importData(event) {
