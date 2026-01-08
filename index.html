@@ -3101,3 +3101,81 @@
 
 </body>
 </html>
+('savings_withdrawals')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .order('date', { ascending: false });
+                
+                if (withdrawals && withdrawals.length > 0) {
+                    state.savingsWithdrawals = deduplicateById(withdrawals);
+                }
+
+                // Cargar depósitos del usuario
+                const { data: deposits } = await supabaseClient
+                    .from('savings_deposits')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .order('date', { ascending: false });
+                
+                if (deposits && deposits.length > 0) {
+                    state.savingsDeposits = deduplicateById(deposits);
+                }
+                
+                // Cargar deudores del usuario
+                const { data: debtors } = await supabaseClient
+                    .from('debtors')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .order('date', { ascending: false });
+                
+                if (debtors && debtors.length > 0) {
+                    state.debtors = deduplicateById(debtors);
+                }
+
+                // Cargar préstamos del usuario
+                const { data: loans } = await supabaseClient
+                    .from('loans')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .order('date', { ascending: false });
+                
+                if (loans && loans.length > 0) {
+                    const mappedLoans = loans.map(l => ({
+                        id: l.id, user_id: l.user_id, name: l.name, totalAmount: l.total_amount, pendingAmount: l.pending_amount,
+                        paidAmount: l.paid_amount, totalMonths: l.total_months, remainingMonths: l.remaining_months,
+                        monthlyPayment: l.monthly_payment, startDate: l.start_date || l.date?.slice(0, 7), date: l.date
+                    }));
+                    state.loans = deduplicateById(mappedLoans);
+                }
+                
+                // Cargar configuración del usuario
+                const { data: config } = await supabaseClient
+                    .from('user_config')
+                    .select('*')
+                    .eq('user_id', state.userId)
+                    .single();
+                
+                if (config) {
+                    state.monthlyIncome = config.monthly_income || '';
+                    state.creditCardIncome = config.credit_card_income || '';
+                    state.projectionMonths = config.projection_months || '';
+                    state.monthlySavingsPlan = config.monthly_savings_plan || '';
+                    state.darkMode = config.dark_mode || false;
+                    state.badges = config.badges || [];
+                }
+                
+                state.lastSync = new Date().toISOString();
+                saveDataLocal();
+                checkBadges();
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+            } finally {
+                isLoadingData = false; // Permitir nuevas cargas
+            }
+        }
+
+        autoInit();
+    </script>
+
+</body>
+</html>
