@@ -583,7 +583,7 @@
             isAuthenticated: false,
             user: null,
             loading: true,
-            authView: 'login', // 'login', 'register', 'forgot'
+            authView: 'login',
             email: '',
             password: '',
             confirmPassword: '',
@@ -814,7 +814,6 @@
             }
         }
         
-        // Función para sincronizar cola pendiente
         async function syncPendingQueue() {
             if (!supabaseClient || !state.userId || syncQueue.length === 0) return;
             
@@ -869,7 +868,6 @@
                 currentUser = data.user;
                 state.userId = data.user.id;
                 
-                // Cargar datos del usuario
                 await loadDataFromSupabasePublic();
                 
                 authState.loading = false;
@@ -966,7 +964,6 @@
                 currentUser = null;
                 state.userId = null;
                 
-                // Limpiar datos locales
                 state.expenses = [];
                 state.savingsWithdrawals = [];
                 state.savingsDeposits = [];
@@ -1127,7 +1124,6 @@
                 </div>
             `;
             
-            // Event listeners para los campos de autenticación
             const emailInput = document.getElementById('authEmail');
             const passwordInput = document.getElementById('authPassword');
             const confirmPasswordInput = document.getElementById('authConfirmPassword');
@@ -1251,7 +1247,6 @@
                     badges: state.badges
                 });
                 
-                // Sincronizar cola pendiente
                 await syncPendingQueue();
             }
             
@@ -1266,13 +1261,11 @@
             const margin = 15;
             let y = 20;
             
-            // Colores
-            const primaryColor = [59, 130, 246]; // Azul
-            const successColor = [16, 185, 129]; // Verde
-            const dangerColor = [239, 68, 68]; // Rojo
+            const primaryColor = [59, 130, 246];
+            const successColor = [16, 185, 129];
+            const dangerColor = [239, 68, 68];
             const grayColor = [107, 114, 128];
             
-            // Función auxiliar para agregar nueva página si es necesario
             function checkNewPage(neededHeight = 30) {
                 if (y + neededHeight > doc.internal.pageSize.getHeight() - 20) {
                     doc.addPage();
@@ -1282,13 +1275,11 @@
                 return false;
             }
             
-            // Función para formatear fecha
             function formatDatePDF(dateStr) {
                 const date = new Date(dateStr);
                 return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
             }
             
-            // ========== ENCABEZADO ==========
             doc.setFillColor(...primaryColor);
             doc.rect(0, 0, pageWidth, 40, 'F');
             
@@ -1303,7 +1294,6 @@
             
             y = 55;
             
-            // ========== RESUMEN FINANCIERO ==========
             doc.setTextColor(0, 0, 0);
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
@@ -1319,7 +1309,6 @@
             const totalLoans = getTotalLoans();
             const typeTotals = getTotalByType();
             
-            // Tabla de resumen
             doc.autoTable({
                 startY: y,
                 head: [['Concepto', 'Importe']],
@@ -1345,7 +1334,6 @@
             
             y = doc.lastAutoTable.finalY + 15;
             
-            // ========== GASTOS POR TIPO ==========
             checkNewPage(50);
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
@@ -1374,7 +1362,6 @@
             
             y = doc.lastAutoTable.finalY + 15;
             
-            // ========== GASTOS POR CATEGORÍA ==========
             const categoryTotals = getTotalByCategory();
             const categoryData = Object.entries(categoryTotals)
                 .filter(([_, amount]) => amount > 0)
@@ -1408,7 +1395,6 @@
                 y = doc.lastAutoTable.finalY + 15;
             }
             
-            // ========== LISTADO DE GASTOS ==========
             const filteredExpenses = getFilteredExpenses();
             if (filteredExpenses.length > 0) {
                 checkNewPage(50);
@@ -1441,7 +1427,6 @@
                 y = doc.lastAutoTable.finalY + 15;
             }
             
-            // ========== AHORROS ==========
             if (state.savingsDeposits.length > 0 || state.savingsWithdrawals.length > 0) {
                 checkNewPage(50);
                 doc.setFontSize(16);
@@ -1478,7 +1463,6 @@
                 y = doc.lastAutoTable.finalY + 15;
             }
             
-            // ========== DEUDORES ==========
             if (state.debtors.length > 0) {
                 checkNewPage(50);
                 doc.setFontSize(16);
@@ -1509,7 +1493,6 @@
                 y = doc.lastAutoTable.finalY + 15;
             }
             
-            // ========== PRÉSTAMOS ==========
             if (state.loans.length > 0) {
                 checkNewPage(50);
                 doc.setFontSize(16);
@@ -1545,7 +1528,6 @@
                 y = doc.lastAutoTable.finalY + 15;
             }
             
-            // ========== PROYECCIONES ==========
             if (state.projectionMonths && state.monthlySavingsPlan) {
                 checkNewPage(50);
                 const projections = calculateProjections();
@@ -1575,7 +1557,6 @@
                 });
             }
             
-            // ========== PIE DE PÁGINA EN TODAS LAS PÁGINAS ==========
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
@@ -1589,7 +1570,6 @@
                 );
             }
             
-            // Guardar PDF
             const fileName = `reporte_gastos_${new Date().toISOString().split('T')[0]}.pdf`;
             doc.save(fileName);
             
@@ -2682,8 +2662,6 @@
                 </div>
             `;
 
-            // Event listeners
-            // Debounce para guardado automático
             let saveTimeout = null;
             function debouncedSave() {
                 if (saveTimeout) clearTimeout(saveTimeout);
@@ -2856,7 +2834,6 @@
         window.ExpenseTracker = { initSupabase, getState: () => state, saveData, exportData };
 
         async function autoInit() {
-            // Cargar datos locales primero
             const savedData = localStorage.getItem('expenseTrackerData');
             if (savedData) {
                 const data = JSON.parse(savedData);
@@ -2878,7 +2855,6 @@
             }
             document.body.classList.toggle('dark-mode', state.darkMode);
             
-            // Inicializar Supabase
             if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
                 try {
                     if (!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
@@ -2887,31 +2863,26 @@
                     SUPABASE_CONFIG.initialized = true;
                     isOnline = true;
                     
-                    // Verificar sesión existente
                     const { data: { session } } = await supabaseClient.auth.getSession();
                     
                     if (session && session.user) {
-                        // Usuario autenticado
                         authState.isAuthenticated = true;
                         authState.user = session.user;
                         authState.loading = false;
                         currentUser = session.user;
                         state.userId = session.user.id;
                         
-                        // Cargar datos del usuario desde Supabase
                         await loadDataFromSupabasePublic();
                         checkBadges();
                         render();
                         setTimeout(() => showMotivationMessages(), 1500);
                         showNotification('✅ Conectado');
                     } else {
-                        // No hay sesión, mostrar login
                         authState.isAuthenticated = false;
                         authState.loading = false;
                         renderAuth();
                     }
                     
-                    // Escuchar cambios en la autenticación
                     supabaseClient.auth.onAuthStateChange(async (event, session) => {
                         if (event === 'SIGNED_IN' && session) {
                             authState.isAuthenticated = true;
@@ -2934,7 +2905,6 @@
                     console.error('Error auto-init:', error);
                     isOnline = false;
                     authState.loading = false;
-                    // Si falla Supabase, mostrar login de todas formas
                     renderAuth();
                 }
             } else {
@@ -2947,38 +2917,32 @@
             if (!supabaseClient || !state.userId) return;
             
             try {
-                // Guardar datos locales antes de cargar de Supabase
                 const localExpenses = [...state.expenses];
                 const localWithdrawals = [...state.savingsWithdrawals];
                 const localDeposits = [...state.savingsDeposits];
                 const localDebtors = [...state.debtors];
                 const localLoans = [...state.loans];
                 
-                // Cargar gastos del usuario
                 const { data: expenses } = await supabaseClient
                     .from('expenses')
                     .select('*')
                     .eq('user_id', state.userId)
                     .order('date', { ascending: false });
                 
-                // Merge: combinar datos de Supabase con datos locales que no estén en Supabase
                 if (expenses && expenses.length > 0) {
                     const supabaseIds = new Set(expenses.map(e => e.id));
                     const localOnly = localExpenses.filter(e => !supabaseIds.has(e.id) && e.user_id === state.userId);
                     state.expenses = [...expenses, ...localOnly];
-                    // Subir los locales que faltan a Supabase
                     for (const exp of localOnly) {
                         await saveToSupabase('expenses', exp);
                     }
                 } else if (localExpenses.length > 0) {
-                    // Si Supabase está vacío pero hay datos locales, subirlos
                     state.expenses = localExpenses.filter(e => e.user_id === state.userId);
                     for (const exp of state.expenses) {
                         await saveToSupabase('expenses', exp);
                     }
                 }
                 
-                // Cargar retiros del usuario
                 const { data: withdrawals } = await supabaseClient
                     .from('savings_withdrawals')
                     .select('*')
@@ -2990,192 +2954,107 @@
                     state.savingsWithdrawals = [...withdrawals, ...localOnly];
                     for (const item of localOnly) {
                         await saveToSupabase('savings_withdrawals', item);
-                    }
-                } else if (localWithdrawals.length > 0) {
-                    state.savingsWithdrawals = localWithdrawals.filter(w => w.user_id === state.userId);
-                    for (const item of state.savingsWithdrawals) {
-                        await saveToSupabase('savings_withdrawals', item);
-                    }
+}
+} else if (localWithdrawals.length > 0) {
+state.savingsWithdrawals = localWithdrawals.filter(w => w.user_id === state.userId);
+for (const item of state.savingsWithdrawals) {
+await saveToSupabase('savings_withdrawals', item);
+}
+}const { data: deposits } = await supabaseClient
+                .from('savings_deposits')
+                .select('*')
+                .eq('user_id', state.userId)
+                .order('date', { ascending: false });
+            if (deposits && deposits.length > 0) {
+                const supabaseIds = new Set(deposits.map(d => d.id));
+                const localOnly = localDeposits.filter(d => !supabaseIds.has(d.id) && d.user_id === state.userId);
+                state.savingsDeposits = [...deposits, ...localOnly];
+                for (const item of localOnly) {
+                    await saveToSupabase('savings_deposits', item);
                 }
-
-                // Cargar depósitos del usuario
-                const { data: deposits } = await supabaseClient
-                    .from('savings_deposits')
-                    .select('*')
-                    .eq('user_id', state.userId)
-                    .order('date', { ascending: false });
-                if (deposits && deposits.length > 0) {
-                    const supabaseIds = new Set(deposits.map(d => d.id));
-                    const localOnly = localDeposits.filter(d => !supabaseIds.has(d.id) && d.user_id === state.userId);
-                    state.savingsDeposits = [...deposits, ...localOnly];
-                    for (const item of localOnly) {
-                        await saveToSupabase('savings_deposits', item);
-                    }
-                } else if (localDeposits.length > 0) {
-                    state.savingsDeposits = localDeposits.filter(d => d.user_id === state.userId);
-                    for (const item of state.savingsDeposits) {
-                        await saveToSupabase('savings_deposits', item);
-                    }
+            } else if (localDeposits.length > 0) {
+                state.savingsDeposits = localDeposits.filter(d => d.user_id === state.userId);
+                for (const item of state.savingsDeposits) {
+                    await saveToSupabase('savings_deposits', item);
                 }
-                
-                // Cargar deudores del usuario
-                const { data: debtors } = await supabaseClient
-                    .from('debtors')
-                    .select('*')
-                    .eq('user_id', state.userId)
-                    .order('date', { ascending: false });
-                if (debtors && debtors.length > 0) {
-                    const supabaseIds = new Set(debtors.map(d => d.id));
-                    const localOnly = localDebtors.filter(d => !supabaseIds.has(d.id) && d.user_id === state.userId);
-                    state.debtors = [...debtors, ...localOnly];
-                    for (const item of localOnly) {
-                        await saveToSupabase('debtors', item);
-                    }
-                } else if (localDebtors.length > 0) {
-                    state.debtors = localDebtors.filter(d => d.user_id === state.userId);
-                    for (const item of state.debtors) {
-                        await saveToSupabase('debtors', item);
-                    }
-                }
-
-                // Cargar préstamos del usuario
-                const { data: loans } = await supabaseClient
-                    .from('loans')
-                    .select('*')
-                    .eq('user_id', state.userId)
-                    .order('date', { ascending: false });
-                if (loans && loans.length > 0) {
-                    const mappedLoans = loans.map(l => ({
-                        id: l.id, user_id: l.user_id, name: l.name, totalAmount: l.total_amount, pendingAmount: l.pending_amount,
-                        paidAmount: l.paid_amount, totalMonths: l.total_months, remainingMonths: l.remaining_months,
-                        monthlyPayment: l.monthly_payment, startDate: l.start_date || l.date?.slice(0, 7), date: l.date
-                    }));
-                    const supabaseIds = new Set(mappedLoans.map(l => l.id));
-                    const localOnly = localLoans.filter(l => !supabaseIds.has(l.id) && l.user_id === state.userId);
-                    state.loans = [...mappedLoans, ...localOnly];
-                    for (const loan of localOnly) {
-                        await saveToSupabase('loans', {
-                            id: loan.id, user_id: loan.user_id, name: loan.name, total_amount: loan.totalAmount,
-                            pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
-                            total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
-                            monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
-                        });
-                    }
-                } else if (localLoans.length > 0) {
-                    state.loans = localLoans.filter(l => l.user_id === state.userId);
-                    for (const loan of state.loans) {
-                        await saveToSupabase('loans', {
-                            id: loan.id, user_id: loan.user_id, name: loan.name, total_amount: loan.totalAmount,
-                            pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
-                            total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
-                            monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
-                        });
-                    }
-                }
-                
-                // Cargar configuración del usuario
-                const { data: config } = await supabaseClient
-                    .from('user_config')
-                    .select('*')
-                    .eq('user_id', state.userId)
-                    .single();
-                if (config) {
-                    state.monthlyIncome = config.monthly_income || state.monthlyIncome || '';
-                    state.creditCardIncome = config.credit_card_income || state.creditCardIncome || '';
-                    state.projectionMonths = config.projection_months || state.projectionMonths || '';
-                    state.monthlySavingsPlan = config.monthly_savings_plan || state.monthlySavingsPlan || '';
-                    state.darkMode = config.dark_mode || false;
-                    state.badges = config.badges || state.badges || [];
-                }
-                
-                state.lastSync = new Date().toISOString();
-                saveDataLocal();
-                checkBadges();
-            } catch (error) {
-                console.error('Error cargando datos:', error);
             }
-        }
-
-        autoInit();
-    </script>
-
-</body>
-</html>
-('savings_withdrawals')
-                    .select('*')
-                    .eq('user_id', state.userId)
-                    .order('date', { ascending: false });
-                
-                if (withdrawals && withdrawals.length > 0) {
-                    state.savingsWithdrawals = deduplicateById(withdrawals);
+            
+            const { data: debtors } = await supabaseClient
+                .from('debtors')
+                .select('*')
+                .eq('user_id', state.userId)
+                .order('date', { ascending: false });
+            if (debtors && debtors.length > 0) {
+                const supabaseIds = new Set(debtors.map(d => d.id));
+                const localOnly = localDebtors.filter(d => !supabaseIds.has(d.id) && d.user_id === state.userId);
+                state.debtors = [...debtors, ...localOnly];
+                for (const item of localOnly) {
+                    await saveToSupabase('debtors', item);
                 }
-
-                // Cargar depósitos del usuario
-                const { data: deposits } = await supabaseClient
-                    .from('savings_deposits')
-                    .select('*')
-                    .eq('user_id', state.userId)
-                    .order('date', { ascending: false });
-                
-                if (deposits && deposits.length > 0) {
-                    state.savingsDeposits = deduplicateById(deposits);
+            } else if (localDebtors.length > 0) {
+                state.debtors = localDebtors.filter(d => d.user_id === state.userId);
+                for (const item of state.debtors) {
+                    await saveToSupabase('debtors', item);
                 }
-                
-                // Cargar deudores del usuario
-                const { data: debtors } = await supabaseClient
-                    .from('debtors')
-                    .select('*')
-                    .eq('user_id', state.userId)
-                    .order('date', { ascending: false });
-                
-                if (debtors && debtors.length > 0) {
-                    state.debtors = deduplicateById(debtors);
-                }
-
-                // Cargar préstamos del usuario
-                const { data: loans } = await supabaseClient
-                    .from('loans')
-                    .select('*')
-                    .eq('user_id', state.userId)
-                    .order('date', { ascending: false });
-                
-                if (loans && loans.length > 0) {
-                    const mappedLoans = loans.map(l => ({
-                        id: l.id, user_id: l.user_id, name: l.name, totalAmount: l.total_amount, pendingAmount: l.pending_amount,
-                        paidAmount: l.paid_amount, totalMonths: l.total_months, remainingMonths: l.remaining_months,
-                        monthlyPayment: l.monthly_payment, startDate: l.start_date || l.date?.slice(0, 7), date: l.date
-                    }));
-                    state.loans = deduplicateById(mappedLoans);
-                }
-                
-                // Cargar configuración del usuario
-                const { data: config } = await supabaseClient
-                    .from('user_config')
-                    .select('*')
-                    .eq('user_id', state.userId)
-                    .single();
-                
-                if (config) {
-                    state.monthlyIncome = config.monthly_income || '';
-                    state.creditCardIncome = config.credit_card_income || '';
-                    state.projectionMonths = config.projection_months || '';
-                    state.monthlySavingsPlan = config.monthly_savings_plan || '';
-                    state.darkMode = config.dark_mode || false;
-                    state.badges = config.badges || [];
-                }
-                
-                state.lastSync = new Date().toISOString();
-                saveDataLocal();
-                checkBadges();
-            } catch (error) {
-                console.error('Error cargando datos:', error);
-            } finally {
-                isLoadingData = false; // Permitir nuevas cargas
             }
+
+            const { data: loans } = await supabaseClient
+                .from('loans')
+                .select('*')
+                .eq('user_id', state.userId)
+                .order('date', { ascending: false });
+            if (loans && loans.length > 0) {
+                const mappedLoans = loans.map(l => ({
+                    id: l.id, user_id: l.user_id, name: l.name, totalAmount: l.total_amount, pendingAmount: l.pending_amount,
+                    paidAmount: l.paid_amount, totalMonths: l.total_months, remainingMonths: l.remaining_months,
+                    monthlyPayment: l.monthly_payment, startDate: l.start_date || l.date?.slice(0, 7), date: l.date
+                }));
+                const supabaseIds = new Set(mappedLoans.map(l => l.id));
+                const localOnly = localLoans.filter(l => !supabaseIds.has(l.id) && l.user_id === state.userId);
+                state.loans = [...mappedLoans, ...localOnly];
+                for (const loan of localOnly) {
+                    await saveToSupabase('loans', {
+                        id: loan.id, user_id: loan.user_id, name: loan.name, total_amount: loan.totalAmount,
+                        pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
+                        total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
+                        monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
+                    });
+                }
+            } else if (localLoans.length > 0) {
+                state.loans = localLoans.filter(l => l.user_id === state.userId);
+                for (const loan of state.loans) {
+                    await saveToSupabase('loans', {
+                        id: loan.id, user_id: loan.user_id, name: loan.name, total_amount: loan.totalAmount,
+                        pending_amount: loan.pendingAmount, paid_amount: loan.paidAmount,
+                        total_months: loan.totalMonths, remaining_months: loan.remainingMonths,
+                        monthly_payment: loan.monthlyPayment, start_date: loan.startDate, date: loan.date
+                    });
+                }
+            }
+            
+            const { data: config } = await supabaseClient
+                .from('user_config')
+                .select('*')
+                .eq('user_id', state.userId)
+                .single();
+            if (config) {
+                state.monthlyIncome = config.monthly_income || state.monthlyIncome || '';
+                state.creditCardIncome = config.credit_card_income || state.creditCardIncome || '';
+                state.projectionMonths = config.projection_months || state.projectionMonths || '';
+                state.monthlySavingsPlan = config.monthly_savings_plan || state.monthlySavingsPlan || '';
+                state.darkMode = config.dark_mode || false;
+                state.badges = config.badges || state.badges || [];
+            }
+            
+            state.lastSync = new Date().toISOString();
+            saveDataLocal();
+            checkBadges();
+        } catch (error) {
+            console.error('Error cargando datos:', error);
         }
+    }
 
-        autoInit();
-    </script>
-
-</body>
+    autoInit();
+</script>
+	</body>
 </html>
