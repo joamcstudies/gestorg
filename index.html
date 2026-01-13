@@ -2405,16 +2405,16 @@
                         `}
                     </div>
 
-                    <!-- Historial de Gastos -->
-                    <div class="bg-white rounded-xl p-5 card animate-slide-in border border-gray-100">
-                        <div class="flex justify-between items-center mb-3">
-                            <h2 class="text-base font-semibold text-gray-800">📝 Historial</h2>
-                            ${getFilteredExpenses().length > 0 ? `<span class="text-xs text-gray-400">${getFilteredExpenses().length} gastos</span>` : ''}
-                        </div>
-                        <div class="space-y-2 max-h-[200px] overflow-y-auto custom-scroll">
-                            ${getFilteredExpenses().length === 0 ? `
-                                <p class="text-gray-400 text-center py-8 text-sm">Sin gastos registrados</p>
-                            ` : getFilteredExpenses().slice(0, 10).map(exp => `
+                  <!-- Historial de Gastos -->
+<div class="bg-white rounded-xl p-5 card animate-slide-in border border-gray-100">
+    <div class="flex justify-between items-center mb-3">
+        <h2 class="text-base font-semibold text-gray-800">📝 Historial</h2>
+        ${getFilteredExpenses().length > 0 ? `<span class="text-xs text-gray-400 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">${getFilteredExpenses().length} gastos</span>` : ''}
+    </div>
+    <div class="space-y-2 max-h-[400px] overflow-y-auto custom-scroll">
+        ${getFilteredExpenses().length === 0 ? `
+            <p class="text-gray-400 text-center py-8 text-sm">Sin gastos registrados</p>
+        ` : getFilteredExpenses().map(exp => `
                                 <div class="expense-item flex items-center justify-between p-2.5 rounded-lg">
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 mb-0.5">
