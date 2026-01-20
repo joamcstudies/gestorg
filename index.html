@@ -2958,9 +2958,11 @@
 } else if (localWithdrawals.length > 0) {
 state.savingsWithdrawals = localWithdrawals.filter(w => w.user_id === state.userId);
 for (const item of state.savingsWithdrawals) {
-await saveToSupabase('savings_withdrawals', item);
-}
-}const { data: deposits } = await supabaseClient
+                await saveToSupabase('savings_withdrawals', item);
+            }
+        }
+
+        const { data: deposits } = await supabaseClient 
                 .from('savings_deposits')
                 .select('*')
                 .eq('user_id', state.userId)
