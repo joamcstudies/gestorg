@@ -133,7 +133,7 @@
             withdrawalDescription: '', withdrawalAmount: '', depositDescription: '', depositAmount: '',
 debtorName: '', debtorAmount: '', loanName: '', loanAmount: '', loanMonths: '', loanPaid: '', loanStartDate: '',
     fixedExpenseName: '', fixedExpenseAmount: '',  // ← NUEVO
-  editingExpenseId: null, editingFixedExpenseId: null, darkMode: false, timeFilter: 'month',  // ← NUEVO editingFixedExpenseId badges: [], lastMonthSavings: 0,
+editingExpenseId: null, editingFixedExpenseId: null, darkMode: false, timeFilter: 'month', badges: [], lastMonthSavings: 0,
 showSavingsSection: false, showDebtorsSection: false, showProjectionsSection: false, showLoansSection: false, showFixedExpensesSection: false,  // ← NUEVO showFixedExpensesSection
             userId: null, lastSync: null
         };
@@ -296,11 +296,7 @@ showSavingsSection: false, showDebtorsSection: false, showProjectionsSection: fa
         }
         function toggleSection(section) { state[section] = !state[section]; const element = document.getElementById(section); const button = document.getElementById(section + 'Btn'); if (element && button) { element.classList.toggle('open'); button.classList.toggle('open'); } }
         function setTimeFilter(filter) { state.timeFilter = filter; render(); }
-        function getFilteredExpenses() {
-			return state.fixedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-            const now = new Date(); let startDate;
-            switch(state.timeFilter) { case 'week': startDate = new Date(now.setDate(now.getDate() - 7)); break; case 'month': startDate = new Date(now.getFullYear(), now.getMonth(), 1); break; case 'year': startDate = new Date(now.getFullYear(), 0, 1); break; default: return state.expenses; }
-            return state.expenses.filter(exp => new Date(exp.date) >= startDate);
+        return state.expenses.filter(exp => new Date(exp.date) >= startDate);
         }
        function saveDataLocal() {
     const dataToSave = { expenses: state.expenses, savingsWithdrawals: state.savingsWithdrawals, savingsDeposits: state.savingsDeposits, debtors: state.debtors, loans: state.loans, fixedExpenses: state.fixedExpenses, savingsHistory: state.savingsHistory,  // ← NUEVO monthlyIncome: state.monthlyIncome, creditCardIncome: state.creditCardIncome, projectionMonths: state.projectionMonths, monthlySavingsPlan: state.monthlySavingsPlan, darkMode: state.darkMode, badges: state.badges, lastMonthSavings: state.lastMonthSavings, syncQueue: syncQueue, lastSaved: new Date().toISOString() };
@@ -314,6 +310,11 @@ showSavingsSection: false, showDebtorsSection: false, showProjectionsSection: fa
             }
             showNotification('✅ Datos guardados');
         }
+		     function getFilteredExpenses() {
+			return state.fixedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const now = new Date(); let startDate;
+            switch(state.timeFilter) { case 'week': startDate = new Date(now.setDate(now.getDate() - 7)); break; case 'month': startDate = new Date(now.getFullYear(), now.getMonth(), 1); break; case 'year': startDate = new Date(now.getFullYear(), 0, 1); break; default: return state.expenses; }
+				 
         function showNotification(message, isError = false) {
             const notification = document.createElement('div');
             notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-50 animate-slide-in ' + (isError ? 'bg-red-500' : 'bg-green-500');
@@ -436,7 +437,7 @@ function handleDeleteFixedExpense(id) {
     const totalExpenses = getTotalMonth();
     const fixedExpenses = getTotalFixedExpenses();  // ← NUEVO
     const monthlyLoanPayments = getTotalMonthlyLoanPayments();
-	 const fixedExpensesTotal = getTotalFixedExpenses();  // ← NUEVO
+	 const fixedExpensesTotal = getTotalFixedExpenses();
     const rawBalance = totalIncome - totalExpenses - fixedExpenses - monthlyLoanPayments;  // ← MODIFICADO
             const netSavings = getNetSavings();
             
@@ -639,12 +640,7 @@ if (state.savingsHistory.length > 0) {
             document.getElementById('detailModal').classList.remove('hidden');
         }
         function closeDetailModal(event) { if (!event || event.target.id === 'detailModal') document.getElementById('detailModal').classList.add('hidden'); }
-        function resetMonth() {
-            if (!confirm('⚠️ ¿Estás seguro?\n\nSe borrarán:\n• Todos los gastos\n• Ingresos del mes\n\nSe mantendrán:\n• Ahorros\n• Préstamos\n• Deudores')) return;
-            if (supabaseClient) state.expenses.forEach(exp => deleteFromSupabase('expenses', exp.id));
-            state.expenses = []; state.monthlyIncome = ''; state.creditCardIncome = '';
-            saveDataLocal(); render(); showNotification('🔄 Mes reiniciado');
-        }
+     
         function exportData() {
             const { jsPDF } = window.jspdf; const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth(); const margin = 15; let y = 20;
@@ -832,7 +828,8 @@ ${fixedExpensesTotal > 0 ? '<p class="text-xs text-gray-400 mt-1">-' + formatEur
             function debouncedSave() { if (saveTimeout) clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDataLocal(); if (supabaseClient && state.userId) saveToSupabase('user_config', { user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges }); }, 1000); }
             ['monthlyIncome', 'creditCardIncome'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; render(); debouncedSave(); }); });
             ['projectionMonths', 'monthlySavingsPlan'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; render(); debouncedSave(); }); });
-        ['description', 'amount', 'withdrawalDescription', 'withdrawalAmount', 'depositDescription', 'depositAmount', 'debtorName', 'debtorAmount', 'loanName', 'loanAmount', 'loanMonths', 'loanPaid', 'loanStartDate', 'fixedExpenseName', 'fixedExpenseAmount'].forEach(id => {  // ← NUEVO fixedExpenseName y fixedExpenseAmountconst el = document.getElementById(id); if (el) el.addEventListener('input', (e) => state[id] = e.target.value); });
+        ['description', 'amount', 'withdrawalDescription', 'withdrawalAmount', 'depositDescription', 'depositAmount', 'debtorName', 'debtorAmount', 'loanName', 'loanAmount', 'loanMonths', 'loanPaid', 'loanStartDate', 'fixedExpenseName', 'fixedExpenseAmount'].forEach(id => {  // ← NUEVO fixedExpenseName y fixedExpenseAmount
+			const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => state[id] = e.target.value); });
             const categoryEl = document.getElementById('category'); if (categoryEl) categoryEl.addEventListener('change', (e) => state.category = e.target.value);
             const dateEl = document.getElementById('date'); if (dateEl) dateEl.addEventListener('change', (e) => state.date = e.target.value);
             setTimeout(() => renderChart(), 100);
