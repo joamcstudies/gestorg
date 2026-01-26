@@ -991,10 +991,11 @@
             `;
             
             let saveTimeout = null;
-         function debouncedSave() { 
+        function debouncedSave() { 
     if (saveTimeout) clearTimeout(saveTimeout); 
+    // Guardar inmediatamente en localStorage
+    saveDataLocal();
     saveTimeout = setTimeout(() => { 
-        saveDataLocal(); 
         // Actualizar solo el saldo mostrado
         const balanceInfo = getBalanceInfo();
         const saldoEl = document.querySelector('.saldo-display');
@@ -1002,7 +1003,19 @@
             saldoEl.textContent = formatEuro(balanceInfo.displayBalance);
             saldoEl.className = 'saldo-display amount-display-large ' + (balanceInfo.displayBalance >= 0 ? 'text-emerald-600' : 'text-red-600');
         }
-        if (supabaseClient && state.userId) saveToSupabase('user_config', { user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory }); 
+        // Guardar en Supabase
+        if (supabaseClient && state.userId) {
+            saveToSupabase('user_config', { 
+                user_id: state.userId, 
+                monthly_income: parseFloat(state.monthlyIncome) || 0, 
+                credit_card_income: parseFloat(state.creditCardIncome) || 0, 
+                projection_months: parseInt(state.projectionMonths) || 0, 
+                monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
+                dark_mode: state.darkMode, 
+                badges: state.badges, 
+                savings_history: state.savingsHistory 
+            });
+        }
     }, 1000); 
 }
             
