@@ -871,8 +871,8 @@
                         ${earnedBadges.length > 0 ? '<div class="flex items-center gap-2"><span class="text-xs text-gray-400">🏆 ' + earnedBadges.length + '/' + badgeDefinitions.length + '</span>' + renderBadges() + '</div>' : ''}
                     </div>
                     <div class="grid grid-cols-3 gap-3">
-                        <div class="income-card"><label class="text-xs text-gray-400 block mb-1">💵 Ingresos</label><input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0,00€" step="0.01" /></div>
-                        <div class="income-card"><label class="text-xs text-gray-400 block mb-1">🎁 Donaciones</label><input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0,00€" step="0.01" /></div>
+                        <div class="income-card"><label class="text-xs text-gray-400 block mb-1">💵 Ingresos</label><input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('monthlyIncome', this.value)" /></div>
+                        <div class="income-card"><label class="text-xs text-gray-400 block mb-1">🎁 Donaciones</label><input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('creditCardIncome', this.value)" /></div>
                         <div class="income-card" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0;"><label class="text-xs text-emerald-600 block mb-1">🤝 Me deben</label><div class="text-lg font-bold text-emerald-700">${formatEuro(getTotalOwed())}</div></div>
                     </div>
                 </div>
