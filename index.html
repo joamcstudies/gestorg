@@ -386,28 +386,38 @@
         
         // ========== FUNCIÓN CLAVE: handleIncomeInput ==========
         function handleIncomeInput(field, value) {
+            console.log('handleIncomeInput called:', field, value);
             state[field] = value;
             saveDataLocal();
             
             // Actualizar saldo INMEDIATAMENTE
-            const balanceInfo = getBalanceInfo();
-            const saldoEl = document.querySelector('.saldo-display');
-            if (saldoEl) {
-                saldoEl.textContent = formatEuro(balanceInfo.displayBalance);
-                saldoEl.className = 'saldo-display amount-display-large ' + (balanceInfo.displayBalance >= 0 ? 'text-emerald-600' : 'text-red-600');
-            }
-            // Actualizar ahorro mes
-            const ahorroEls = document.querySelectorAll('.total-card');
-            ahorroEls.forEach(card => {
-                const label = card.querySelector('.text-gray-400');
-                if (label && label.textContent === 'Ahorro Mes') {
-                    const amountEl = card.querySelector('.amount-display');
-                    if (amountEl) {
-                        amountEl.textContent = formatEuro(balanceInfo.adjustedSavings);
-                        amountEl.className = 'amount-display ' + (balanceInfo.adjustedSavings >= 0 ? 'text-emerald-600' : 'text-red-600');
-                    }
+            try {
+                const balanceInfo = getBalanceInfo();
+                console.log('Balance calculado:', balanceInfo.displayBalance);
+                
+                const saldoEl = document.querySelector('.saldo-display');
+                console.log('Elemento saldo encontrado:', saldoEl);
+                
+                if (saldoEl) {
+                    saldoEl.textContent = formatEuro(balanceInfo.displayBalance);
+                    saldoEl.className = 'saldo-display amount-display-large ' + (balanceInfo.displayBalance >= 0 ? 'text-emerald-600' : 'text-red-600');
                 }
-            });
+                
+                // Actualizar ahorro mes
+                const ahorroEls = document.querySelectorAll('.total-card');
+                ahorroEls.forEach(card => {
+                    const label = card.querySelector('.text-gray-400');
+                    if (label && label.textContent === 'Ahorro Mes') {
+                        const amountEl = card.querySelector('.amount-display');
+                        if (amountEl) {
+                            amountEl.textContent = formatEuro(balanceInfo.adjustedSavings);
+                            amountEl.className = 'amount-display ' + (balanceInfo.adjustedSavings >= 0 ? 'text-emerald-600' : 'text-red-600');
+                        }
+                    }
+                });
+            } catch(e) {
+                console.error('Error en handleIncomeInput:', e);
+            }
             
             // Guardar en Supabase con debounce
             if (saveTimeout) clearTimeout(saveTimeout);
