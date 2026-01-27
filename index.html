@@ -386,31 +386,56 @@
         
         // ========== FUNCIÓN CLAVE: handleIncomeInput ==========
         function handleIncomeInput(field, value) {
+            // Guardar el valor en el estado
             state[field] = value;
-            saveDataLocal();
             
-            // Actualizar displays INMEDIATAMENTE
-            const balanceInfo = getBalanceInfo();
+            // Guardar en localStorage inmediatamente
+            const dataToSave = { 
+                expenses: state.expenses, 
+                savingsWithdrawals: state.savingsWithdrawals, 
+                savingsDeposits: state.savingsDeposits, 
+                debtors: state.debtors, 
+                loans: state.loans, 
+                fixedExpenses: state.fixedExpenses, 
+                savingsHistory: state.savingsHistory,
+                monthlyIncome: state.monthlyIncome, 
+                creditCardIncome: state.creditCardIncome, 
+                projectionMonths: state.projectionMonths, 
+                monthlySavingsPlan: state.monthlySavingsPlan, 
+                darkMode: state.darkMode, 
+                badges: state.badges, 
+                lastMonthSavings: state.lastMonthSavings
+            };
+            localStorage.setItem('expenseTrackerData', JSON.stringify(dataToSave));
             
-            // Actualizar saldo disponible
+            // Calcular nuevo saldo
+            const totalIncome = (parseFloat(state.monthlyIncome) || 0) + (parseFloat(state.creditCardIncome) || 0);
+            const totalExpenses = getFilteredExpenses().reduce((sum, exp) => sum + exp.amount, 0);
+            const fixedExpenses = state.fixedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const monthlyLoanPayments = state.loans.reduce((sum, l) => sum + l.monthlyPayment, 0);
+            const rawBalance = totalIncome - totalExpenses - fixedExpenses - monthlyLoanPayments;
+            
+            // Actualizar saldo en pantalla
             const saldoEl = document.querySelector('.saldo-display');
             if (saldoEl) {
-                saldoEl.textContent = formatEuro(balanceInfo.displayBalance);
-                saldoEl.className = 'saldo-display amount-display-large ' + (balanceInfo.displayBalance >= 0 ? 'text-emerald-600' : 'text-red-600');
-            }
-            
-            // Actualizar ahorro mes
-            const ahorroEl = document.getElementById('ahorroMesDisplay');
-            if (ahorroEl) {
-                ahorroEl.textContent = formatEuro(balanceInfo.adjustedSavings);
-                ahorroEl.className = 'amount-display ' + (balanceInfo.adjustedSavings >= 0 ? 'text-emerald-600' : 'text-red-600');
+                saldoEl.textContent = formatEuro(rawBalance >= 0 ? rawBalance : rawBalance);
+                saldoEl.className = 'saldo-display amount-display-large ' + (rawBalance >= 0 ? 'text-emerald-600' : 'text-red-600');
             }
             
             // Guardar en Supabase con debounce
             if (saveTimeout) clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => {
                 if (supabaseClient && state.userId) {
-                    saveToSupabase('user_config', { user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory });
+                    saveToSupabase('user_config', { 
+                        user_id: state.userId, 
+                        monthly_income: parseFloat(state.monthlyIncome) || 0, 
+                        credit_card_income: parseFloat(state.creditCardIncome) || 0, 
+                        projection_months: parseInt(state.projectionMonths) || 0, 
+                        monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
+                        dark_mode: state.darkMode, 
+                        badges: state.badges, 
+                        savings_history: state.savingsHistory 
+                    });
                 }
             }, 1000);
         }
