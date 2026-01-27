@@ -425,11 +425,11 @@
                 ahorroEl.className = 'amount-display ' + (balanceInfo.adjustedSavings >= 0 ? 'text-emerald-600' : 'text-red-600');
             }
             
-            // Guardar en Supabase con debounce
+            // Guardar en Supabase con debounce (1 segundo)
             if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
+            saveTimeout = setTimeout(async () => {
                 if (supabaseClient && state.userId) {
-                    saveToSupabase('user_config', { 
+                    const configData = { 
                         user_id: state.userId, 
                         monthly_income: parseFloat(state.monthlyIncome) || 0, 
                         credit_card_income: parseFloat(state.creditCardIncome) || 0, 
@@ -438,7 +438,11 @@
                         dark_mode: state.darkMode, 
                         badges: state.badges, 
                         savings_history: state.savingsHistory 
-                    });
+                    };
+                    const result = await saveToSupabase('user_config', configData);
+                    if (result) {
+                        showNotification('✅ Guardado');
+                    }
                 }
             }, 1000);
         }
