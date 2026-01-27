@@ -127,6 +127,7 @@
             initialized: false
         };
         let supabaseClient = null, currentUser = null, isOnline = false, syncQueue = [], shownMotivations = new Set();
+        let saveTimeout = null;
         let authState = { isAuthenticated: false, user: null, loading: true, authView: 'login', email: '', password: '', confirmPassword: '', authError: '', authSuccess: '' };
         let state = {
             expenses: [], savingsWithdrawals: [], savingsDeposits: [], debtors: [], loans: [], 
@@ -381,6 +382,25 @@
                 await syncPendingQueue();
             }
             showNotification('✅ Datos guardados');
+        }
+        
+        // ========== FUNCIÓN CLAVE: handleIncomeInput ==========
+        function handleIncomeInput(field, value) {
+            state[field] = value;
+            saveDataLocal();
+            
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                const balanceInfo = getBalanceInfo();
+                const saldoEl = document.querySelector('.saldo-display');
+                if (saldoEl) {
+                    saldoEl.textContent = formatEuro(balanceInfo.displayBalance);
+                    saldoEl.className = 'saldo-display amount-display-large ' + (balanceInfo.displayBalance >= 0 ? 'text-emerald-600' : 'text-red-600');
+                }
+                if (supabaseClient && state.userId) {
+                    saveToSupabase('user_config', { user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory });
+                }
+            }, 500);
         }
         
         function showNotification(message, isError = false) {
@@ -871,8 +891,8 @@
                         ${earnedBadges.length > 0 ? '<div class="flex items-center gap-2"><span class="text-xs text-gray-400">🏆 ' + earnedBadges.length + '/' + badgeDefinitions.length + '</span>' + renderBadges() + '</div>' : ''}
                     </div>
                     <div class="grid grid-cols-3 gap-3">
-                        <div class="income-card"><label class="text-xs text-gray-400 block mb-1">💵 Ingresos</label><input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0,00€" step="0.01" /></div>
-                        <div class="income-card"><label class="text-xs text-gray-400 block mb-1">🎁 Donaciones</label><input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0,00€" step="0.01" /></div>
+                        <div class="income-card"><label class="text-xs text-gray-400 block mb-1">💵 Ingresos</label><input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('monthlyIncome', this.value)" /></div>
+                        <div class="income-card"><label class="text-xs text-gray-400 block mb-1">🎁 Donaciones</label><input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('creditCardIncome', this.value)" /></div>
                         <div class="income-card" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0;"><label class="text-xs text-emerald-600 block mb-1">🤝 Me deben</label><div class="text-lg font-bold text-emerald-700">${formatEuro(getTotalOwed())}</div></div>
                     </div>
                 </div>
@@ -993,7 +1013,7 @@
             let saveTimeout = null;
             function debouncedSave() { if (saveTimeout) clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDataLocal(); if (supabaseClient && state.userId) saveToSupabase('user_config', { user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory }); }, 1000); }
             
-            ['monthlyIncome', 'creditCardIncome'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; render(); debouncedSave(); }); });
+            // monthlyIncome y creditCardIncome usan oninput="handleIncomeInput" directamente
             ['projectionMonths', 'monthlySavingsPlan'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; render(); debouncedSave(); }); });
             ['description', 'amount', 'withdrawalDescription', 'withdrawalAmount', 'depositDescription', 'depositAmount', 'debtorName', 'debtorAmount', 'loanName', 'loanAmount', 'loanMonths', 'loanPaid', 'loanStartDate', 'fixedExpenseName', 'fixedExpenseAmount'].forEach(id => {
                 const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => state[id] = e.target.value); 
