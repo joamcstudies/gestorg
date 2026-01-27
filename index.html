@@ -390,36 +390,39 @@
             state[field] = value;
             
             // Guardar en localStorage inmediatamente
-            const dataToSave = { 
-                expenses: state.expenses, 
-                savingsWithdrawals: state.savingsWithdrawals, 
-                savingsDeposits: state.savingsDeposits, 
-                debtors: state.debtors, 
-                loans: state.loans, 
-                fixedExpenses: state.fixedExpenses, 
-                savingsHistory: state.savingsHistory,
-                monthlyIncome: state.monthlyIncome, 
-                creditCardIncome: state.creditCardIncome, 
-                projectionMonths: state.projectionMonths, 
-                monthlySavingsPlan: state.monthlySavingsPlan, 
-                darkMode: state.darkMode, 
-                badges: state.badges, 
-                lastMonthSavings: state.lastMonthSavings
-            };
-            localStorage.setItem('expenseTrackerData', JSON.stringify(dataToSave));
+            saveDataLocal();
             
-            // Calcular nuevo saldo
-            const totalIncome = (parseFloat(state.monthlyIncome) || 0) + (parseFloat(state.creditCardIncome) || 0);
-            const totalExpenses = getFilteredExpenses().reduce((sum, exp) => sum + exp.amount, 0);
-            const fixedExpenses = state.fixedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-            const monthlyLoanPayments = state.loans.reduce((sum, l) => sum + l.monthlyPayment, 0);
-            const rawBalance = totalIncome - totalExpenses - fixedExpenses - monthlyLoanPayments;
+            // Calcular balance usando la función existente
+            const balanceInfo = getBalanceInfo();
             
             // Actualizar saldo en pantalla
             const saldoEl = document.querySelector('.saldo-display');
             if (saldoEl) {
-                saldoEl.textContent = formatEuro(rawBalance >= 0 ? rawBalance : rawBalance);
-                saldoEl.className = 'saldo-display amount-display-large ' + (rawBalance >= 0 ? 'text-emerald-600' : 'text-red-600');
+                saldoEl.textContent = formatEuro(balanceInfo.displayBalance);
+                saldoEl.className = 'saldo-display amount-display-large ' + (balanceInfo.displayBalance >= 0 ? 'text-emerald-600' : 'text-red-600');
+            }
+            
+            // Actualizar indicador de "Usando X de ahorros"
+            const saldoCard = document.getElementById('saldoCard');
+            if (saldoCard) {
+                const warningEl = saldoCard.querySelector('.text-amber-600');
+                if (balanceInfo.isUsingFromSavings && warningEl) {
+                    warningEl.textContent = '⚠️ Usando ' + formatEuro(balanceInfo.usedFromSavings) + ' de ahorros';
+                } else if (balanceInfo.isUsingFromSavings && !warningEl) {
+                    const newWarning = document.createElement('p');
+                    newWarning.className = 'text-xs text-amber-600 mt-1 font-medium';
+                    newWarning.textContent = '⚠️ Usando ' + formatEuro(balanceInfo.usedFromSavings) + ' de ahorros';
+                    saldoCard.querySelector('.saldo-display').parentNode.appendChild(newWarning);
+                } else if (!balanceInfo.isUsingFromSavings && warningEl) {
+                    warningEl.remove();
+                }
+            }
+            
+            // Actualizar ahorro mes
+            const ahorroEl = document.getElementById('ahorroMesDisplay');
+            if (ahorroEl) {
+                ahorroEl.textContent = formatEuro(balanceInfo.adjustedSavings);
+                ahorroEl.className = 'amount-display ' + (balanceInfo.adjustedSavings >= 0 ? 'text-emerald-600' : 'text-red-600');
             }
             
             // Guardar en Supabase con debounce
@@ -934,7 +937,7 @@
                     </div>
                 </div>
                 <div class="totals-grid mb-4">
-                    <div class="total-card rounded-xl p-4 border-l-4 ${balanceInfo.isUsingFromSavings ? 'border-amber-500 using-savings-indicator' : 'border-blue-500'} animate-slide-in col-span-2 md:col-span-1">
+                    <div id="saldoCard" class="total-card rounded-xl p-4 border-l-4 ${balanceInfo.isUsingFromSavings ? 'border-amber-500 using-savings-indicator' : 'border-blue-500'} animate-slide-in col-span-2 md:col-span-1">
                         <p class="text-gray-500 text-xs mb-1">Saldo Disponible</p>
                         <p class="saldo-display amount-display-large ${balanceInfo.displayBalance >= 0 ? 'text-emerald-600' : 'text-red-600'}">${formatEuro(balanceInfo.displayBalance)}</p>
                         ${fixedExpensesTotal > 0 ? '<p class="text-xs text-gray-400 mt-1">-' + formatEuro(fixedExpensesTotal) + ' fijos</p>' : ''}
