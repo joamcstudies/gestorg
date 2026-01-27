@@ -447,7 +447,7 @@
                         
                         if (error) {
                             console.error('Error Supabase:', error);
-                            showNotification('❌ Error al guardar', true);
+                            showNotification('❌ ' + error.message, true);
                         } else {
                             showNotification('✅ Guardado');
                         }
