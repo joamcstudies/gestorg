@@ -428,21 +428,35 @@
             // Guardar en Supabase con debounce (1 segundo)
             if (saveTimeout) clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
+                // Primero guardar en localStorage de nuevo
+                saveDataLocal();
+                
+                // Intentar guardar en Supabase
                 if (supabaseClient && state.userId) {
-                    const configData = { 
-                        user_id: state.userId, 
-                        monthly_income: parseFloat(state.monthlyIncome) || 0, 
-                        credit_card_income: parseFloat(state.creditCardIncome) || 0, 
-                        projection_months: parseInt(state.projectionMonths) || 0, 
-                        monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
-                        dark_mode: state.darkMode, 
-                        badges: state.badges, 
-                        savings_history: state.savingsHistory 
-                    };
-                    const result = await saveToSupabase('user_config', configData);
-                    if (result) {
-                        showNotification('✅ Guardado');
+                    try {
+                        const { error } = await supabaseClient.from('user_config').upsert({
+                            user_id: state.userId, 
+                            monthly_income: parseFloat(state.monthlyIncome) || 0, 
+                            credit_card_income: parseFloat(state.creditCardIncome) || 0, 
+                            projection_months: parseInt(state.projectionMonths) || 0, 
+                            monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
+                            dark_mode: state.darkMode, 
+                            badges: state.badges, 
+                            savings_history: state.savingsHistory 
+                        }, { onConflict: 'user_id' });
+                        
+                        if (error) {
+                            console.error('Error Supabase:', error);
+                            showNotification('❌ Error al guardar', true);
+                        } else {
+                            showNotification('✅ Guardado');
+                        }
+                    } catch (e) {
+                        console.error('Exception:', e);
+                        showNotification('❌ Error', true);
                     }
+                } else {
+                    showNotification('✅ Guardado local');
                 }
             }, 1000);
         }
