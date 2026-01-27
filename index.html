@@ -441,8 +441,7 @@
                             projection_months: parseInt(state.projectionMonths) || 0, 
                             monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
                             dark_mode: state.darkMode, 
-                            badges: state.badges, 
-                            savings_history: state.savingsHistory 
+                            badges: state.badges
                         }, { onConflict: 'user_id' });
                         
                         if (error) {
