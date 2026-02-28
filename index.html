@@ -52,7 +52,7 @@
         body.dark-mode .text-gray-600 { color: #94a3b8 !important; }
         body.dark-mode .text-gray-500 { color: #64748b !important; }
         body.dark-mode .border-gray-300 { border-color: #334155 !important; }
-        body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background-color: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+        body.dark-mode input, body.dark-mode select { background-color: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
         body.dark-mode .bg-gray-50 { background-color: #1e293b !important; }
         body.dark-mode .gradient-bg { background: #0f172a; }
         body.dark-mode .total-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
@@ -67,7 +67,6 @@
         body.dark-mode .motivation-toast-content p { color: #e2e8f0; }
         body.dark-mode .header-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
         body.dark-mode .income-card { background: #0f172a; border-color: #334155; }
-        body.dark-mode .note-item { background: #0f172a !important; border-color: #334155 !important; }
         .time-filter { background: white; border: 1px solid #e2e8f0; transition: all 0.2s ease; }
         .time-filter:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .time-filter-active { background: #3b82f6 !important; border-color: #3b82f6 !important; color: white !important; font-weight: 600; }
@@ -106,8 +105,8 @@
         .connection-dot.offline { background: #ef4444; }
         .action-btn { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 1rem; flex-shrink: 0; }
         .action-btn:hover { transform: translateY(-2px); }
-        input, select, textarea { font-size: 0.875rem; box-sizing: border-box; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        input, select { font-size: 0.875rem; box-sizing: border-box; }
+        input:focus, select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         input[type="date"] { -webkit-appearance: none; min-width: 0 !important; max-width: 100% !important; width: 100% !important; box-sizing: border-box !important; }
         .grid { max-width: 100%; }
         .grid > * { min-width: 0; max-width: 100%; }
@@ -116,8 +115,6 @@
         .fixed-expense-badge { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #93c5fd; }
         .fixed-expense-badge:hover { border-color: #3b82f6; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15); }
         .savings-history-item { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #86efac; }
-        .note-item { background: #fffbeb; border: 1px solid #fde68a; transition: all 0.15s ease; }
-        .note-item:hover { border-color: #f59e0b; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1); }
     </style>
 </head>
 <body class="min-h-screen gradient-bg">
@@ -134,15 +131,14 @@
         let authState = { isAuthenticated: false, user: null, loading: true, authView: 'login', email: '', password: '', confirmPassword: '', authError: '', authSuccess: '' };
         let state = {
             expenses: [], savingsWithdrawals: [], savingsDeposits: [], debtors: [], loans: [], 
-            fixedExpenses: [], savingsHistory: [], notes: [],
+            fixedExpenses: [], savingsHistory: [],
             monthlyIncome: '', creditCardIncome: '', owedMoney: '', projectionMonths: '', monthlySavingsPlan: '',
             description: '', amount: '', category: '🍎 Alimentación', date: new Date().toISOString().split('T')[0],
             withdrawalDescription: '', withdrawalAmount: '', depositDescription: '', depositAmount: '',
             debtorName: '', debtorAmount: '', loanName: '', loanAmount: '', loanMonths: '', loanPaid: '', loanStartDate: '',
             fixedExpenseName: '', fixedExpenseAmount: '',
-            noteText: '', editingNoteId: null,
             editingExpenseId: null, editingFixedExpenseId: null, darkMode: false, timeFilter: 'month', badges: [], lastMonthSavings: 0,
-            showSavingsSection: false, showDebtorsSection: false, showProjectionsSection: false, showLoansSection: false, showFixedExpensesSection: false, showNotesSection: false,
+            showSavingsSection: false, showDebtorsSection: false, showProjectionsSection: false, showLoansSection: false, showFixedExpensesSection: false,
             userId: null, lastSync: null
         };
         const categories = [
@@ -269,7 +265,7 @@
         
         async function handleLogout() {
             try { await supabaseClient.auth.signOut(); authState.isAuthenticated = false; authState.user = null; currentUser = null; state.userId = null;
-            state.expenses = []; state.savingsWithdrawals = []; state.savingsDeposits = []; state.debtors = []; state.loans = []; state.fixedExpenses = []; state.savingsHistory = []; state.notes = []; state.monthlyIncome = ''; state.creditCardIncome = '';
+            state.expenses = []; state.savingsWithdrawals = []; state.savingsDeposits = []; state.debtors = []; state.loans = []; state.fixedExpenses = []; state.savingsHistory = []; state.monthlyIncome = ''; state.creditCardIncome = '';
             renderAuth(); showNotification('👋 Sesión cerrada'); } catch (error) { showNotification('❌ Error al cerrar sesión', true); }
         }
         
@@ -327,24 +323,43 @@
             const now = new Date();
             let startDate;
             switch(state.timeFilter) {
-                case 'week': startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7); break;
-                case 'month': startDate = new Date(now.getFullYear(), now.getMonth(), 1); break;
-                case 'year': startDate = new Date(now.getFullYear(), 0, 1); break;
-                default: return state.expenses;
+                case 'week':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+                    break;
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'year':
+                    startDate = new Date(now.getFullYear(), 0, 1);
+                    break;
+                default:
+                    return state.expenses;
             }
             return state.expenses.filter(exp => new Date(exp.date) >= startDate);
         }
         
-        function getTotalFixedExpenses() { return state.fixedExpenses.reduce((sum, exp) => sum + exp.amount, 0); }
+        function getTotalFixedExpenses() {
+            return state.fixedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+        }
         
         function saveDataLocal() {
             const dataToSave = { 
-                expenses: state.expenses, savingsWithdrawals: state.savingsWithdrawals, savingsDeposits: state.savingsDeposits, 
-                debtors: state.debtors, loans: state.loans, fixedExpenses: state.fixedExpenses, savingsHistory: state.savingsHistory,
-                notes: state.notes,
-                monthlyIncome: state.monthlyIncome, creditCardIncome: state.creditCardIncome, projectionMonths: state.projectionMonths, 
-                monthlySavingsPlan: state.monthlySavingsPlan, darkMode: state.darkMode, badges: state.badges, 
-                lastMonthSavings: state.lastMonthSavings, syncQueue: syncQueue, lastSaved: new Date().toISOString() 
+                expenses: state.expenses, 
+                savingsWithdrawals: state.savingsWithdrawals, 
+                savingsDeposits: state.savingsDeposits, 
+                debtors: state.debtors, 
+                loans: state.loans, 
+                fixedExpenses: state.fixedExpenses, 
+                savingsHistory: state.savingsHistory,
+                monthlyIncome: state.monthlyIncome, 
+                creditCardIncome: state.creditCardIncome, 
+                projectionMonths: state.projectionMonths, 
+                monthlySavingsPlan: state.monthlySavingsPlan, 
+                darkMode: state.darkMode, 
+                badges: state.badges, 
+                lastMonthSavings: state.lastMonthSavings, 
+                syncQueue: syncQueue, 
+                lastSaved: new Date().toISOString() 
             };
             localStorage.setItem('expenseTrackerData', JSON.stringify(dataToSave));
         }
@@ -353,9 +368,14 @@
             saveDataLocal();
             if (supabaseClient && state.userId) {
                 await saveToSupabase('user_config', { 
-                    user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, 
-                    projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
-                    dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory, notes: state.notes 
+                    user_id: state.userId, 
+                    monthly_income: parseFloat(state.monthlyIncome) || 0, 
+                    credit_card_income: parseFloat(state.creditCardIncome) || 0, 
+                    projection_months: parseInt(state.projectionMonths) || 0, 
+                    monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
+                    dark_mode: state.darkMode, 
+                    badges: state.badges, 
+                    savings_history: state.savingsHistory 
                 });
                 await syncPendingQueue();
             }
@@ -371,6 +391,20 @@
                 saldoEl.textContent = formatEuro(balanceInfo.displayBalance);
                 saldoEl.className = 'saldo-display amount-display-large ' + (balanceInfo.displayBalance >= 0 ? 'text-emerald-600' : 'text-red-600');
             }
+            const saldoCard = document.getElementById('saldoCard');
+            if (saldoCard) {
+                const warningEl = saldoCard.querySelector('.text-amber-600');
+                if (balanceInfo.isUsingFromSavings && warningEl) {
+                    warningEl.textContent = '⚠️ Usando ' + formatEuro(balanceInfo.usedFromSavings) + ' de ahorros';
+                } else if (balanceInfo.isUsingFromSavings && !warningEl) {
+                    const newWarning = document.createElement('p');
+                    newWarning.className = 'text-xs text-amber-600 mt-1 font-medium';
+                    newWarning.textContent = '⚠️ Usando ' + formatEuro(balanceInfo.usedFromSavings) + ' de ahorros';
+                    saldoCard.querySelector('.saldo-display').parentNode.appendChild(newWarning);
+                } else if (!balanceInfo.isUsingFromSavings && warningEl) {
+                    warningEl.remove();
+                }
+            }
             const ahorroEl = document.getElementById('ahorroMesDisplay');
             if (ahorroEl) {
                 ahorroEl.textContent = formatEuro(balanceInfo.adjustedSavings);
@@ -382,13 +416,27 @@
                 if (supabaseClient && state.userId) {
                     try {
                         const { error } = await supabaseClient.from('user_config').upsert({
-                            user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, 
-                            projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
-                            dark_mode: state.darkMode, badges: state.badges, notes: state.notes
+                            user_id: state.userId, 
+                            monthly_income: parseFloat(state.monthlyIncome) || 0, 
+                            credit_card_income: parseFloat(state.creditCardIncome) || 0, 
+                            projection_months: parseInt(state.projectionMonths) || 0, 
+                            monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
+                            dark_mode: state.darkMode, 
+                            badges: state.badges
                         }, { onConflict: 'user_id' });
-                        if (error) { showNotification('❌ ' + error.message, true); } else { showNotification('✅ Guardado'); }
-                    } catch (e) { showNotification('❌ Error', true); }
-                } else { showNotification('✅ Guardado local'); }
+                        if (error) {
+                            console.error('Error Supabase:', error);
+                            showNotification('❌ ' + error.message, true);
+                        } else {
+                            showNotification('✅ Guardado');
+                        }
+                    } catch (e) {
+                        console.error('Exception:', e);
+                        showNotification('❌ Error', true);
+                    }
+                } else {
+                    showNotification('✅ Guardado local');
+                }
             }, 1000);
         }
         
@@ -444,28 +492,65 @@
         }
         
         async function addFixedExpense() {
-            if (!state.fixedExpenseName || !state.fixedExpenseAmount || parseFloat(state.fixedExpenseAmount) <= 0) { showNotification('❌ Completa todos los campos', true); return; }
+            if (!state.fixedExpenseName || !state.fixedExpenseAmount || parseFloat(state.fixedExpenseAmount) <= 0) { 
+                showNotification('❌ Completa todos los campos', true); return; 
+            }
             if (state.editingFixedExpenseId) {
                 const index = state.fixedExpenses.findIndex(exp => exp.id === state.editingFixedExpenseId);
-                if (index !== -1) { const updated = { id: state.editingFixedExpenseId, user_id: state.userId, name: state.fixedExpenseName, amount: parseFloat(state.fixedExpenseAmount) };
-                state.fixedExpenses[index] = updated; saveDataLocal(); await saveToSupabase('fixed_expenses', updated); showNotification('✅ Gasto fijo actualizado'); }
+                if (index !== -1) { 
+                    const updated = { id: state.editingFixedExpenseId, user_id: state.userId, name: state.fixedExpenseName, amount: parseFloat(state.fixedExpenseAmount) };
+                    state.fixedExpenses[index] = updated; 
+                    saveDataLocal(); 
+                    await saveToSupabase('fixed_expenses', updated); 
+                    showNotification('✅ Gasto fijo actualizado'); 
+                }
                 state.editingFixedExpenseId = null;
             } else {
                 const newFixed = { id: Date.now(), user_id: state.userId, name: state.fixedExpenseName, amount: parseFloat(state.fixedExpenseAmount) };
-                state.fixedExpenses.unshift(newFixed); saveDataLocal(); await saveToSupabase('fixed_expenses', newFixed); showNotification('✅ Gasto fijo añadido');
+                state.fixedExpenses.unshift(newFixed); 
+                saveDataLocal(); 
+                await saveToSupabase('fixed_expenses', newFixed); 
+                showNotification('✅ Gasto fijo añadido');
             }
-            state.fixedExpenseName = ''; state.fixedExpenseAmount = ''; render();
+            state.fixedExpenseName = ''; state.fixedExpenseAmount = '';
+            render();
         }
 
         function editFixedExpense(id) {
             const fixed = state.fixedExpenses.find(exp => exp.id === id);
-            if (fixed) { state.editingFixedExpenseId = id; state.fixedExpenseName = fixed.name; state.fixedExpenseAmount = fixed.amount.toString(); render();
-            setTimeout(() => { const section = document.getElementById('showFixedExpensesSection'); if (section && !section.classList.contains('open')) toggleSection('showFixedExpensesSection'); document.getElementById('fixedExpenseName')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100); }
+            if (fixed) { 
+                state.editingFixedExpenseId = id; 
+                state.fixedExpenseName = fixed.name; 
+                state.fixedExpenseAmount = fixed.amount.toString(); 
+                render();
+                setTimeout(() => { 
+                    const section = document.getElementById('showFixedExpensesSection');
+                    if (section && !section.classList.contains('open')) {
+                        toggleSection('showFixedExpensesSection');
+                    }
+                    document.getElementById('fixedExpenseName')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+                }, 100); 
+            }
         }
 
-        function cancelEditFixed() { state.editingFixedExpenseId = null; state.fixedExpenseName = ''; state.fixedExpenseAmount = ''; render(); }
-        async function deleteFixedExpense(id) { state.fixedExpenses = state.fixedExpenses.filter(exp => exp.id !== id); saveDataLocal(); await deleteFromSupabase('fixed_expenses', id); render(); showNotification('🗑️ Gasto fijo eliminado'); }
-        function handleDeleteFixedExpense(id) { if (confirm('¿Eliminar este gasto fijo?')) deleteFixedExpense(id); }
+        function cancelEditFixed() { 
+            state.editingFixedExpenseId = null; 
+            state.fixedExpenseName = ''; 
+            state.fixedExpenseAmount = ''; 
+            render(); 
+        }
+
+        async function deleteFixedExpense(id) { 
+            state.fixedExpenses = state.fixedExpenses.filter(exp => exp.id !== id); 
+            saveDataLocal(); 
+            await deleteFromSupabase('fixed_expenses', id); 
+            render(); 
+            showNotification('🗑️ Gasto fijo eliminado'); 
+        }
+
+        function handleDeleteFixedExpense(id) { 
+            if (confirm('¿Eliminar este gasto fijo?')) deleteFixedExpense(id); 
+        }
         
         function getTotalByCategory() {
             const totals = {};
@@ -475,20 +560,40 @@
         }
         
         function getTotalMonth() { return getFilteredExpenses().reduce((sum, exp) => sum + exp.amount, 0); }
+        
         function getTotalIncome() { return (parseFloat(state.monthlyIncome) || 0) + (parseFloat(state.creditCardIncome) || 0); }
+        
         function getTotalWithdrawals() { return state.savingsWithdrawals.reduce((sum, w) => sum + w.amount, 0); }
+        
         function getTotalDeposits() { return state.savingsDeposits.reduce((sum, d) => sum + d.amount, 0); }
+        
         function getNetSavings() { const typeTotals = getTotalByType(); return typeTotals.ahorro + getTotalDeposits() - getTotalWithdrawals(); }
         
         function getBalanceInfo() {
-            const totalIncome = getTotalIncome(); const totalExpenses = getTotalMonth(); const fixedExpenses = getTotalFixedExpenses(); const monthlyLoanPayments = getTotalMonthlyLoanPayments();
-            const rawBalance = totalIncome - totalExpenses - fixedExpenses - monthlyLoanPayments; const netSavings = getNetSavings();
+            const totalIncome = getTotalIncome();
+            const totalExpenses = getTotalMonth();
+            const fixedExpenses = getTotalFixedExpenses();
+            const monthlyLoanPayments = getTotalMonthlyLoanPayments();
+            const rawBalance = totalIncome - totalExpenses - fixedExpenses - monthlyLoanPayments;
+            const netSavings = getNetSavings();
+            
             if (rawBalance < 0) {
-                const deficit = Math.abs(rawBalance); const usedFromSavings = Math.min(deficit, Math.max(0, netSavings));
-                const adjustedSavings = netSavings - usedFromSavings; const remainingDeficit = deficit - usedFromSavings;
-                return { rawBalance, displayBalance: remainingDeficit > 0 ? -remainingDeficit : 0, usedFromSavings, adjustedSavings, isUsingFromSavings: usedFromSavings > 0, savingsInsufficient: remainingDeficit > 0 };
+                const deficit = Math.abs(rawBalance);
+                const usedFromSavings = Math.min(deficit, Math.max(0, netSavings));
+                const adjustedSavings = netSavings - usedFromSavings;
+                const remainingDeficit = deficit - usedFromSavings;
+                
+                return {
+                    rawBalance: rawBalance,
+                    displayBalance: remainingDeficit > 0 ? -remainingDeficit : 0,
+                    usedFromSavings: usedFromSavings,
+                    adjustedSavings: adjustedSavings,
+                    isUsingFromSavings: usedFromSavings > 0,
+                    savingsInsufficient: remainingDeficit > 0
+                };
             }
-            return { rawBalance, displayBalance: rawBalance, usedFromSavings: 0, adjustedSavings: netSavings, isUsingFromSavings: false, savingsInsufficient: false };
+            
+            return { rawBalance: rawBalance, displayBalance: rawBalance, usedFromSavings: 0, adjustedSavings: netSavings, isUsingFromSavings: false, savingsInsufficient: false };
         }
         
         async function addWithdrawal() {
@@ -521,31 +626,85 @@
         }
         
         async function deleteDebtor(id) { state.debtors = state.debtors.filter(d => d.id !== id); saveDataLocal(); await deleteFromSupabase('debtors', id); render(); showNotification('🗑️ Deudor eliminado'); }
+        
         function remindDebtorWhatsApp(name, amount) { const message = 'Hola ' + name + ', te recuerdo que me debes ' + formatEuro(amount) + '. ¡Gracias! 😊'; window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank'); }
         
         function getTotalLoans() { return state.loans.reduce((sum, loan) => sum + loan.pendingAmount, 0); }
+        
         function getTotalMonthlyLoanPayments() {
             const currentMonth = new Date().toISOString().slice(0, 7);
             return state.loans.reduce((sum, loan) => { if (loan.startDate && loan.startDate > currentMonth) return sum; return sum + loan.monthlyPayment; }, 0);
         }
+        
         function isLoanActive(loan) { if (!loan.startDate) return true; const currentMonth = new Date().toISOString().slice(0, 7); return loan.startDate <= currentMonth; }
         
+        // ========== FIX #3: resetMonth CORREGIDO ==========
         async function resetMonth() {
-            if (!confirm('⚠️ ¿Estás seguro de iniciar un nuevo mes?\n\n✅ Se GUARDARÁN:\n• Gastos fijos mensuales\n• Ahorros (en historial)\n• Préstamos\n• Deudores\n• Notas\n\n❌ Se BORRARÁN:\n• Gastos del mes\n• Ingresos del mes\n• Movimientos de ahorro')) return;
+            if (!confirm('⚠️ ¿Estás seguro de iniciar un nuevo mes?\n\n✅ Se GUARDARÁN:\n• Gastos fijos mensuales\n• Ahorros (en historial)\n• Préstamos\n• Deudores\n\n❌ Se BORRARÁN:\n• Gastos del mes\n• Ingresos del mes\n• Movimientos de ahorro')) return;
+            
             showNotification('🔄 Reseteando mes...');
-            const currentMonth = new Date().toISOString().slice(0, 7); const currentSavings = getNetSavings();
-            if (currentSavings !== 0) { const existingIndex = state.savingsHistory.findIndex(h => h.month === currentMonth); if (existingIndex >= 0) state.savingsHistory[existingIndex].amount = currentSavings; else state.savingsHistory.push({ month: currentMonth, amount: currentSavings }); }
-            if (supabaseClient && state.userId) {
-                try { await supabaseClient.from('expenses').delete().eq('user_id', state.userId); await supabaseClient.from('savings_withdrawals').delete().eq('user_id', state.userId); await supabaseClient.from('savings_deposits').delete().eq('user_id', state.userId); }
-                catch (error) { console.error('Error borrando de Supabase en reset:', error); }
+            
+            // Guardar el ahorro actual en el historial
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const currentSavings = getNetSavings();
+            
+            if (currentSavings !== 0) {
+                const existingIndex = state.savingsHistory.findIndex(h => h.month === currentMonth);
+                if (existingIndex >= 0) {
+                    state.savingsHistory[existingIndex].amount = currentSavings;
+                } else {
+                    state.savingsHistory.push({ month: currentMonth, amount: currentSavings });
+                }
             }
-            state.expenses = []; state.monthlyIncome = ''; state.creditCardIncome = ''; state.savingsWithdrawals = []; state.savingsDeposits = [];
+            
+            // Borrar gastos de Supabase
+            if (supabaseClient && state.userId) {
+                try {
+                    // Borrar todos los gastos del usuario de una vez (más eficiente)
+                    await supabaseClient.from('expenses').delete().eq('user_id', state.userId);
+                    // Borrar movimientos de ahorro
+                    await supabaseClient.from('savings_withdrawals').delete().eq('user_id', state.userId);
+                    await supabaseClient.from('savings_deposits').delete().eq('user_id', state.userId);
+                } catch (error) {
+                    console.error('Error borrando de Supabase en reset:', error);
+                }
+            }
+            
+            // Limpiar estado local
+            state.expenses = [];
+            state.monthlyIncome = ''; 
+            state.creditCardIncome = '';
+            state.savingsWithdrawals = [];
+            state.savingsDeposits = [];
+            
+            // LOS GASTOS FIJOS, PRÉSTAMOS, DEUDORES Y HISTORIAL DE AHORROS SE MANTIENEN
+            
+            // Guardar localmente primero
             saveDataLocal();
+            
+            // Guardar config en Supabase
             if (supabaseClient && state.userId) {
-                try { await supabaseClient.from('user_config').upsert({ user_id: state.userId, monthly_income: 0, credit_card_income: 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory, notes: state.notes }, { onConflict: 'user_id' }); }
-                catch (error) { console.error('Error guardando config en reset:', error); }
+                try {
+                    await supabaseClient.from('user_config').upsert({ 
+                        user_id: state.userId, 
+                        monthly_income: 0, 
+                        credit_card_income: 0, 
+                        projection_months: parseInt(state.projectionMonths) || 0, 
+                        monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
+                        dark_mode: state.darkMode, 
+                        badges: state.badges, 
+                        savings_history: state.savingsHistory 
+                    }, { onConflict: 'user_id' });
+                } catch (error) {
+                    console.error('Error guardando config en reset:', error);
+                }
             }
-            saveDataLocal(); render(); showNotification('🔄 ¡Nuevo mes iniciado! Ahorro guardado en historial');
+            
+            // Guardar localmente de nuevo con todo limpio
+            saveDataLocal();
+            
+            render(); 
+            showNotification('🔄 ¡Nuevo mes iniciado! Ahorro guardado en historial');
         }
         
         async function addLoan() {
@@ -598,59 +757,8 @@
             return messages;
         }
         
-        function getTotalAccumulatedSavings() { return state.savingsHistory.reduce((sum, record) => sum + record.amount, 0); }
-
-        // ========== NOTES FUNCTIONS ==========
-        async function addNote() {
-            const text = state.noteText.trim();
-            if (!text) { showNotification('❌ Escribe algo', true); return; }
-            if (state.editingNoteId) {
-                const idx = state.notes.findIndex(n => n.id === state.editingNoteId);
-                if (idx !== -1) { state.notes[idx].text = text; state.notes[idx].updatedAt = new Date().toISOString(); }
-                state.editingNoteId = null;
-                showNotification('✅ Nota actualizada');
-            } else {
-                state.notes.unshift({ id: Date.now(), text, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-                showNotification('✅ Nota añadida');
-            }
-            state.noteText = '';
-            saveDataLocal();
-            await saveNotesToSupabase();
-            render();
-        }
-
-        function editNote(id) {
-            const note = state.notes.find(n => n.id === id);
-            if (note) { state.editingNoteId = id; state.noteText = note.text; render();
-            setTimeout(() => { const section = document.getElementById('showNotesSection'); if (section && !section.classList.contains('open')) toggleSection('showNotesSection'); document.getElementById('noteText')?.focus(); }, 100); }
-        }
-
-        function cancelEditNote() { state.editingNoteId = null; state.noteText = ''; render(); }
-
-        async function deleteNote(id) {
-            if (!confirm('¿Eliminar esta nota?')) return;
-            state.notes = state.notes.filter(n => n.id !== id);
-            saveDataLocal();
-            await saveNotesToSupabase();
-            render();
-            showNotification('🗑️ Nota eliminada');
-        }
-
-        async function saveNotesToSupabase() {
-            if (supabaseClient && state.userId) {
-                try {
-                    await supabaseClient.from('user_config').upsert({
-                        user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0,
-                        projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0,
-                        dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory, notes: state.notes
-                    }, { onConflict: 'user_id' });
-                } catch (e) { console.error('Error guardando notas:', e); }
-            }
-        }
-
-        function formatNoteDate(dateStr) {
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) + ' ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        function getTotalAccumulatedSavings() {
+            return state.savingsHistory.reduce((sum, record) => sum + record.amount, 0);
         }
         
         let chartInstance = null;
@@ -691,20 +799,37 @@
         function showSavingsDetail() {
             const savingsExpenses = getFilteredExpenses().filter(exp => getCategoryType(exp.category) === 'ahorro');
             const totalFromExpenses = savingsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-            const balanceInfo = getBalanceInfo(); const totalAccumulated = getTotalAccumulatedSavings();
+            const balanceInfo = getBalanceInfo();
+            const totalAccumulated = getTotalAccumulatedSavings();
+            
             let content = '<div class="space-y-3 mb-4">' +
                 '<div class="p-3 bg-emerald-50 rounded-lg flex justify-between items-center"><span class="text-sm text-emerald-700">Por categorías</span><span class="font-bold text-emerald-800">' + formatEuro(totalFromExpenses) + '</span></div>' +
                 '<div class="p-3 bg-blue-50 rounded-lg flex justify-between items-center"><span class="text-sm text-blue-700">Ingresos extras</span><span class="font-bold text-blue-800">+' + formatEuro(getTotalDeposits()) + '</span></div>' +
                 '<div class="p-3 bg-red-50 rounded-lg flex justify-between items-center"><span class="text-sm text-red-700">Retiros</span><span class="font-bold text-red-800">-' + formatEuro(getTotalWithdrawals()) + '</span></div>' +
                 (balanceInfo.isUsingFromSavings ? '<div class="p-3 bg-amber-50 rounded-lg flex justify-between items-center border border-amber-200"><span class="text-sm text-amber-700">⚠️ Usado para cubrir déficit</span><span class="font-bold text-amber-800">-' + formatEuro(balanceInfo.usedFromSavings) + '</span></div>' : '') +
                 '<div class="p-3 bg-gray-100 rounded-lg flex justify-between items-center border-t-2 ' + (balanceInfo.adjustedSavings >= 0 ? 'border-emerald-500' : 'border-red-500') + '"><span class="text-sm font-semibold text-gray-700">Ahorro Este Mes</span><span class="font-bold ' + (balanceInfo.adjustedSavings >= 0 ? 'text-emerald-700' : 'text-red-700') + '">' + formatEuro(balanceInfo.adjustedSavings) + '</span></div></div>';
+            
             if (state.savingsHistory.length > 0) {
-                content += '<div class="border-t border-gray-200 pt-3 mt-3"><div class="flex justify-between items-center mb-3"><p class="text-xs font-semibold text-gray-500 uppercase">📊 Historial Mensual</p><div class="px-2 py-1 bg-emerald-100 rounded-full"><span class="text-xs font-bold text-emerald-700">Total: ' + formatEuro(totalAccumulated) + '</span></div></div><div class="space-y-2 max-h-48 overflow-y-auto custom-scroll">';
-                state.savingsHistory.slice().reverse().forEach(record => { const monthName = new Date(record.month + '-01').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }); const isPositive = record.amount >= 0;
-                content += '<div class="flex justify-between items-center p-2 ' + (isPositive ? 'savings-history-item' : 'bg-red-50 border border-red-200') + ' rounded-lg"><span class="text-xs text-gray-600 capitalize">' + monthName + '</span><span class="font-semibold ' + (isPositive ? 'text-emerald-700' : 'text-red-600') + ' text-sm">' + formatEuro(record.amount) + '</span></div>'; });
+                content += '<div class="border-t border-gray-200 pt-3 mt-3">' +
+                    '<div class="flex justify-between items-center mb-3"><p class="text-xs font-semibold text-gray-500 uppercase">📊 Historial Mensual</p>' +
+                    '<div class="px-2 py-1 bg-emerald-100 rounded-full"><span class="text-xs font-bold text-emerald-700">Total: ' + formatEuro(totalAccumulated) + '</span></div></div>' +
+                    '<div class="space-y-2 max-h-48 overflow-y-auto custom-scroll">';
+                
+                state.savingsHistory.slice().reverse().forEach(record => {
+                    const monthName = new Date(record.month + '-01').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+                    const isPositive = record.amount >= 0;
+                    content += '<div class="flex justify-between items-center p-2 ' + (isPositive ? 'savings-history-item' : 'bg-red-50 border border-red-200') + ' rounded-lg">' +
+                        '<span class="text-xs text-gray-600 capitalize">' + monthName + '</span>' +
+                        '<span class="font-semibold ' + (isPositive ? 'text-emerald-700' : 'text-red-600') + ' text-sm">' + formatEuro(record.amount) + '</span></div>';
+                });
                 content += '</div></div>';
-            } else { content += '<div class="border-t border-gray-200 pt-3 mt-3 text-center"><p class="text-gray-400 text-xs py-2">📊 El historial aparecerá cuando uses "Reset (nuevo mes)"</p></div>'; }
-            document.getElementById('modalTitle').textContent = 'Ahorro Neto'; document.getElementById('modalContent').innerHTML = content; document.getElementById('detailModal').classList.remove('hidden');
+            } else {
+                content += '<div class="border-t border-gray-200 pt-3 mt-3 text-center"><p class="text-gray-400 text-xs py-2">📊 El historial aparecerá cuando uses "Reset (nuevo mes)"</p></div>';
+            }
+            
+            document.getElementById('modalTitle').textContent = 'Ahorro Neto';
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
         }
         
         function showLoansDetail() {
@@ -713,7 +838,9 @@
                 '<div class="space-y-3 mb-4"><div class="p-3 bg-orange-50 rounded-lg flex justify-between items-center"><span class="text-sm text-orange-700">Deuda total</span><span class="font-bold text-orange-800">' + formatEuro(getTotalLoans()) + '</span></div>' +
                 '<div class="p-3 bg-gray-100 rounded-lg flex justify-between items-center"><span class="text-sm text-gray-700">Cuota mensual</span><span class="font-bold text-gray-800">' + formatEuro(getTotalMonthlyLoanPayments()) + '</span></div></div><div class="space-y-2">' +
                 activeLoans.map(l => '<div class="p-3 bg-orange-50 rounded-lg"><p class="font-medium text-sm text-gray-800">' + l.name + '</p><div class="flex justify-between text-xs mt-1"><span class="text-gray-500">Pendiente: ' + formatEuro(l.pendingAmount) + '</span><span class="text-gray-500">Cuota: ' + formatEuro(l.monthlyPayment) + '</span></div></div>').join('') + '</div>';
-            document.getElementById('modalTitle').textContent = 'Préstamos'; document.getElementById('modalContent').innerHTML = content; document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('modalTitle').textContent = 'Préstamos';
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
         }
         
         function showFixedExpensesDetail() {
@@ -721,7 +848,9 @@
             let content = state.fixedExpenses.length === 0 ? '<p class="text-gray-400 text-center py-8">No hay gastos fijos</p>' :
                 '<div class="mb-4 p-3 bg-blue-50 rounded-lg flex justify-between items-center"><span class="text-sm text-blue-700">Total mensual</span><span class="font-bold text-blue-800">' + formatEuro(total) + '</span></div><div class="space-y-2">' +
                 state.fixedExpenses.map(exp => '<div class="flex justify-between items-center p-3 fixed-expense-badge rounded-lg"><div class="flex-1 min-w-0"><p class="font-medium text-sm text-gray-800">📌 ' + exp.name + '</p></div><span class="font-semibold text-blue-700 ml-3">' + formatEuro(exp.amount) + '</span></div>').join('') + '</div>';
-            document.getElementById('modalTitle').textContent = 'Gastos Fijos Mensuales'; document.getElementById('modalContent').innerHTML = content; document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('modalTitle').textContent = 'Gastos Fijos Mensuales';
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
         }
         
         function closeDetailModal(event) { if (!event || event.target.id === 'detailModal') document.getElementById('detailModal').classList.add('hidden'); }
@@ -738,17 +867,16 @@
             doc.text('Resumen Financiero', margin, y); y += 10;
             const balanceInfo = getBalanceInfo();
             doc.autoTable({ startY: y, head: [['Concepto', 'Importe']], body: [
-                ['Total Ingresos', formatEuro(getTotalIncome())], ['Total Gastos Variables', formatEuro(getTotalMonth())],
-                ['Gastos Fijos Mensuales', formatEuro(getTotalFixedExpenses())], ['Cuotas Préstamos', formatEuro(getTotalMonthlyLoanPayments())], 
-                ['Saldo Disponible', formatEuro(balanceInfo.displayBalance)], ['Ahorro Este Mes', formatEuro(balanceInfo.adjustedSavings)], 
-                ['Ahorro Acumulado', formatEuro(getTotalAccumulatedSavings())], ['Me Deben', formatEuro(getTotalOwed())], ['Deuda Préstamos', formatEuro(getTotalLoans())]
+                ['Total Ingresos', formatEuro(getTotalIncome())], 
+                ['Total Gastos Variables', formatEuro(getTotalMonth())],
+                ['Gastos Fijos Mensuales', formatEuro(getTotalFixedExpenses())],
+                ['Cuotas Préstamos', formatEuro(getTotalMonthlyLoanPayments())], 
+                ['Saldo Disponible', formatEuro(balanceInfo.displayBalance)],
+                ['Ahorro Este Mes', formatEuro(balanceInfo.adjustedSavings)], 
+                ['Ahorro Acumulado', formatEuro(getTotalAccumulatedSavings())],
+                ['Me Deben', formatEuro(getTotalOwed())], 
+                ['Deuda Préstamos', formatEuro(getTotalLoans())]
             ], theme: 'striped', headStyles: { fillColor: [59, 130, 246] }, margin: { left: margin, right: margin } });
-            if (state.notes.length > 0) {
-                let notesY = doc.lastAutoTable.finalY + 15;
-                doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.text('Notas', margin, notesY); notesY += 8;
-                doc.setFontSize(10); doc.setFont('helvetica', 'normal');
-                state.notes.forEach(n => { const lines = doc.splitTextToSize(n.text, pageWidth - 2 * margin); if (notesY + lines.length * 5 > 280) { doc.addPage(); notesY = 20; } doc.text(lines, margin, notesY); notesY += lines.length * 5 + 4; });
-            }
             doc.save('reporte_gastos_' + new Date().toISOString().split('T')[0] + '.pdf');
             showNotification('📄 PDF descargado');
         }
@@ -759,12 +887,17 @@
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    state.expenses = data.expenses || []; state.savingsWithdrawals = data.savingsWithdrawals || [];
-                    state.savingsDeposits = data.savingsDeposits || []; state.debtors = data.debtors || [];
-                    state.loans = data.loans || []; state.fixedExpenses = data.fixedExpenses || [];
-                    state.savingsHistory = data.savingsHistory || []; state.notes = data.notes || [];
-                    state.monthlyIncome = data.monthlyIncome || ''; state.creditCardIncome = data.creditCardIncome || ''; 
-                    state.projectionMonths = data.projectionMonths || ''; state.monthlySavingsPlan = data.monthlySavingsPlan || '';
+                    state.expenses = data.expenses || []; 
+                    state.savingsWithdrawals = data.savingsWithdrawals || [];
+                    state.savingsDeposits = data.savingsDeposits || [];
+                    state.debtors = data.debtors || [];
+                    state.loans = data.loans || [];
+                    state.fixedExpenses = data.fixedExpenses || [];
+                    state.savingsHistory = data.savingsHistory || [];
+                    state.monthlyIncome = data.monthlyIncome || '';
+                    state.creditCardIncome = data.creditCardIncome || ''; 
+                    state.projectionMonths = data.projectionMonths || '';
+                    state.monthlySavingsPlan = data.monthlySavingsPlan || '';
                     saveData(); render(); showNotification('✅ Datos importados');
                 } catch (error) { showNotification('❌ Error al importar', true); }
             };
@@ -772,9 +905,14 @@
         }
         
         function render() {
-            const typeTotals = getTotalByType(); const totals = getTotalByCategory(); const monthTotal = getTotalMonth();
-            const totalLoans = getTotalLoans(); const monthlyLoanPayments = getTotalMonthlyLoanPayments();
-            const fixedExpensesTotal = getTotalFixedExpenses(); const balanceInfo = getBalanceInfo(); const projections = calculateProjections();
+            const typeTotals = getTotalByType(); 
+            const totals = getTotalByCategory(); 
+            const monthTotal = getTotalMonth();
+            const totalLoans = getTotalLoans(); 
+            const monthlyLoanPayments = getTotalMonthlyLoanPayments();
+            const fixedExpensesTotal = getTotalFixedExpenses();
+            const balanceInfo = getBalanceInfo(); 
+            const projections = calculateProjections();
             const earnedBadges = badgeDefinitions.filter(b => state.badges.includes(b.id));
             const hasExpenses = Object.values(totals).some(v => v > 0);
             const totalAccumulatedSavings = getTotalAccumulatedSavings();
@@ -859,19 +997,26 @@
                         ${getFilteredExpenses().length > 0 ? '<div class="mt-3 pt-3 border-t border-gray-100"><div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><span class="text-sm font-medium text-gray-600">Total Gastos</span><span class="amount-display-large text-blue-600">' + formatEuro(monthTotal) + '</span></div></div>' : ''}
                     </div>
                 </div>
-                <div class="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+                <div class="grid md:grid-cols-5 gap-4 mb-4">
                     <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100">
                         <button onclick="toggleSection('showFixedExpensesSection')" class="w-full flex justify-between items-center mb-3">
                             <h2 class="text-base font-semibold text-gray-800">📌 Gastos Fijos</h2>
                             <span id="showFixedExpensesSectionBtn" class="toggle-btn text-lg ${state.showFixedExpensesSection ? 'open' : ''}">▼</span>
                         </button>
                         <div id="showFixedExpensesSection" class="collapsible-content ${state.showFixedExpensesSection ? 'open' : ''} custom-scroll">
-                            <div class="mb-3 p-3 bg-blue-50 rounded-lg text-center"><p class="text-xs text-gray-500 mb-1">Total mensual</p><p class="text-xl font-bold text-blue-600">${formatEuro(fixedExpensesTotal)}</p><p class="text-xs text-blue-500 mt-1">Se descuenta del saldo</p></div>
+                            <div class="mb-3 p-3 bg-blue-50 rounded-lg text-center">
+                                <p class="text-xs text-gray-500 mb-1">Total mensual</p>
+                                <p class="text-xl font-bold text-blue-600">${formatEuro(fixedExpensesTotal)}</p>
+                                <p class="text-xs text-blue-500 mt-1">Se descuenta del saldo</p>
+                            </div>
                             <div class="space-y-2 mb-3 ${state.editingFixedExpenseId ? 'border-2 border-amber-200 p-2 rounded-lg' : ''}">
                                 ${state.editingFixedExpenseId ? '<p class="text-xs text-amber-600 font-semibold mb-2">✏️ Editando gasto fijo</p>' : ''}
                                 <input type="text" id="fixedExpenseName" value="${state.fixedExpenseName}" placeholder="Nombre (ej: Alquiler)" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
                                 <input type="number" id="fixedExpenseAmount" value="${state.fixedExpenseAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-                                <div class="flex gap-2"><button onclick="addFixedExpense()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm">${state.editingFixedExpenseId ? '✓ Actualizar' : '+ Añadir'}</button>${state.editingFixedExpenseId ? '<button onclick="cancelEditFixed()" class="px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg text-sm">✕</button>' : ''}</div>
+                                <div class="flex gap-2">
+                                    <button onclick="addFixedExpense()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm">${state.editingFixedExpenseId ? '✓ Actualizar' : '+ Añadir'}</button>
+                                    ${state.editingFixedExpenseId ? '<button onclick="cancelEditFixed()" class="px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg text-sm">✕</button>' : ''}
+                                </div>
                             </div>
                             ${state.fixedExpenses.length > 0 ? '<div class="space-y-2">' + state.fixedExpenses.map(exp => '<div class="flex justify-between items-center p-2 fixed-expense-badge rounded-lg"><div class="flex-1 min-w-0"><p class="font-medium text-xs text-gray-800">📌 ' + exp.name + '</p></div><div class="flex items-center gap-1"><span class="font-semibold text-blue-700 text-sm">' + formatEuro(exp.amount) + '</span><button onclick="editFixedExpense(' + exp.id + ')" class="text-gray-400 hover:text-blue-500 p-1">✏️</button><button onclick="handleDeleteFixedExpense(' + exp.id + ')" class="text-gray-400 hover:text-red-500 p-1">🗑️</button></div></div>').join('') + '</div>' : '<p class="text-gray-400 text-xs text-center py-3">Sin gastos fijos</p>'}
                         </div>
@@ -898,4 +1043,150 @@
                         <div id="showLoansSection" class="collapsible-content ${state.showLoansSection ? 'open' : ''} custom-scroll">
                             <div class="mb-3 p-3 bg-orange-50 rounded-lg"><div class="flex justify-between text-xs text-gray-600 mb-1"><span>Deuda total</span><span class="font-semibold text-orange-700">${formatEuro(totalLoans)}</span></div><div class="flex justify-between border-t border-orange-200 pt-2"><span class="text-sm font-medium text-gray-700">Cuota mensual</span><span class="text-sm font-bold text-orange-700">${formatEuro(monthlyLoanPayments)}</span></div></div>
                             <div class="space-y-2 mb-3"><input type="text" id="loanName" value="${state.loanName}" placeholder="Nombre préstamo" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" /><div class="grid grid-cols-2 gap-2"><input type="number" id="loanAmount" value="${state.loanAmount}" placeholder="Capital" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" /><input type="number" id="loanMonths" value="${state.loanMonths}" placeholder="Meses" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" /></div><input type="number" id="loanPaid" value="${state.loanPaid}" placeholder="Ya pagado (opcional)" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" /><div><label class="text-xs text-gray-500 mb-1 block">1ª cuota</label><input type="month" id="loanStartDate" value="${state.loanStartDate}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" /></div><button onclick="addLoan()" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg text-sm">+ Añadir</button></div>
-                            ${state.loans.length > 0 ? '<div class="space-y-3">' + state.loans.map(l => { const active = isLoanActive(l); return '<div class="p-3 ' + (active ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200') + ' rounded-lg border"><div class="flex justify-between items-start mb-2"><div class="flex-1 min-w-0"><p class="font-semibold text-sm text-gray-800">' + l.name + '</p><p class="text-xs text-gray-500">' + l.
+                            ${state.loans.length > 0 ? '<div class="space-y-3">' + state.loans.map(l => { const active = isLoanActive(l); return '<div class="p-3 ' + (active ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200') + ' rounded-lg border"><div class="flex justify-between items-start mb-2"><div class="flex-1 min-w-0"><p class="font-semibold text-sm text-gray-800">' + l.name + '</p><p class="text-xs text-gray-500">' + l.remainingMonths + ' meses</p></div><button onclick="handleDeleteLoan(' + l.id + ')" class="text-gray-400 hover:text-red-500 p-1">🗑️</button></div><div class="flex justify-between text-xs mb-2"><span class="text-gray-500">Pendiente</span><span class="font-bold text-orange-700">' + formatEuro(l.pendingAmount) + '</span></div><div class="w-full bg-gray-200 rounded-full h-1.5 mb-2"><div class="' + (active ? 'bg-orange-500' : 'bg-gray-400') + ' h-1.5 rounded-full" style="width: ' + (l.paidAmount / l.totalAmount) * 100 + '%"></div></div><button onclick="payLoan(' + l.id + ')" class="w-full ' + (active ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-gray-400') + ' text-white py-1.5 rounded text-xs"' + (!active ? ' disabled' : '') + '>✓ Pagar ' + formatEuro(l.monthlyPayment) + '</button></div>'; }).join('') + '</div>' : '<p class="text-gray-400 text-xs text-center py-3">Sin préstamos</p>'}
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100">
+                        <button onclick="toggleSection('showDebtorsSection')" class="w-full flex justify-between items-center mb-3"><h2 class="text-base font-semibold text-gray-800">💵 Me Deben</h2><span id="showDebtorsSectionBtn" class="toggle-btn text-lg ${state.showDebtorsSection ? 'open' : ''}">▼</span></button>
+                        <div id="showDebtorsSection" class="collapsible-content ${state.showDebtorsSection ? 'open' : ''} custom-scroll">
+                            <div class="mb-3 p-3 bg-blue-50 rounded-lg text-center"><p class="text-xs text-gray-500 mb-1">Total pendiente</p><p class="text-xl font-bold text-blue-600">${formatEuro(getTotalOwed())}</p></div>
+                            <div class="space-y-2 mb-3"><input type="text" id="debtorName" value="${state.debtorName}" placeholder="Nombre" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" /><input type="number" id="debtorAmount" value="${state.debtorAmount}" placeholder="Cantidad" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" /><button onclick="addDebtor()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm">+ Añadir</button></div>
+                            ${state.debtors.length > 0 ? '<div class="space-y-2">' + state.debtors.map(d => '<div class="flex justify-between items-center p-2 bg-blue-50 rounded-lg"><div class="flex-1 min-w-0"><p class="font-medium text-xs text-gray-800">' + d.name + '</p><p class="text-xs text-gray-400">' + d.date + '</p></div><div class="flex items-center gap-1 flex-shrink-0"><span class="font-semibold text-blue-600 text-sm">' + formatEuro(d.amount) + '</span><button onclick="remindDebtorWhatsApp(\'' + d.name.replace(/'/g, "\\'") + '\', ' + d.amount + ')" class="text-gray-400 hover:text-green-500 p-1" title="WhatsApp">📱</button><button onclick="handleDeleteDebtor(' + d.id + ')" class="text-gray-400 hover:text-red-500 p-1">🗑️</button></div></div>').join('') + '</div>' : '<p class="text-gray-400 text-xs text-center py-3">Sin deudas</p>'}
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100">
+                        <button onclick="toggleSection('showProjectionsSection')" class="w-full flex justify-between items-center mb-3"><h2 class="text-base font-semibold text-gray-800">📈 Proyecciones</h2><span id="showProjectionsSectionBtn" class="toggle-btn text-lg ${state.showProjectionsSection ? 'open' : ''}">▼</span></button>
+                        <div id="showProjectionsSection" class="collapsible-content ${state.showProjectionsSection ? 'open' : ''} custom-scroll">
+                            <div class="space-y-2 mb-3"><input type="number" id="projectionMonths" value="${state.projectionMonths}" placeholder="Meses" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" /><input type="number" id="monthlySavingsPlan" value="${state.monthlySavingsPlan}" placeholder="Ahorro mensual" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" /></div>
+                            ${state.projectionMonths && state.monthlySavingsPlan ? '<div class="grid grid-cols-2 gap-2"><div class="bg-blue-50 p-3 rounded-lg"><p class="text-xs text-blue-600 mb-1">Desde cero</p><p class="text-sm font-bold text-blue-800">' + formatEuro(projections.fromZero) + '</p></div><div class="bg-emerald-50 p-3 rounded-lg"><p class="text-xs text-emerald-600 mb-1">Con actual</p><p class="text-sm font-bold text-emerald-800">' + formatEuro(projections.withCurrent) + '</p></div><div class="bg-violet-50 p-3 rounded-lg"><p class="text-xs text-violet-600 mb-1">Sin prestado</p><p class="text-sm font-bold text-violet-800">' + formatEuro(projections.withoutOwed) + '</p></div><div class="bg-amber-50 p-3 rounded-lg"><p class="text-xs text-amber-600 mb-1">Si pagan</p><p class="text-sm font-bold text-amber-800">' + formatEuro(projections.withOwed) + '</p></div></div>' : '<p class="text-gray-400 text-xs text-center py-3">Completa los campos</p>'}
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-gray-200"><button onclick="resetMonth()" class="w-full bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 py-3 rounded-xl text-sm font-medium border border-gray-200 hover:border-red-200">🔄 Reset (nuevo mes) - Guarda ahorros en historial</button></div>
+            `;
+            
+            let saveTimeout = null;
+            function debouncedSave() { if (saveTimeout) clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDataLocal(); if (supabaseClient && state.userId) saveToSupabase('user_config', { user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory }); }, 1000); }
+            
+            ['projectionMonths', 'monthlySavingsPlan'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; render(); debouncedSave(); }); });
+            ['description', 'amount', 'withdrawalDescription', 'withdrawalAmount', 'depositDescription', 'depositAmount', 'debtorName', 'debtorAmount', 'loanName', 'loanAmount', 'loanMonths', 'loanPaid', 'loanStartDate', 'fixedExpenseName', 'fixedExpenseAmount'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => state[id] = e.target.value); 
+            });
+            const categoryEl = document.getElementById('category'); if (categoryEl) categoryEl.addEventListener('change', (e) => state.category = e.target.value);
+            const dateEl = document.getElementById('date'); if (dateEl) dateEl.addEventListener('change', (e) => state.date = e.target.value);
+            setTimeout(() => renderChart(), 100);
+        }
+        
+        async function autoInit() {
+            const savedData = localStorage.getItem('expenseTrackerData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                Object.assign(state, { 
+                    expenses: data.expenses || [], 
+                    savingsWithdrawals: data.savingsWithdrawals || [], 
+                    savingsDeposits: data.savingsDeposits || [], 
+                    debtors: data.debtors || [], 
+                    loans: data.loans || [], 
+                    fixedExpenses: data.fixedExpenses || [], 
+                    savingsHistory: data.savingsHistory || [],
+                    monthlyIncome: data.monthlyIncome || '', 
+                    creditCardIncome: data.creditCardIncome || '', 
+                    projectionMonths: data.projectionMonths || '', 
+                    monthlySavingsPlan: data.monthlySavingsPlan || '', 
+                    darkMode: data.darkMode || false, 
+                    badges: data.badges || [], 
+                    lastMonthSavings: data.lastMonthSavings || 0 
+                });
+                syncQueue = data.syncQueue || [];
+            }
+            document.body.classList.toggle('dark-mode', state.darkMode);
+            if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+                try {
+                    if (!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+                    supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+                    SUPABASE_CONFIG.initialized = true; isOnline = true;
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session && session.user) {
+                        authState.isAuthenticated = true; authState.user = session.user; authState.loading = false; currentUser = session.user; state.userId = session.user.id;
+                        await loadDataFromSupabasePublic(); checkBadges(); render();
+                        setTimeout(() => showMotivationMessages(), 1500); showNotification('✅ Conectado');
+                    } else { authState.isAuthenticated = false; authState.loading = false; renderAuth(); }
+                    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                        if (event === 'SIGNED_IN' && session) { authState.isAuthenticated = true; authState.user = session.user; currentUser = session.user; state.userId = session.user.id; await loadDataFromSupabasePublic(); checkBadges(); render(); }
+                        else if (event === 'SIGNED_OUT') { authState.isAuthenticated = false; authState.user = null; currentUser = null; state.userId = null; renderAuth(); }
+                    });
+                } catch (error) { console.error('Error auto-init:', error); isOnline = false; authState.loading = false; renderAuth(); }
+            } else { authState.loading = false; renderAuth(); }
+        }
+
+        // ========== FIX #1: loadDataFromSupabasePublic - Supabase es la fuente de verdad ==========
+        async function loadDataFromSupabasePublic() {
+            if (!supabaseClient || !state.userId) return;
+            try {
+                // EXPENSES: Supabase es la fuente de verdad
+                const { data: expenses } = await supabaseClient.from('expenses').select('*').eq('user_id', state.userId).order('date', { ascending: false });
+                if (expenses !== null) {
+                    state.expenses = expenses;
+                }
+
+                // SAVINGS WITHDRAWALS: Supabase es la fuente de verdad
+                const { data: withdrawals } = await supabaseClient.from('savings_withdrawals').select('*').eq('user_id', state.userId).order('date', { ascending: false });
+                if (withdrawals !== null) {
+                    state.savingsWithdrawals = withdrawals;
+                }
+
+                // SAVINGS DEPOSITS: Supabase es la fuente de verdad
+                const { data: deposits } = await supabaseClient.from('savings_deposits').select('*').eq('user_id', state.userId).order('date', { ascending: false });
+                if (deposits !== null) {
+                    state.savingsDeposits = deposits;
+                }
+
+                // DEBTORS: Supabase es la fuente de verdad - NO re-añadir locales borrados
+                const { data: debtors } = await supabaseClient.from('debtors').select('*').eq('user_id', state.userId).order('date', { ascending: false });
+                if (debtors !== null) {
+                    state.debtors = debtors;
+                }
+
+                // LOANS: Supabase es la fuente de verdad - NO re-añadir locales borrados
+                const { data: loans } = await supabaseClient.from('loans').select('*').eq('user_id', state.userId).order('date', { ascending: false });
+                if (loans !== null) {
+                    state.loans = loans.map(l => ({
+                        id: l.id, user_id: l.user_id, name: l.name,
+                        totalAmount: l.total_amount, pendingAmount: l.pending_amount,
+                        paidAmount: l.paid_amount, totalMonths: l.total_months,
+                        remainingMonths: l.remaining_months, monthlyPayment: l.monthly_payment,
+                        startDate: l.start_date || (l.date ? l.date.slice(0, 7) : ''),
+                        date: l.date
+                    }));
+                }
+
+                // FIXED EXPENSES: Supabase es la fuente de verdad
+                const { data: fixedExpenses } = await supabaseClient.from('fixed_expenses').select('*').eq('user_id', state.userId);
+                if (fixedExpenses !== null) {
+                    state.fixedExpenses = fixedExpenses;
+                }
+
+                // USER CONFIG
+                const { data: config } = await supabaseClient.from('user_config').select('*').eq('user_id', state.userId).single();
+                if (config) {
+                    state.monthlyIncome = config.monthly_income || '';
+                    state.creditCardIncome = config.credit_card_income || '';
+                    state.projectionMonths = config.projection_months || '';
+                    state.monthlySavingsPlan = config.monthly_savings_plan || '';
+                    state.darkMode = config.dark_mode || false;
+                    state.badges = config.badges || [];
+                    state.savingsHistory = config.savings_history || state.savingsHistory || [];
+                }
+
+                state.lastSync = new Date().toISOString();
+                saveDataLocal();
+                checkBadges();
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+            }
+        }
+
+        autoInit();
+    </script>
+</body>
+</html>
