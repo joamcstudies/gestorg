@@ -45,7 +45,7 @@
         .badge-tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-8px); padding: 6px 10px; background: #1e293b; color: white; font-size: 0.6rem; border-radius: 6px; white-space: nowrap; opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 10; }
         .badge-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: #1e293b; }
         .badge-item:hover .badge-tooltip { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-4px); }
-        .gradient-bg { background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f0f4f8 100%); min-height: 100vh; }
+        .gradient-bg { background: #f8fafc; min-height: 100vh; }
         body.dark-mode { background: #0f172a !important; color: #e2e8f0; }
         body.dark-mode .bg-white { background-color: #1e293b !important; color: #e2e8f0; }
         body.dark-mode .text-gray-800 { color: #f1f5f9 !important; }
@@ -67,44 +67,47 @@
         body.dark-mode .motivation-toast-content p { color: #e2e8f0; }
         body.dark-mode .header-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
         body.dark-mode .income-card { background: #0f172a; border-color: #334155; }
-        .time-filter { background: white; border: 1px solid #e2e8f0; transition: all 0.2s ease; }
-        .time-filter:hover { background: #f1f5f9; border-color: #cbd5e1; }
-        .time-filter-active { background: #3b82f6 !important; border-color: #3b82f6 !important; color: white !important; font-weight: 600; }
-        .card { transition: all 0.2s ease; background: white; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-        .header-card { background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e2e8f0; }
-        .income-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; transition: all 0.2s; }
-        .income-card:hover { border-color: #3b82f6; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1); }
+        body.dark-mode .bankinter-card { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border-color: #4338ca; }
+        body.dark-mode .bankinter-card label { color: #e2e8f0; }
+        body.dark-mode .bankinter-card .bg-indigo-50 { background: rgba(99, 102, 241, 0.15) !important; }
+        .time-filter { background: white; border: 1px solid #f1f5f9; transition: all 0.2s ease; border-radius: 10px; }
+        .time-filter:hover { background: #f8fafc; border-color: #e2e8f0; }
+        .time-filter-active { background: #1e293b !important; border-color: #1e293b !important; color: white !important; font-weight: 600; }
+        .card { transition: all 0.2s ease; background: white; border: 1px solid #f1f5f9; box-shadow: 0 1px 2px rgba(0,0,0,0.02); border-radius: 16px; }
+        .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+        .header-card { background: white; border: 1px solid #f1f5f9; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .income-card { background: white; border: 1px solid #f1f5f9; border-radius: 14px; padding: 12px 16px; transition: all 0.2s; }
+        .income-card:hover { border-color: #e0e7ff; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.06); }
         .income-card:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         .income-card input { border: none !important; padding: 0 !important; background: transparent !important; font-size: 1.125rem; font-weight: 600; color: #1e293b; }
         .income-card input:focus { outline: none !important; box-shadow: none !important; }
         .income-card input::placeholder { color: #94a3b8; font-weight: 400; }
-        .total-card { background: white; border: 1px solid #e2e8f0; transition: all 0.2s ease; min-width: 0; overflow: hidden; }
-        .total-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .total-card { background: white; border: 1px solid #f1f5f9; transition: all 0.2s ease; min-width: 0; overflow: hidden; border-radius: 14px; }
+        .total-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
         .amount-display { font-size: clamp(0.875rem, 2.5vw, 1.25rem); line-height: 1.3; word-break: break-word; overflow-wrap: break-word; font-weight: 700; letter-spacing: -0.02em; }
         .amount-display-large { font-size: clamp(1.125rem, 3vw, 1.5rem); line-height: 1.3; word-break: break-word; overflow-wrap: break-word; font-weight: 700; letter-spacing: -0.02em; }
         .totals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; }
-        @media (min-width: 768px) { .totals-grid { grid-template-columns: repeat(7, 1fr); } }
-        @media (max-width: 1200px) { .totals-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (min-width: 768px) { .totals-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (min-width: 1024px) { .totals-grid { grid-template-columns: repeat(8, 1fr); } }
         @media (max-width: 768px) { .totals-grid { grid-template-columns: repeat(2, 1fr); } .motivation-toast { right: 12px; left: 12px; max-width: none; } }
         .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.25s ease-out; }
-        .collapsible-content.open { max-height: 600px; overflow-y: auto; }
+        .collapsible-content.open { max-height: 800px; overflow-y: auto; }
         .toggle-btn { transition: transform 0.2s ease; color: #64748b; }
         .toggle-btn.open { transform: rotate(180deg); }
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .expense-item { transition: all 0.15s ease; background: #fafafa; border: 1px solid transparent; }
-        .expense-item:hover { background: #f0f9ff; border-color: #bae6fd; }
+        .expense-item { transition: all 0.15s ease; background: white; border: 1px solid #f1f5f9; border-radius: 10px; }
+        .expense-item:hover { background: #f8fafc; border-color: #e2e8f0; }
         .connection-status { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 500; }
         .connection-status.online { background: #dcfce7; color: #166534; }
         .connection-status.offline { background: #fee2e2; color: #991b1b; }
         .connection-dot { width: 5px; height: 5px; border-radius: 50%; }
         .connection-dot.online { background: #22c55e; }
         .connection-dot.offline { background: #ef4444; }
-        .action-btn { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 1rem; flex-shrink: 0; }
-        .action-btn:hover { transform: translateY(-2px); }
+        .action-btn { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 0.9rem; flex-shrink: 0; }
+        .action-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         input, select { font-size: 0.875rem; box-sizing: border-box; }
         input:focus, select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         input[type="date"] { -webkit-appearance: none; min-width: 0 !important; max-width: 100% !important; width: 100% !important; box-sizing: border-box !important; }
@@ -138,6 +141,7 @@
             debtorName: '', debtorAmount: '', loanName: '', loanAmount: '', loanMonths: '', loanPaid: '', loanStartDate: '',
             fixedExpenseName: '', fixedExpenseAmount: '',noteText: '', editingNoteId: null,
             editingExpenseId: null, editingFixedExpenseId: null, darkMode: false, timeFilter: 'month', badges: [], lastMonthSavings: 0,
+            bankinterSelected: [], showBankinterSection: false,
             showSavingsSection: false, showDebtorsSection: false, showProjectionsSection: false, showLoansSection: false, showFixedExpensesSection: false,showNotesSection: false,
             userId: null, lastSync: null
         };
@@ -265,7 +269,7 @@
         
         async function handleLogout() {
             try { await supabaseClient.auth.signOut(); authState.isAuthenticated = false; authState.user = null; currentUser = null; state.userId = null;
-            state.expenses = []; state.savingsWithdrawals = []; state.savingsDeposits = []; state.debtors = []; state.loans = []; state.fixedExpenses = []; state.savingsHistory = []; state.monthlyIncome = ''; state.creditCardIncome = '';
+            state.expenses = []; state.savingsWithdrawals = []; state.savingsDeposits = []; state.debtors = []; state.loans = []; state.fixedExpenses = []; state.savingsHistory = []; state.monthlyIncome = ''; state.creditCardIncome = ''; state.bankinterSelected = [];
             renderAuth(); showNotification('👋 Sesión cerrada'); } catch (error) { showNotification('❌ Error al cerrar sesión', true); }
         }
         
@@ -352,6 +356,7 @@
                 loans: state.loans, 
                 fixedExpenses: state.fixedExpenses, 
                 savingsHistory: state.savingsHistory,
+                bankinterSelected: state.bankinterSelected,
                 monthlyIncome: state.monthlyIncome, 
                 creditCardIncome: state.creditCardIncome, 
                 projectionMonths: state.projectionMonths, 
@@ -377,7 +382,8 @@
                     dark_mode: state.darkMode, 
                     badges: state.badges, 
                     savings_history: state.savingsHistory,
-                    notes: state.notes 
+                    notes: state.notes,
+                    bankinter_selected: state.bankinterSelected 
                 });
                 await syncPendingQueue();
             }
@@ -426,7 +432,8 @@
                             dark_mode: state.darkMode, 
                             badges: state.badges,
                             savings_history: state.savingsHistory,
-                            notes: state.notes
+                            notes: state.notes,
+                            bankinter_selected: state.bankinterSelected
                         }, { onConflict: 'user_id' });
                         if (error) {
                             console.error('Error Supabase:', error);
@@ -446,7 +453,7 @@
         
         function showNotification(message, isError = false) {
             const notification = document.createElement('div');
-            notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-50 animate-slide-in ' + (isError ? 'bg-red-500' : 'bg-green-500');
+            notification.className = 'fixed top-4 right-4 px-5 py-2.5 rounded-xl shadow-sm text-white font-medium z-50 animate-slide-in text-sm ' + (isError ? 'bg-red-500' : 'bg-gray-800');
             notification.textContent = message;
             document.body.appendChild(notification);
             setTimeout(() => { notification.style.opacity = '0'; notification.style.transition = 'opacity 0.3s'; setTimeout(() => notification.remove(), 300); }, 3000);
@@ -485,7 +492,7 @@
         
         function cancelEdit() { state.editingExpenseId = null; state.description = ''; state.amount = ''; state.category = '🍎 Alimentación'; state.date = new Date().toISOString().split('T')[0]; render(); }
         
-        async function deleteExpense(id) { state.expenses = state.expenses.filter(exp => exp.id !== id); saveDataLocal(); await deleteFromSupabase('expenses', id); checkBadges(); render(); showNotification('🗑️ Gasto eliminado'); }
+        async function deleteExpense(id) { state.expenses = state.expenses.filter(exp => exp.id !== id); state.bankinterSelected = state.bankinterSelected.filter(bid => bid !== id); saveDataLocal(); await deleteFromSupabase('expenses', id); checkBadges(); render(); showNotification('🗑️ Gasto eliminado'); }
         
         function getCategoryType(catName) { const cat = categories.find(c => c.name === catName); return cat ? cat.type : 'otros'; }
         
@@ -680,6 +687,7 @@
             state.creditCardIncome = '';
             state.savingsWithdrawals = [];
             state.savingsDeposits = [];
+            state.bankinterSelected = [];
             
             // LOS GASTOS FIJOS, PRÉSTAMOS, DEUDORES Y HISTORIAL DE AHORROS SE MANTIENEN
             
@@ -698,7 +706,8 @@
                         dark_mode: state.darkMode, 
                         badges: state.badges, 
                         savings_history: state.savingsHistory,
-                        notes: state.notes 
+                        notes: state.notes,
+                        bankinter_selected: []
                     }, { onConflict: 'user_id' });
                 } catch (error) {
                     console.error('Error guardando config en reset:', error);
@@ -770,6 +779,63 @@
 		function editNote(id){var n=state.notes.find(function(x){return x.id===id});if(n){state.editingNoteId=id;state.noteText=n.text;render();setTimeout(function(){var s=document.getElementById('showNotesSection');if(s&&!s.classList.contains('open'))toggleSection('showNotesSection');var el=document.getElementById('noteText');if(el)el.focus()},100)}}
 		function cancelEditNote(){state.editingNoteId=null;state.noteText='';render()}
 		async function deleteNote(id){if(!confirm('¿Eliminar esta nota?'))return;state.notes=state.notes.filter(function(n){return n.id!==id});saveDataLocal();saveData();render();showNotification('🗑️ Nota eliminada')}
+		
+        // ========== BANKINTER CREDIT CARD ==========
+        function toggleBankinterExpense(id) {
+            const idx = state.bankinterSelected.indexOf(id);
+            if (idx >= 0) {
+                state.bankinterSelected.splice(idx, 1);
+            } else {
+                state.bankinterSelected.push(id);
+            }
+            updateBankinterTotal();
+            saveDataLocal();
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => saveData(), 1500);
+        }
+        
+        function selectAllBankinter() {
+            const filtered = getFilteredExpenses();
+            const allIds = filtered.map(e => e.id);
+            const allSelected = allIds.every(id => state.bankinterSelected.includes(id));
+            if (allSelected) {
+                state.bankinterSelected = state.bankinterSelected.filter(id => !allIds.includes(id));
+            } else {
+                allIds.forEach(id => { if (!state.bankinterSelected.includes(id)) state.bankinterSelected.push(id); });
+            }
+            render();
+            saveDataLocal();
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => saveData(), 1500);
+        }
+        
+        function clearBankinter() {
+            state.bankinterSelected = [];
+            render();
+            saveDataLocal();
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => saveData(), 1500);
+        }
+        
+        function getBankinterTotal() {
+            return getFilteredExpenses().filter(e => state.bankinterSelected.includes(e.id)).reduce((sum, e) => sum + e.amount, 0);
+        }
+        
+        function getBankinterCount() {
+            return getFilteredExpenses().filter(e => state.bankinterSelected.includes(e.id)).length;
+        }
+        
+        function updateBankinterTotal() {
+            const totalEl = document.getElementById('bankinterTotal');
+            const countEl = document.getElementById('bankinterCount');
+            if (totalEl) totalEl.textContent = formatEuro(getBankinterTotal());
+            if (countEl) countEl.textContent = getBankinterCount() + ' seleccionados';
+            // Update checkboxes
+            getFilteredExpenses().forEach(exp => {
+                const cb = document.getElementById('bk_' + exp.id);
+                if (cb) cb.checked = state.bankinterSelected.includes(exp.id);
+            });
+        }
 		
         let chartInstance = null;
         function renderChart() {
@@ -885,7 +951,8 @@
                 ['Ahorro Este Mes', formatEuro(balanceInfo.adjustedSavings)], 
                 ['Ahorro Acumulado', formatEuro(getTotalAccumulatedSavings())],
                 ['Me Deben', formatEuro(getTotalOwed())], 
-                ['Deuda Préstamos', formatEuro(getTotalLoans())]
+                ['Deuda Préstamos', formatEuro(getTotalLoans())],
+                ['Tarjeta Bankinter', formatEuro(getBankinterTotal())]
             ], theme: 'striped', headStyles: { fillColor: [59, 130, 246] }, margin: { left: margin, right: margin } });
             doc.save('reporte_gastos_' + new Date().toISOString().split('T')[0] + '.pdf');
             showNotification('📄 PDF descargado');
@@ -908,6 +975,7 @@
                     state.creditCardIncome = data.creditCardIncome || ''; 
                     state.projectionMonths = data.projectionMonths || '';
                     state.monthlySavingsPlan = data.monthlySavingsPlan || '';
+                    state.bankinterSelected = data.bankinterSelected || [];
                     saveData(); render(); showNotification('✅ Datos importados');
                 } catch (error) { showNotification('❌ Error al importar', true); }
             };
@@ -978,6 +1046,7 @@
                     <div class="total-card rounded-xl p-3 border-l-4 border-indigo-400 animate-slide-in cursor-pointer hover:bg-indigo-50" onclick="showExpensesByType('bizum', 'Bizums')"><p class="text-gray-400 text-xs">Bizums</p><p class="amount-display text-gray-800">${formatEuro(typeTotals.bizum)}</p></div>
                     <div class="total-card rounded-xl p-3 border-l-4 border-sky-400 animate-slide-in cursor-pointer hover:bg-sky-50" onclick="showFixedExpensesDetail()"><p class="text-gray-400 text-xs">G. Fijos</p><p class="amount-display text-sky-600">${formatEuro(fixedExpensesTotal)}</p></div>
                     <div class="total-card rounded-xl p-3 border-l-4 border-orange-400 animate-slide-in cursor-pointer hover:bg-orange-50" onclick="showLoansDetail()"><p class="text-gray-400 text-xs">Préstamos</p><p class="amount-display text-orange-600">${formatEuro(totalLoans)}</p></div>
+                    <div class="total-card rounded-xl p-3 border-l-4 border-indigo-500 animate-slide-in cursor-pointer hover:bg-indigo-50" onclick="toggleSection('showBankinterSection')"><p class="text-gray-400 text-xs">💳 Bankinter</p><p class="amount-display text-indigo-600">${formatEuro(getBankinterTotal())}</p>${getBankinterCount() > 0 ? '<p class="text-xs text-indigo-400 mt-0.5">' + getBankinterCount() + ' gastos</p>' : ''}</div>
                 </div>
                 <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onclick="closeDetailModal(event)">
                     <div class="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
@@ -1007,7 +1076,7 @@
                         ${getFilteredExpenses().length > 0 ? '<div class="mt-3 pt-3 border-t border-gray-100"><div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><span class="text-sm font-medium text-gray-600">Total Gastos</span><span class="amount-display-large text-blue-600">' + formatEuro(monthTotal) + '</span></div></div>' : ''}
                     </div>
                 </div>
-                <div class="grid md:grid-cols-5 gap-4 mb-4">
+                <div class="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
                     <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100">
                         <button onclick="toggleSection('showFixedExpensesSection')" class="w-full flex justify-between items-center mb-3">
                             <h2 class="text-base font-semibold text-gray-800">📌 Gastos Fijos</h2>
@@ -1082,12 +1151,32 @@
                             ${state.notes.length > 0 ? '<div class="space-y-2">' + state.notes.map(n => '<div class="p-2.5 rounded-lg" style="background:#fffbeb;border:1px solid #fde68a"><p class="text-xs text-gray-700 whitespace-pre-wrap">' + n.text.replace(/</g,'&lt;') + '</p><div class="flex justify-between items-center mt-2"><span class="text-xs text-gray-400">' + new Date(n.createdAt).toLocaleDateString('es-ES',{day:'numeric',month:'short'}) + '</span><div class="flex gap-1"><button onclick="editNote(' + n.id + ')" class="text-gray-400 hover:text-blue-500 p-1">✏️</button><button onclick="deleteNote(' + n.id + ')" class="text-gray-400 hover:text-red-500 p-1">🗑️</button></div></div></div>').join('') + '</div>' : '<p class="text-gray-400 text-xs text-center py-3">Sin notas</p>'}
                         </div>
                     </div>
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100 md:col-span-2 lg:col-span-1">
+                        <button onclick="toggleSection('showBankinterSection')" class="w-full flex justify-between items-center mb-3">
+                            <h2 class="text-base font-semibold text-gray-800">💳 Bankinter Fin de Mes</h2>
+                            <span id="showBankinterSectionBtn" class="toggle-btn text-lg ${state.showBankinterSection ? 'open' : ''}">▼</span>
+                        </button>
+                        <div id="showBankinterSection" class="collapsible-content ${state.showBankinterSection ? 'open' : ''} custom-scroll">
+                            <div class="mb-3 p-3 rounded-xl" style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); border: 1px solid #c7d2fe;">
+                                <div class="flex items-center justify-between mb-1">
+                                    <p class="text-xs text-indigo-600 font-semibold">Total Tarjeta</p>
+                                    <span id="bankinterCount" class="text-xs text-indigo-400">${getBankinterCount()} seleccionados</span>
+                                </div>
+                                <p id="bankinterTotal" class="text-2xl font-bold text-indigo-700">${formatEuro(getBankinterTotal())}</p>
+                            </div>
+                            <div class="flex gap-2 mb-3">
+                                <button onclick="selectAllBankinter()" class="flex-1 text-xs py-1.5 rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50">Seleccionar todo</button>
+                                <button onclick="clearBankinter()" class="flex-1 text-xs py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50">Limpiar</button>
+                            </div>
+                            ${getFilteredExpenses().length > 0 ? '<div class="space-y-1.5">' + getFilteredExpenses().map(exp => '<label class="flex items-center gap-2.5 p-2 rounded-lg cursor-pointer transition-all ' + (state.bankinterSelected.includes(exp.id) ? 'bg-indigo-50 border border-indigo-200' : 'hover:bg-gray-50 border border-transparent') + '"><input type="checkbox" id="bk_' + exp.id + '" ' + (state.bankinterSelected.includes(exp.id) ? 'checked' : '') + ' onchange="toggleBankinterExpense(' + exp.id + ')" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer flex-shrink-0" /><div class="flex-1 min-w-0"><p class="text-xs font-medium text-gray-700 truncate">' + exp.description + '</p><p class="text-xs text-gray-400">' + exp.category.split(' ')[0] + ' ' + exp.date + '</p></div><span class="text-xs font-semibold ' + (state.bankinterSelected.includes(exp.id) ? 'text-indigo-700' : 'text-gray-500') + ' flex-shrink-0">' + formatEuro(exp.amount) + '</span></label>').join('') + '</div>' : '<p class="text-gray-400 text-xs text-center py-3">Sin gastos para seleccionar</p>'}
+                        </div>
+                    </div>
                 </div>
                 <div class="pt-4 border-t border-gray-200"><button onclick="resetMonth()" class="w-full bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 py-3 rounded-xl text-sm font-medium border border-gray-200 hover:border-red-200">🔄 Reset (nuevo mes) - Guarda ahorros en historial</button></div>
             `;
             
             let saveTimeout = null;
-            function debouncedSave() { if (saveTimeout) clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDataLocal(); if (supabaseClient && state.userId) saveToSupabase('user_config', { user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory, notes: state.notes }); }, 1000); }
+            function debouncedSave() { if (saveTimeout) clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDataLocal(); if (supabaseClient && state.userId) saveToSupabase('user_config', { user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory, notes: state.notes, bankinter_selected: state.bankinterSelected }); }, 1000); }
             
 ['projectionMonths', 'monthlySavingsPlan'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; render(); debouncedSave(); }); });
             const noteEl = document.getElementById('noteText'); if (noteEl) noteEl.addEventListener('input', (e) => state.noteText = e.target.value);
@@ -1118,7 +1207,8 @@
                     monthlySavingsPlan: data.monthlySavingsPlan || '', 
                     darkMode: data.darkMode || false, 
                     badges: data.badges || [], 
-                    lastMonthSavings: data.lastMonthSavings || 0 
+                    lastMonthSavings: data.lastMonthSavings || 0,
+                    bankinterSelected: data.bankinterSelected || []
                 });
                 syncQueue = data.syncQueue || [];
             }
@@ -1200,6 +1290,7 @@
                     state.badges = config.badges || [];
                     state.savingsHistory = config.savings_history || state.savingsHistory || [];
 					state.notes = config.notes || [];
+                    state.bankinterSelected = config.bankinter_selected || [];
                 }
 
                 state.lastSync = new Date().toISOString();
