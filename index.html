@@ -515,7 +515,8 @@
                             badges: state.badges,
                             savings_history: state.savingsHistory,
                             notes: state.notes,
-                            bankinter_selected: state.bankinterSelected
+                            bankinter_selected: state.bankinterSelected,
+                            klarna_loans: state.klarnaLoans
                         }, { onConflict: 'user_id' });
                         if (error) {
                             console.error('Error Supabase:', error);
@@ -884,11 +885,11 @@
         function getTotalAccumulatedSavings() {
             return state.savingsHistory.reduce((sum, record) => sum + record.amount, 0);
         }
-        async function addNote(){var t=state.noteText.trim();if(!t){showNotification('❌ Escribe algo',true);return}if(state.editingNoteId){var i=state.notes.findIndex(function(n){return n.id===state.editingNoteId});if(i!==-1){state.notes[i].text=t;state.notes[i].updatedAt=new Date().toISOString()}state.editingNoteId=null;showNotification('✅ Nota actualizada')}else{state.notes.unshift({id:Date.now(),text:t,createdAt:new Date().toISOString()});showNotification('✅ Nota añadida')}state.noteText='';saveDataLocal();saveData();render()}
+        async function addNote(){var t=state.noteText.trim();if(!t){showNotification('❌ Escribe algo',true);return}if(state.editingNoteId){var i=state.notes.findIndex(function(n){return n.id===state.editingNoteId});if(i!==-1){state.notes[i].text=t;state.notes[i].updatedAt=new Date().toISOString()}state.editingNoteId=null;showNotification('✅ Nota actualizada')}else{state.notes.unshift({id:Date.now(),text:t,createdAt:new Date().toISOString()});showNotification('✅ Nota añadida')}state.noteText='';saveDataLocal();await saveData();render()}
 		
 		function editNote(id){var n=state.notes.find(function(x){return x.id===id});if(n){state.editingNoteId=id;state.noteText=n.text;render();setTimeout(function(){var s=document.getElementById('showNotesSection');if(s&&!s.classList.contains('open'))toggleSection('showNotesSection');var el=document.getElementById('noteText');if(el)el.focus()},100)}}
 		function cancelEditNote(){state.editingNoteId=null;state.noteText='';render()}
-		async function deleteNote(id){if(!confirm('¿Eliminar esta nota?'))return;state.notes=state.notes.filter(function(n){return n.id!==id});saveDataLocal();saveData();render();showNotification('🗑️ Nota eliminada')}
+		async function deleteNote(id){if(!confirm('¿Eliminar esta nota?'))return;state.notes=state.notes.filter(function(n){return n.id!==id});saveDataLocal();if(saveTimeout)clearTimeout(saveTimeout);await saveData();render();showNotification('🗑️ Nota eliminada')}
 		
         // ========== BANKINTER CREDIT CARD ==========
         function toggleBankinterExpense(id) {
