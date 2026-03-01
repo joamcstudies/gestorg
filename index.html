@@ -131,14 +131,14 @@
         let authState = { isAuthenticated: false, user: null, loading: true, authView: 'login', email: '', password: '', confirmPassword: '', authError: '', authSuccess: '' };
         let state = {
             expenses: [], savingsWithdrawals: [], savingsDeposits: [], debtors: [], loans: [], 
-            fixedExpenses: [], savingsHistory: [],
+            fixedExpenses: [], savingsHistory: [],notes: [],
             monthlyIncome: '', creditCardIncome: '', owedMoney: '', projectionMonths: '', monthlySavingsPlan: '',
             description: '', amount: '', category: '🍎 Alimentación', date: new Date().toISOString().split('T')[0],
             withdrawalDescription: '', withdrawalAmount: '', depositDescription: '', depositAmount: '',
             debtorName: '', debtorAmount: '', loanName: '', loanAmount: '', loanMonths: '', loanPaid: '', loanStartDate: '',
-            fixedExpenseName: '', fixedExpenseAmount: '',
+            fixedExpenseName: '', fixedExpenseAmount: '',noteText: '', editingNoteId: null,
             editingExpenseId: null, editingFixedExpenseId: null, darkMode: false, timeFilter: 'month', badges: [], lastMonthSavings: 0,
-            showSavingsSection: false, showDebtorsSection: false, showProjectionsSection: false, showLoansSection: false, showFixedExpensesSection: false,
+            showSavingsSection: false, showDebtorsSection: false, showProjectionsSection: false, showLoansSection: false, showFixedExpensesSection: false,showNotesSection: false,
             userId: null, lastSync: null
         };
         const categories = [
@@ -205,7 +205,7 @@
         function loadScript(src) { return new Promise((resolve, reject) => { const script = document.createElement('script'); script.src = src; script.onload = resolve; script.onerror = reject; document.head.appendChild(script); }); }
         
         async function saveToSupabase(table, data) {
-            if (!supabaseClient || !state.userId) { syncQueue.push({ table, data, action: 'upsert' }); saveDataLocal(); return false; }
+            if (!supabaseClient || !state.userId) { syncQueue.push({ table, data, action: 'upsert' }); saveDataLocal();  return false; }
             try { const { error } = await supabaseClient.from(table).upsert(data, { onConflict: table === 'user_config' ? 'user_id' : 'id' }); if (error) throw error; return true; }
             catch (error) { console.error('Error guardando:', error); syncQueue.push({ table, data, action: 'upsert' }); return false; }
         }
@@ -345,6 +345,7 @@
         function saveDataLocal() {
             const dataToSave = { 
                 expenses: state.expenses, 
+				notes: state.notes,
                 savingsWithdrawals: state.savingsWithdrawals, 
                 savingsDeposits: state.savingsDeposits, 
                 debtors: state.debtors, 
@@ -375,7 +376,8 @@
                     monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
                     dark_mode: state.darkMode, 
                     badges: state.badges, 
-                    savings_history: state.savingsHistory 
+                    savings_history: state.savingsHistory,
+                    notes: state.notes 
                 });
                 await syncPendingQueue();
             }
@@ -422,7 +424,9 @@
                             projection_months: parseInt(state.projectionMonths) || 0, 
                             monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
                             dark_mode: state.darkMode, 
-                            badges: state.badges
+                            badges: state.badges,
+                            savings_history: state.savingsHistory,
+                            notes: state.notes
                         }, { onConflict: 'user_id' });
                         if (error) {
                             console.error('Error Supabase:', error);
@@ -693,7 +697,8 @@
                         monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, 
                         dark_mode: state.darkMode, 
                         badges: state.badges, 
-                        savings_history: state.savingsHistory 
+                        savings_history: state.savingsHistory,
+                        notes: state.notes 
                     }, { onConflict: 'user_id' });
                 } catch (error) {
                     console.error('Error guardando config en reset:', error);
@@ -760,7 +765,12 @@
         function getTotalAccumulatedSavings() {
             return state.savingsHistory.reduce((sum, record) => sum + record.amount, 0);
         }
-        
+        async function addNote(){var t=state.noteText.trim();if(!t){showNotification('❌ Escribe algo',true);return}if(state.editingNoteId){var i=state.notes.findIndex(function(n){return n.id===state.editingNoteId});if(i!==-1){state.notes[i].text=t;state.notes[i].updatedAt=new Date().toISOString()}state.editingNoteId=null;showNotification('✅ Nota actualizada')}else{state.notes.unshift({id:Date.now(),text:t,createdAt:new Date().toISOString()});showNotification('✅ Nota añadida')}state.noteText='';saveDataLocal();saveData();render()}
+		
+		function editNote(id){var n=state.notes.find(function(x){return x.id===id});if(n){state.editingNoteId=id;state.noteText=n.text;render();setTimeout(function(){var s=document.getElementById('showNotesSection');if(s&&!s.classList.contains('open'))toggleSection('showNotesSection');var el=document.getElementById('noteText');if(el)el.focus()},100)}}
+		function cancelEditNote(){state.editingNoteId=null;state.noteText='';render()}
+		async function deleteNote(id){if(!confirm('¿Eliminar esta nota?'))return;state.notes=state.notes.filter(function(n){return n.id!==id});saveDataLocal();saveData();render();showNotification('🗑️ Nota eliminada')}
+		
         let chartInstance = null;
         function renderChart() {
             const ctx = document.getElementById('expenseChart'); if (!ctx) return;
@@ -1061,14 +1071,26 @@
                             ${state.projectionMonths && state.monthlySavingsPlan ? '<div class="grid grid-cols-2 gap-2"><div class="bg-blue-50 p-3 rounded-lg"><p class="text-xs text-blue-600 mb-1">Desde cero</p><p class="text-sm font-bold text-blue-800">' + formatEuro(projections.fromZero) + '</p></div><div class="bg-emerald-50 p-3 rounded-lg"><p class="text-xs text-emerald-600 mb-1">Con actual</p><p class="text-sm font-bold text-emerald-800">' + formatEuro(projections.withCurrent) + '</p></div><div class="bg-violet-50 p-3 rounded-lg"><p class="text-xs text-violet-600 mb-1">Sin prestado</p><p class="text-sm font-bold text-violet-800">' + formatEuro(projections.withoutOwed) + '</p></div><div class="bg-amber-50 p-3 rounded-lg"><p class="text-xs text-amber-600 mb-1">Si pagan</p><p class="text-sm font-bold text-amber-800">' + formatEuro(projections.withOwed) + '</p></div></div>' : '<p class="text-gray-400 text-xs text-center py-3">Completa los campos</p>'}
                         </div>
                     </div>
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100">
+                        <button onclick="toggleSection('showNotesSection')" class="w-full flex justify-between items-center mb-3"><h2 class="text-base font-semibold text-gray-800">🗒️ Notas</h2><span id="showNotesSectionBtn" class="toggle-btn text-lg ${state.showNotesSection ? 'open' : ''}">▼</span></button>
+                        <div id="showNotesSection" class="collapsible-content ${state.showNotesSection ? 'open' : ''} custom-scroll">
+                            <div class="space-y-2 mb-3 ${state.editingNoteId ? 'border-2 border-amber-200 p-2 rounded-lg' : ''}">
+                                ${state.editingNoteId ? '<p class="text-xs text-amber-600 font-semibold mb-1">✏️ Editando nota</p>' : ''}
+                                <textarea id="noteText" rows="3" placeholder="Escribe una nota..." class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none">${state.noteText.replace(/</g,'&lt;')}</textarea>
+                                <div class="flex gap-2"><button onclick="addNote()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm">${state.editingNoteId ? '✓ Actualizar' : '+ Añadir'}</button>${state.editingNoteId ? '<button onclick="cancelEditNote()" class="px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg text-sm">✕</button>' : ''}</div>
+                            </div>
+                            ${state.notes.length > 0 ? '<div class="space-y-2">' + state.notes.map(n => '<div class="p-2.5 rounded-lg" style="background:#fffbeb;border:1px solid #fde68a"><p class="text-xs text-gray-700 whitespace-pre-wrap">' + n.text.replace(/</g,'&lt;') + '</p><div class="flex justify-between items-center mt-2"><span class="text-xs text-gray-400">' + new Date(n.createdAt).toLocaleDateString('es-ES',{day:'numeric',month:'short'}) + '</span><div class="flex gap-1"><button onclick="editNote(' + n.id + ')" class="text-gray-400 hover:text-blue-500 p-1">✏️</button><button onclick="deleteNote(' + n.id + ')" class="text-gray-400 hover:text-red-500 p-1">🗑️</button></div></div></div>').join('') + '</div>' : '<p class="text-gray-400 text-xs text-center py-3">Sin notas</p>'}
+                        </div>
+                    </div>
                 </div>
                 <div class="pt-4 border-t border-gray-200"><button onclick="resetMonth()" class="w-full bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 py-3 rounded-xl text-sm font-medium border border-gray-200 hover:border-red-200">🔄 Reset (nuevo mes) - Guarda ahorros en historial</button></div>
             `;
             
             let saveTimeout = null;
-            function debouncedSave() { if (saveTimeout) clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDataLocal(); if (supabaseClient && state.userId) saveToSupabase('user_config', { user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory }); }, 1000); }
+            function debouncedSave() { if (saveTimeout) clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDataLocal(); if (supabaseClient && state.userId) saveToSupabase('user_config', { user_id: state.userId, monthly_income: parseFloat(state.monthlyIncome) || 0, credit_card_income: parseFloat(state.creditCardIncome) || 0, projection_months: parseInt(state.projectionMonths) || 0, monthly_savings_plan: parseFloat(state.monthlySavingsPlan) || 0, dark_mode: state.darkMode, badges: state.badges, savings_history: state.savingsHistory, notes: state.notes }); }, 1000); }
             
-            ['projectionMonths', 'monthlySavingsPlan'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; render(); debouncedSave(); }); });
+['projectionMonths', 'monthlySavingsPlan'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => { state[id] = e.target.value; render(); debouncedSave(); }); });
+            const noteEl = document.getElementById('noteText'); if (noteEl) noteEl.addEventListener('input', (e) => state.noteText = e.target.value);
             ['description', 'amount', 'withdrawalDescription', 'withdrawalAmount', 'depositDescription', 'depositAmount', 'debtorName', 'debtorAmount', 'loanName', 'loanAmount', 'loanMonths', 'loanPaid', 'loanStartDate', 'fixedExpenseName', 'fixedExpenseAmount'].forEach(id => {
                 const el = document.getElementById(id); if (el) el.addEventListener('input', (e) => state[id] = e.target.value); 
             });
@@ -1086,6 +1108,7 @@
                     savingsWithdrawals: data.savingsWithdrawals || [], 
                     savingsDeposits: data.savingsDeposits || [], 
                     debtors: data.debtors || [], 
+					notes: data.notes || [],
                     loans: data.loans || [], 
                     fixedExpenses: data.fixedExpenses || [], 
                     savingsHistory: data.savingsHistory || [],
@@ -1176,6 +1199,7 @@
                     state.darkMode = config.dark_mode || false;
                     state.badges = config.badges || [];
                     state.savingsHistory = config.savings_history || state.savingsHistory || [];
+					state.notes = config.notes || [];
                 }
 
                 state.lastSync = new Date().toISOString();
