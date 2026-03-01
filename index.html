@@ -9,7 +9,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        :root {
+            --bank-primary: #005BBB;
+            --bank-primary-dark: #003D82;
+            --bank-primary-light: #E8F0FE;
+            --bank-accent: #0092D0;
+            --bank-success: #00875A;
+            --bank-danger: #D93025;
+            --bank-warning: #F59E0B;
+            --bank-bg: #F0F2F5;
+            --bank-card: #FFFFFF;
+            --bank-border: #E4E7EC;
+            --bank-text: #1A2B4A;
+            --bank-text-secondary: #6B7A99;
+        }
         * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
         body { -webkit-font-smoothing: antialiased; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
@@ -45,45 +59,47 @@
         .badge-tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-8px); padding: 6px 10px; background: #1e293b; color: white; font-size: 0.6rem; border-radius: 6px; white-space: nowrap; opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 10; }
         .badge-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: #1e293b; }
         .badge-item:hover .badge-tooltip { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-4px); }
-        .gradient-bg { background: #f8fafc; min-height: 100vh; }
-        body.dark-mode { background: #0f172a !important; color: #e2e8f0; }
-        body.dark-mode .bg-white { background-color: #1e293b !important; color: #e2e8f0; }
+        .gradient-bg { background: var(--bank-bg); min-height: 100vh; }
+        body.dark-mode { background: #0A1628 !important; color: #e2e8f0; }
+        body.dark-mode { --bank-bg: #0A1628; --bank-card: #132040; --bank-border: #1E3A5F; --bank-text: #E8F0FE; --bank-text-secondary: #8BAFD4; }
+        body.dark-mode .bg-white { background-color: #132040 !important; color: #e2e8f0; }
         body.dark-mode .text-gray-800 { color: #f1f5f9 !important; }
         body.dark-mode .text-gray-600 { color: #94a3b8 !important; }
         body.dark-mode .text-gray-500 { color: #64748b !important; }
-        body.dark-mode .border-gray-300 { border-color: #334155 !important; }
-        body.dark-mode input, body.dark-mode select { background-color: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
-        body.dark-mode .bg-gray-50 { background-color: #1e293b !important; }
-        body.dark-mode .gradient-bg { background: #0f172a; }
-        body.dark-mode .total-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-        body.dark-mode .card { background: #1e293b; border: 1px solid #334155; }
-        body.dark-mode #detailModal > div { background: #1e293b; }
+        body.dark-mode .border-gray-300 { border-color: #1E3A5F !important; }
+        body.dark-mode input, body.dark-mode select { background-color: #0A1628 !important; color: #e2e8f0 !important; border-color: #1E3A5F !important; }
+        body.dark-mode .bg-gray-50 { background-color: #132040 !important; }
+        body.dark-mode .gradient-bg { background: #0A1628; }
+        body.dark-mode .total-card { background: #132040; }
+        body.dark-mode .card { background: #132040; border: 1px solid #1E3A5F; }
+        body.dark-mode #detailModal > div { background: #132040; }
         body.dark-mode #detailModal h3, body.dark-mode #detailModal .text-gray-800 { color: #e2e8f0; }
-        body.dark-mode #detailModal .bg-gray-50 { background: #0f172a; }
-        body.dark-mode #detailModal .bg-gray-100 { background: #334155; }
-        body.dark-mode .badge-item { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+        body.dark-mode #detailModal .bg-gray-50 { background: #0A1628; }
+        body.dark-mode #detailModal .bg-gray-100 { background: #1E3A5F; }
+        body.dark-mode .badge-item { background: #132040; border-color: #1E3A5F; color: #e2e8f0; }
         body.dark-mode .badge-item:hover { background: linear-gradient(135deg, #422006 0%, #78350f 100%); border-color: #fbbf24; }
-        body.dark-mode .motivation-toast-content { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-color: #334155; }
+        body.dark-mode .motivation-toast-content { background: linear-gradient(135deg, #132040 0%, #0A1628 100%); border-color: #1E3A5F; }
         body.dark-mode .motivation-toast-content p { color: #e2e8f0; }
-        body.dark-mode .header-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-        body.dark-mode .income-card { background: #0f172a; border-color: #334155; }
+        body.dark-mode .header-card { background: linear-gradient(135deg, #003D82 0%, #001D5C 100%); }
+        body.dark-mode .income-card { background: #0A1628; border-color: #1E3A5F; }
         body.dark-mode .bankinter-card { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border-color: #4338ca; }
         body.dark-mode .bankinter-card label { color: #e2e8f0; }
         body.dark-mode .bankinter-card .bg-indigo-50 { background: rgba(99, 102, 241, 0.15) !important; }
-        .time-filter { background: white; border: 1px solid #f1f5f9; transition: all 0.2s ease; border-radius: 10px; }
-        .time-filter:hover { background: #f8fafc; border-color: #e2e8f0; }
-        .time-filter-active { background: #1e293b !important; border-color: #1e293b !important; color: white !important; font-weight: 600; }
-        .card { transition: all 0.2s ease; background: white; border: 1px solid #f1f5f9; box-shadow: 0 1px 2px rgba(0,0,0,0.02); border-radius: 16px; }
-        .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
-        .header-card { background: white; border: 1px solid #f1f5f9; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
-        .income-card { background: white; border: 1px solid #f1f5f9; border-radius: 14px; padding: 12px 16px; transition: all 0.2s; }
-        .income-card:hover { border-color: #e0e7ff; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.06); }
-        .income-card:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        .income-card input { border: none !important; padding: 0 !important; background: transparent !important; font-size: 1.125rem; font-weight: 600; color: #1e293b; }
+        .time-filter { background: white; border: 1px solid var(--bank-border); transition: all 0.2s ease; border-radius: 8px; color: var(--bank-text-secondary); }
+        .time-filter:hover { background: var(--bank-primary-light); border-color: var(--bank-primary); color: var(--bank-primary); }
+        .time-filter-active { background: var(--bank-primary) !important; border-color: var(--bank-primary) !important; color: white !important; font-weight: 600; }
+        .card { transition: all 0.2s ease; background: white; border: 1px solid var(--bank-border); box-shadow: 0 2px 8px rgba(0,85,187,0.06); border-radius: 12px; }
+        .card:hover { box-shadow: 0 4px 16px rgba(0,85,187,0.1); }
+        .header-card { background: linear-gradient(135deg, var(--bank-primary) 0%, var(--bank-primary-dark) 100%); border: none; box-shadow: 0 4px 20px rgba(0,61,130,0.3); color: white; }
+        .income-card { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 12px 16px; transition: all 0.2s; backdrop-filter: blur(4px); }
+        .income-card:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.2); }
+        .income-card:focus-within { border-color: rgba(255,255,255,0.6); box-shadow: 0 0 0 3px rgba(255,255,255,0.15); }
+        .income-card input { border: none !important; padding: 0 !important; background: transparent !important; font-size: 1.125rem; font-weight: 600; color: white; }
         .income-card input:focus { outline: none !important; box-shadow: none !important; }
-        .income-card input::placeholder { color: #94a3b8; font-weight: 400; }
-        .total-card { background: white; border: 1px solid #f1f5f9; transition: all 0.2s ease; min-width: 0; overflow: hidden; border-radius: 14px; }
-        .total-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
+        .income-card input::placeholder { color: rgba(255,255,255,0.5); font-weight: 400; }
+        .income-card label { color: rgba(255,255,255,0.8) !important; }
+        .total-card { background: white; border: 1px solid var(--bank-border); transition: all 0.2s ease; min-width: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,85,187,0.06); }
+        .total-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,85,187,0.12); }
         .amount-display { font-size: clamp(0.875rem, 2.5vw, 1.25rem); line-height: 1.3; word-break: break-word; overflow-wrap: break-word; font-weight: 700; letter-spacing: -0.02em; }
         .amount-display-large { font-size: clamp(1.125rem, 3vw, 1.5rem); line-height: 1.3; word-break: break-word; overflow-wrap: break-word; font-weight: 700; letter-spacing: -0.02em; }
         .totals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; }
@@ -106,8 +122,9 @@
         .connection-dot { width: 5px; height: 5px; border-radius: 50%; }
         .connection-dot.online { background: #22c55e; }
         .connection-dot.offline { background: #ef4444; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .action-btn { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 0.9rem; flex-shrink: 0; }
-        .action-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .action-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
         input, select { font-size: 0.875rem; box-sizing: border-box; }
         input:focus, select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         input[type="date"] { -webkit-appearance: none; min-width: 0 !important; max-width: 100% !important; width: 100% !important; box-sizing: border-box !important; }
@@ -284,33 +301,91 @@
         
         function renderAuth() {
             const app = document.getElementById('app');
-            if (authState.loading && !authState.isAuthenticated) { app.innerHTML = '<div class="min-h-screen flex items-center justify-center"><div class="text-center"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div><p class="text-gray-500">Cargando...</p></div></div>'; return; }
-            let formContent = '';
-            if (authState.authView === 'login') {
-                formContent = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Iniciar Sesión</h2><p class="text-gray-500 text-sm mb-6">Accede a tu organizador de gastos</p>' +
-                    (authState.authSuccess ? '<div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">' + authState.authSuccess + '</div>' : '') +
-                    (authState.authError ? '<div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">' + authState.authError + '</div>' : '') +
-                    '<div class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="authEmail" value="' + authState.email + '" placeholder="tu@email.com" class="w-full px-4 py-3 border border-gray-200 rounded-xl" /></div>' +
-                    '<div><label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label><input type="password" id="authPassword" value="' + authState.password + '" placeholder="••••••••" class="w-full px-4 py-3 border border-gray-200 rounded-xl" /></div>' +
-                    '<button onclick="handleLogin()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-medium">Entrar</button></div>' +
-                    '<div class="mt-6 text-center space-y-2"><button onclick="setAuthView(\'forgot\')" class="text-blue-500 hover:text-blue-600 text-sm">¿Olvidaste tu contraseña?</button>' +
-                    '<p class="text-gray-500 text-sm">¿No tienes cuenta? <button onclick="setAuthView(\'register\')" class="text-blue-500 hover:text-blue-600 font-medium">Regístrate</button></p></div>';
-            } else if (authState.authView === 'register') {
-                formContent = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Crear Cuenta</h2><p class="text-gray-500 text-sm mb-6">Empieza a organizar tus finanzas</p>' +
-                    (authState.authError ? '<div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">' + authState.authError + '</div>' : '') +
-                    '<div class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="authEmail" value="' + authState.email + '" placeholder="tu@email.com" class="w-full px-4 py-3 border border-gray-200 rounded-xl" /></div>' +
-                    '<div><label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label><input type="password" id="authPassword" value="' + authState.password + '" placeholder="Mínimo 6 caracteres" class="w-full px-4 py-3 border border-gray-200 rounded-xl" /></div>' +
-                    '<div><label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label><input type="password" id="authConfirmPassword" value="' + authState.confirmPassword + '" placeholder="Repite la contraseña" class="w-full px-4 py-3 border border-gray-200 rounded-xl" /></div>' +
-                    '<button onclick="handleRegister()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium">Crear Cuenta</button></div>' +
-                    '<div class="mt-6 text-center"><p class="text-gray-500 text-sm">¿Ya tienes cuenta? <button onclick="setAuthView(\'login\')" class="text-blue-500 hover:text-blue-600 font-medium">Inicia sesión</button></p></div>';
-            } else if (authState.authView === 'forgot') {
-                formContent = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Recuperar Contraseña</h2><p class="text-gray-500 text-sm mb-6">Te enviaremos un email</p>' +
-                    (authState.authError ? '<div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">' + authState.authError + '</div>' : '') +
-                    '<div class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="authEmail" value="' + authState.email + '" placeholder="tu@email.com" class="w-full px-4 py-3 border border-gray-200 rounded-xl" /></div>' +
-                    '<button onclick="handleForgotPassword()" class="w-full bg-violet-500 hover:bg-violet-600 text-white py-3 rounded-xl font-medium">Enviar Email</button></div>' +
-                    '<div class="mt-6 text-center"><button onclick="setAuthView(\'login\')" class="text-blue-500 hover:text-blue-600 text-sm">← Volver al login</button></div>';
+            if (authState.loading && !authState.isAuthenticated) { 
+                app.innerHTML = `<div style="min-height:100vh;background:linear-gradient(160deg,#003D82 0%,#005BBB 50%,#0092D0 100%);display:flex;align-items:center;justify-content:center;">
+                    <div style="text-align:center;color:white">
+                        <div style="width:56px;height:56px;border:3px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;"></div>
+                        <p style="color:rgba(255,255,255,0.8);font-size:0.875rem;letter-spacing:0.05em">CARGANDO...</p>
+                    </div>
+                </div>`;
+                return; 
             }
-            app.innerHTML = '<div class="min-h-screen flex items-center justify-center p-4"><div class="w-full max-w-md"><div class="text-center mb-8"><div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><span class="text-4xl">💰</span></div><h1 class="text-3xl font-bold text-gray-800">Organizador de Gastos</h1></div><div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">' + formContent + '</div><p class="text-center text-gray-400 text-xs mt-6">Tus datos están seguros</p></div></div>';
+            
+            // Build form fields based on view
+            let formTitle = '', formSubtitle = '', formFields = '', formFooter = '', btnColor = '#005BBB', btnText = '';
+            
+            if (authState.authView === 'login') {
+                formTitle = 'Bienvenido';
+                formSubtitle = 'Accede a tu organizador de finanzas';
+                btnText = 'Entrar';
+                btnColor = '#005BBB';
+                formFields = `
+                    ${authState.authSuccess ? '<div style="padding:10px 14px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:8px;color:#065F46;font-size:0.8rem;margin-bottom:16px">' + authState.authSuccess + '</div>' : ''}
+                    ${authState.authError ? '<div style="padding:10px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;color:#991B1B;font-size:0.8rem;margin-bottom:16px">' + authState.authError + '</div>' : ''}
+                    <div style="margin-bottom:16px">
+                        <label style="display:block;font-size:0.75rem;font-weight:600;color:#6B7A99;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px">Email</label>
+                        <input type="email" id="authEmail" value="${authState.email}" placeholder="tu@email.com" style="width:100%;padding:12px 16px;border:1.5px solid #E4E7EC;border-radius:10px;font-size:0.875rem;color:#1A2B4A;background:#F8FAFF;box-sizing:border-box;transition:all 0.2s" onfocus="this.style.borderColor='#005BBB';this.style.boxShadow='0 0 0 3px rgba(0,91,187,0.1)'" onblur="this.style.borderColor='#E4E7EC';this.style.boxShadow='none'" />
+                    </div>
+                    <div style="margin-bottom:24px">
+                        <label style="display:block;font-size:0.75rem;font-weight:600;color:#6B7A99;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px">Contraseña</label>
+                        <input type="password" id="authPassword" value="${authState.password}" placeholder="••••••••" style="width:100%;padding:12px 16px;border:1.5px solid #E4E7EC;border-radius:10px;font-size:0.875rem;color:#1A2B4A;background:#F8FAFF;box-sizing:border-box;transition:all 0.2s" onfocus="this.style.borderColor='#005BBB';this.style.boxShadow='0 0 0 3px rgba(0,91,187,0.1)'" onblur="this.style.borderColor='#E4E7EC';this.style.boxShadow='none'" />
+                    </div>
+                    <button onclick="handleLogin()" style="width:100%;padding:14px;background:linear-gradient(135deg,#005BBB,#003D82);color:white;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;letter-spacing:0.03em;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,61,130,0.3)" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 18px rgba(0,61,130,0.4)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 12px rgba(0,61,130,0.3)'">Entrar</button>`;
+                formFooter = `<div style="margin-top:20px;text-align:center">
+                    <button onclick="setAuthView('forgot')" style="color:#005BBB;background:none;border:none;font-size:0.8rem;cursor:pointer;font-weight:500">¿Olvidaste tu contraseña?</button>
+                    <p style="color:#6B7A99;font-size:0.8rem;margin-top:10px">¿No tienes cuenta? <button onclick="setAuthView('register')" style="color:#005BBB;background:none;border:none;font-weight:600;cursor:pointer">Regístrate</button></p>
+                </div>`;
+            } else if (authState.authView === 'register') {
+                formTitle = 'Crear Cuenta';
+                formSubtitle = 'Empieza a organizar tus finanzas';
+                formFields = `
+                    ${authState.authError ? '<div style="padding:10px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;color:#991B1B;font-size:0.8rem;margin-bottom:16px">' + authState.authError + '</div>' : ''}
+                    <div style="margin-bottom:14px"><label style="display:block;font-size:0.75rem;font-weight:600;color:#6B7A99;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px">Email</label><input type="email" id="authEmail" value="${authState.email}" placeholder="tu@email.com" style="width:100%;padding:12px 16px;border:1.5px solid #E4E7EC;border-radius:10px;font-size:0.875rem;color:#1A2B4A;background:#F8FAFF;box-sizing:border-box" onfocus="this.style.borderColor='#005BBB'" onblur="this.style.borderColor='#E4E7EC'" /></div>
+                    <div style="margin-bottom:14px"><label style="display:block;font-size:0.75rem;font-weight:600;color:#6B7A99;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px">Contraseña</label><input type="password" id="authPassword" value="${authState.password}" placeholder="Mínimo 6 caracteres" style="width:100%;padding:12px 16px;border:1.5px solid #E4E7EC;border-radius:10px;font-size:0.875rem;color:#1A2B4A;background:#F8FAFF;box-sizing:border-box" onfocus="this.style.borderColor='#005BBB'" onblur="this.style.borderColor='#E4E7EC'" /></div>
+                    <div style="margin-bottom:24px"><label style="display:block;font-size:0.75rem;font-weight:600;color:#6B7A99;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px">Confirmar Contraseña</label><input type="password" id="authConfirmPassword" value="${authState.confirmPassword}" placeholder="Repite la contraseña" style="width:100%;padding:12px 16px;border:1.5px solid #E4E7EC;border-radius:10px;font-size:0.875rem;color:#1A2B4A;background:#F8FAFF;box-sizing:border-box" onfocus="this.style.borderColor='#005BBB'" onblur="this.style.borderColor='#E4E7EC'" /></div>
+                    <button onclick="handleRegister()" style="width:100%;padding:14px;background:linear-gradient(135deg,#00875A,#005C3D);color:white;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;letter-spacing:0.03em;box-shadow:0 4px 12px rgba(0,92,61,0.3)">Crear Cuenta</button>`;
+                formFooter = `<div style="margin-top:20px;text-align:center"><p style="color:#6B7A99;font-size:0.8rem">¿Ya tienes cuenta? <button onclick="setAuthView('login')" style="color:#005BBB;background:none;border:none;font-weight:600;cursor:pointer">Inicia sesión</button></p></div>`;
+            } else if (authState.authView === 'forgot') {
+                formTitle = 'Recuperar Acceso';
+                formSubtitle = 'Te enviaremos un enlace de recuperación';
+                formFields = `
+                    ${authState.authError ? '<div style="padding:10px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;color:#991B1B;font-size:0.8rem;margin-bottom:16px">' + authState.authError + '</div>' : ''}
+                    <div style="margin-bottom:24px"><label style="display:block;font-size:0.75rem;font-weight:600;color:#6B7A99;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px">Email</label><input type="email" id="authEmail" value="${authState.email}" placeholder="tu@email.com" style="width:100%;padding:12px 16px;border:1.5px solid #E4E7EC;border-radius:10px;font-size:0.875rem;color:#1A2B4A;background:#F8FAFF;box-sizing:border-box" onfocus="this.style.borderColor='#005BBB'" onblur="this.style.borderColor='#E4E7EC'" /></div>
+                    <button onclick="handleForgotPassword()" style="width:100%;padding:14px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:white;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(91,33,182,0.3)">Enviar Email</button>`;
+                formFooter = `<div style="margin-top:20px;text-align:center"><button onclick="setAuthView('login')" style="color:#005BBB;background:none;border:none;font-size:0.8rem;cursor:pointer;font-weight:500">← Volver al inicio de sesión</button></div>`;
+            }
+            
+            app.innerHTML = `
+                <div style="min-height:100vh;background:linear-gradient(160deg,#002D6E 0%,#005BBB 55%,#0092D0 100%);display:flex;align-items:center;justify-content:center;padding:16px;position:relative;overflow:hidden">
+                    <!-- Decorative circles -->
+                    <div style="position:absolute;top:-80px;left:-80px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.05)"></div>
+                    <div style="position:absolute;bottom:-120px;right:-60px;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,0.04)"></div>
+                    <div style="position:absolute;top:30%;right:-100px;width:200px;height:200px;border-radius:50%;background:rgba(0,146,208,0.2)"></div>
+                    
+                    <div style="width:100%;max-width:420px;position:relative;z-index:1">
+                        <!-- Logo / Brand area -->
+                        <div style="text-align:center;margin-bottom:28px">
+                            <div style="width:72px;height:72px;background:white;border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 32px rgba(0,0,0,0.2)">
+                                <span style="font-size:2rem">💰</span>
+                            </div>
+                            <h1 style="color:white;font-size:1.6rem;font-weight:800;letter-spacing:-0.02em;margin:0">Mis Finanzas</h1>
+                            <p style="color:rgba(255,255,255,0.65);font-size:0.8rem;margin-top:4px;letter-spacing:0.05em">ORGANIZADOR PERSONAL</p>
+                        </div>
+                        
+                        <!-- Card -->
+                        <div style="background:white;border-radius:20px;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+                            <div style="margin-bottom:24px">
+                                <h2 style="font-size:1.3rem;font-weight:700;color:#1A2B4A;margin:0 0 4px">${formTitle}</h2>
+                                <p style="color:#6B7A99;font-size:0.85rem;margin:0">${formSubtitle}</p>
+                            </div>
+                            ${formFields}
+                            ${formFooter}
+                        </div>
+                        
+                        <p style="text-align:center;color:rgba(255,255,255,0.45);font-size:0.7rem;margin-top:20px;letter-spacing:0.05em">🔒 TUS DATOS ESTÁN CIFRADOS Y SEGUROS</p>
+                    </div>
+                </div>`;
+                
             const emailInput = document.getElementById('authEmail');
             const passwordInput = document.getElementById('authPassword');
             const confirmPasswordInput = document.getElementById('authConfirmPassword');
@@ -999,31 +1074,31 @@
             app.innerHTML = `
                 <div class="header-card rounded-2xl shadow-sm p-4 mb-4 animate-slide-in relative">
                     <div class="absolute top-4 right-4 grid grid-cols-2 gap-1.5 sm:flex sm:flex-row sm:gap-2">
-                        <button onclick="toggleDarkMode()" class="action-btn bg-gray-100 hover:bg-gray-200">${state.darkMode ? '☀️' : '🌙'}</button>
-                        <button onclick="saveData()" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white">💾</button>
-                        <button onclick="exportData()" class="action-btn bg-blue-500 hover:bg-blue-600 text-white">📥</button>
-                        <label class="action-btn bg-violet-500 hover:bg-violet-600 text-white cursor-pointer">📤<input type="file" accept=".json" onchange="importData(event)" class="hidden" /></label>
-                        <button onclick="handleLogout()" class="action-btn bg-red-500 hover:bg-red-600 text-white" title="Cerrar sesión">🚪</button>
+                        <button onclick="toggleDarkMode()" class="action-btn bg-white bg-opacity-20 hover:bg-opacity-30 text-white">${state.darkMode ? '☀️' : '🌙'}</button>
+                        <button onclick="saveData()" class="action-btn bg-white bg-opacity-20 hover:bg-opacity-30 text-white">💾</button>
+                        <button onclick="exportData()" class="action-btn bg-white bg-opacity-20 hover:bg-opacity-30 text-white">📥</button>
+                        <label class="action-btn bg-white bg-opacity-20 hover:bg-opacity-30 text-white cursor-pointer">📤<input type="file" accept=".json" onchange="importData(event)" class="hidden" /></label>
+                        <button onclick="handleLogout()" class="action-btn bg-white bg-opacity-20 hover:bg-red-500 text-white" title="Cerrar sesión">🚪</button>
                     </div>
                     <div class="pr-24 sm:pr-56">
-                        <div class="sm:hidden"><h1 class="text-lg font-bold text-gray-800">💰 Organizador de Gastos</h1>
-                            <div class="connection-status ${isOnline ? 'online' : 'offline'} w-fit mt-1"><span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Sincronizado' : 'Local'}</div></div>
-                        <div class="hidden sm:flex sm:items-center sm:gap-3"><h1 class="text-2xl font-bold text-gray-800">💰 Organizador de Gastos</h1>
-                            <div class="connection-status ${isOnline ? 'online' : 'offline'}"><span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Sincronizado' : 'Local'}</div>
-                            ${authState.user ? '<div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg"><span class="text-xs text-gray-500">👤</span><span class="text-xs text-gray-600 font-medium truncate max-w-[150px]">' + authState.user.email + '</span></div>' : ''}</div>
+                        <div class="sm:hidden"><h1 class="text-lg font-bold text-white tracking-tight">💰 Organizador de Gastos</h1>
+                            <div class="connection-status ${isOnline ? 'online' : 'offline'} w-fit mt-1" style="${isOnline ? 'background:rgba(255,255,255,0.2);color:white;' : 'background:rgba(255,100,100,0.3);color:#fca5a5;'}"><span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Sincronizado' : 'Local'}</div></div>
+                        <div class="hidden sm:flex sm:items-center sm:gap-3"><h1 class="text-2xl font-bold text-white tracking-tight">💰 Organizador de Gastos</h1>
+                            <div class="connection-status ${isOnline ? 'online' : 'offline'}" style="${isOnline ? 'background:rgba(255,255,255,0.2);color:white;' : 'background:rgba(255,100,100,0.3);color:#fca5a5;'}"><span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Sincronizado' : 'Local'}</div>
+                            ${authState.user ? '<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:rgba(255,255,255,0.15)"><span class="text-xs text-white opacity-70">👤</span><span class="text-xs text-white font-medium truncate max-w-[150px]">' + authState.user.email + '</span></div>' : ''}</div>
                     </div>
                     <div class="flex flex-wrap items-center gap-4 mb-4 mt-3">
-                        <div class="flex gap-2">
-                            <button onclick="setTimeFilter('week')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'week' ? 'time-filter-active' : 'text-gray-600'}">Semana</button>
-                            <button onclick="setTimeFilter('month')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'month' ? 'time-filter-active' : 'text-gray-600'}">Mes</button>
-                            <button onclick="setTimeFilter('year')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'year' ? 'time-filter-active' : 'text-gray-600'}">Año</button>
+                        <div class="flex gap-2 p-1 rounded-xl" style="background:rgba(255,255,255,0.15)">
+                            <button onclick="setTimeFilter('week')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'week' ? 'time-filter-active' : ''}" style="${state.timeFilter !== 'week' ? 'background:transparent;border-color:transparent;color:rgba(255,255,255,0.8);' : ''}">Semana</button>
+                            <button onclick="setTimeFilter('month')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'month' ? 'time-filter-active' : ''}" style="${state.timeFilter !== 'month' ? 'background:transparent;border-color:transparent;color:rgba(255,255,255,0.8);' : ''}">Mes</button>
+                            <button onclick="setTimeFilter('year')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'year' ? 'time-filter-active' : ''}" style="${state.timeFilter !== 'year' ? 'background:transparent;border-color:transparent;color:rgba(255,255,255,0.8);' : ''}">Año</button>
                         </div>
-                        ${earnedBadges.length > 0 ? '<div class="flex items-center gap-2"><span class="text-xs text-gray-400">🏆 ' + earnedBadges.length + '/' + badgeDefinitions.length + '</span>' + renderBadges() + '</div>' : ''}
+                        ${earnedBadges.length > 0 ? '<div class="flex items-center gap-2"><span class="text-xs text-white opacity-70">🏆 ' + earnedBadges.length + '/' + badgeDefinitions.length + '</span>' + renderBadges() + '</div>' : ''}
                     </div>
                     <div class="grid grid-cols-3 gap-3">
-                        <div class="income-card"><label class="text-xs text-gray-400 block mb-1">💵 Ingresos</label><input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('monthlyIncome', this.value)" /></div>
-                        <div class="income-card"><label class="text-xs text-gray-400 block mb-1">🎁 Donaciones</label><input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('creditCardIncome', this.value)" /></div>
-                        <div class="income-card" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0;"><label class="text-xs text-emerald-600 block mb-1">🤝 Me deben</label><div class="text-lg font-bold text-emerald-700">${formatEuro(getTotalOwed())}</div></div>
+                        <div class="income-card"><label class="text-xs block mb-1" style="color:rgba(255,255,255,0.75)">💵 Ingresos</label><input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('monthlyIncome', this.value)" /></div>
+                        <div class="income-card"><label class="text-xs block mb-1" style="color:rgba(255,255,255,0.75)">🎁 Donaciones</label><input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('creditCardIncome', this.value)" /></div>
+                        <div class="income-card" style="background: rgba(0,200,130,0.2); border-color: rgba(0,255,160,0.3);"><label class="text-xs block mb-1" style="color:rgba(160,255,200,0.9)">🤝 Me deben</label><div class="text-lg font-bold text-white">${formatEuro(getTotalOwed())}</div></div>
                     </div>
                 </div>
                 <div class="totals-grid mb-4">
@@ -1151,7 +1226,7 @@
                             ${state.notes.length > 0 ? '<div class="space-y-2">' + state.notes.map(n => '<div class="p-2.5 rounded-lg" style="background:#fffbeb;border:1px solid #fde68a"><p class="text-xs text-gray-700 whitespace-pre-wrap">' + n.text.replace(/</g,'&lt;') + '</p><div class="flex justify-between items-center mt-2"><span class="text-xs text-gray-400">' + new Date(n.createdAt).toLocaleDateString('es-ES',{day:'numeric',month:'short'}) + '</span><div class="flex gap-1"><button onclick="editNote(' + n.id + ')" class="text-gray-400 hover:text-blue-500 p-1">✏️</button><button onclick="deleteNote(' + n.id + ')" class="text-gray-400 hover:text-red-500 p-1">🗑️</button></div></div></div>').join('') + '</div>' : '<p class="text-gray-400 text-xs text-center py-3">Sin notas</p>'}
                         </div>
                     </div>
-                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100 md:col-span-2 lg:col-span-1">
+                    <div class="bg-white rounded-xl p-5 card animate-slide-in-right border border-gray-100">
                         <button onclick="toggleSection('showBankinterSection')" class="w-full flex justify-between items-center mb-3">
                             <h2 class="text-base font-semibold text-gray-800">💳 Bankinter Fin de Mes</h2>
                             <span id="showBankinterSectionBtn" class="toggle-btn text-lg ${state.showBankinterSection ? 'open' : ''}">▼</span>
