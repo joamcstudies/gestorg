@@ -80,8 +80,12 @@
         body.dark-mode .badge-item:hover { background: linear-gradient(135deg, #422006 0%, #78350f 100%); border-color: #fbbf24; }
         body.dark-mode .motivation-toast-content { background: linear-gradient(135deg, #132040 0%, #0A1628 100%); border-color: #1E3A5F; }
         body.dark-mode .motivation-toast-content p { color: #e2e8f0; }
-        body.dark-mode .header-card { background: linear-gradient(135deg, #1A5570 0%, #0E3D52 100%); }
-        body.dark-mode .income-card { background: #0A1628; border-color: #1E3A5F; }
+        body.dark-mode .header-card { background: linear-gradient(135deg, #0E3D52 0%, #153E3E 50%, #0E3D52 100%); border-color: #1E5A5A; }
+        body.dark-mode .header-card h1, body.dark-mode .header-card .text-gray-600 { color: #e2e8f0 !important; }
+        body.dark-mode .header-card .action-btn { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.15) !important; color: #e2e8f0 !important; }
+        body.dark-mode .income-card { background: rgba(255,255,255,0.08) !important; border-color: rgba(255,255,255,0.12) !important; }
+        body.dark-mode .income-card input { color: #e2e8f0 !important; }
+        body.dark-mode .income-card label { color: rgba(226,232,240,0.7) !important; }
         body.dark-mode .bankinter-card { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border-color: #4338ca; }
         body.dark-mode .bankinter-card label { color: #e2e8f0; }
         body.dark-mode .bankinter-card .bg-indigo-50 { background: rgba(99, 102, 241, 0.15) !important; }
@@ -90,14 +94,14 @@
         .time-filter-active { background: var(--bank-primary) !important; border-color: var(--bank-primary) !important; color: white !important; font-weight: 600; }
         .card { transition: all 0.2s ease; background: white; border: 1px solid var(--bank-border); box-shadow: 0 2px 8px rgba(86,168,199,0.06); border-radius: 12px; }
         .card:hover { box-shadow: 0 4px 16px rgba(86,168,199,0.1); }
-        .header-card { background: linear-gradient(135deg, var(--bank-primary) 0%, var(--bank-primary-dark) 100%); border: none; box-shadow: 0 4px 20px rgba(61,143,174,0.3); color: white; }
-        .income-card { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 12px 16px; transition: all 0.2s; backdrop-filter: blur(4px); }
-        .income-card:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.2); }
-        .income-card:focus-within { border-color: rgba(255,255,255,0.6); box-shadow: 0 0 0 3px rgba(255,255,255,0.15); }
-        .income-card input { border: none !important; padding: 0 !important; background: transparent !important; font-size: 1.125rem; font-weight: 600; color: white; }
+        .header-card { background: linear-gradient(135deg, #D4F1F9 0%, #B8E8D0 35%, #A8E6CF 65%, #C5EEE0 100%); border: 1px solid rgba(168,230,207,0.4); box-shadow: 0 4px 20px rgba(86,168,199,0.12); color: #1B3A4B; }
+        .income-card { background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.7); border-radius: 10px; padding: 12px 16px; transition: all 0.2s; backdrop-filter: blur(8px); }
+        .income-card:hover { border-color: rgba(86,168,199,0.4); background: rgba(255,255,255,0.7); }
+        .income-card:focus-within { border-color: #56A8C7; box-shadow: 0 0 0 3px rgba(86,168,199,0.12); }
+        .income-card input { border: none !important; padding: 0 !important; background: transparent !important; font-size: 1.125rem; font-weight: 600; color: #1B3A4B; }
         .income-card input:focus { outline: none !important; box-shadow: none !important; }
-        .income-card input::placeholder { color: rgba(255,255,255,0.5); font-weight: 400; }
-        .income-card label { color: rgba(255,255,255,0.8) !important; }
+        .income-card input::placeholder { color: rgba(27,58,75,0.35); font-weight: 400; }
+        .income-card label { color: rgba(27,58,75,0.65) !important; }
         .total-card { background: white; border: 1px solid var(--bank-border); transition: all 0.2s ease; min-width: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 2px 8px rgba(86,168,199,0.06); }
         .total-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(86,168,199,0.12); }
         .amount-display { font-size: clamp(0.875rem, 2.5vw, 1.25rem); line-height: 1.3; word-break: break-word; overflow-wrap: break-word; font-weight: 700; letter-spacing: -0.02em; }
@@ -1107,31 +1111,31 @@
             app.innerHTML = `
                 <div class="header-card rounded-2xl shadow-sm p-4 mb-4 animate-slide-in relative">
                     <div class="absolute top-4 right-4 grid grid-cols-2 gap-1.5 sm:flex sm:flex-row sm:gap-2">
-                        <button onclick="toggleDarkMode()" class="action-btn bg-white bg-opacity-20 hover:bg-opacity-30 text-white">${state.darkMode ? '☀️' : '🌙'}</button>
-                        <button onclick="saveData()" class="action-btn bg-white bg-opacity-20 hover:bg-opacity-30 text-white">💾</button>
-                        <button onclick="exportData()" class="action-btn bg-white bg-opacity-20 hover:bg-opacity-30 text-white">📥</button>
-                        <label class="action-btn bg-white bg-opacity-20 hover:bg-opacity-30 text-white cursor-pointer">📤<input type="file" accept=".json" onchange="importData(event)" class="hidden" /></label>
-                        <button onclick="handleLogout()" class="action-btn bg-white bg-opacity-20 hover:bg-red-500 text-white" title="Cerrar sesión">🚪</button>
+                        <button onclick="toggleDarkMode()" class="action-btn bg-white bg-opacity-60 hover:bg-opacity-80 text-gray-600 border border-white border-opacity-50">${state.darkMode ? '☀️' : '🌙'}</button>
+                        <button onclick="saveData()" class="action-btn bg-white bg-opacity-60 hover:bg-opacity-80 text-gray-600 border border-white border-opacity-50">💾</button>
+                        <button onclick="exportData()" class="action-btn bg-white bg-opacity-60 hover:bg-opacity-80 text-gray-600 border border-white border-opacity-50">📥</button>
+                        <label class="action-btn bg-white bg-opacity-60 hover:bg-opacity-80 text-gray-600 border border-white border-opacity-50 cursor-pointer">📤<input type="file" accept=".json" onchange="importData(event)" class="hidden" /></label>
+                        <button onclick="handleLogout()" class="action-btn bg-white bg-opacity-60 hover:bg-red-400 text-gray-600 hover:text-white border border-white border-opacity-50" title="Cerrar sesión">🚪</button>
                     </div>
                     <div class="pr-24 sm:pr-56">
-                        <div class="sm:hidden"><h1 class="text-lg font-bold text-white tracking-tight">💰 Organizador de Gastos</h1>
-                            <div class="connection-status ${isOnline ? 'online' : 'offline'} w-fit mt-1" style="${isOnline ? 'background:rgba(255,255,255,0.2);color:white;' : 'background:rgba(255,100,100,0.3);color:#fca5a5;'}"><span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Sincronizado' : 'Local'}</div></div>
-                        <div class="hidden sm:flex sm:items-center sm:gap-3"><h1 class="text-2xl font-bold text-white tracking-tight">💰 Organizador de Gastos</h1>
-                            <div class="connection-status ${isOnline ? 'online' : 'offline'}" style="${isOnline ? 'background:rgba(255,255,255,0.2);color:white;' : 'background:rgba(255,100,100,0.3);color:#fca5a5;'}"><span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Sincronizado' : 'Local'}</div>
-                            ${authState.user ? '<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:rgba(255,255,255,0.15)"><span class="text-xs text-white opacity-70">👤</span><span class="text-xs text-white font-medium truncate max-w-[150px]">' + authState.user.email + '</span></div>' : ''}</div>
+                        <div class="sm:hidden"><h1 class="text-lg font-bold tracking-tight" style="color:#1B3A4B">💰 Organizador de Gastos</h1>
+                            <div class="connection-status ${isOnline ? 'online' : 'offline'} w-fit mt-1"><span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Sincronizado' : 'Local'}</div></div>
+                        <div class="hidden sm:flex sm:items-center sm:gap-3"><h1 class="text-2xl font-bold tracking-tight" style="color:#1B3A4B">💰 Organizador de Gastos</h1>
+                            <div class="connection-status ${isOnline ? 'online' : 'offline'}"><span class="connection-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Sincronizado' : 'Local'}</div>
+                            ${authState.user ? '<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:rgba(255,255,255,0.5)"><span class="text-xs" style="color:#6B8FA0">👤</span><span class="text-xs font-medium truncate max-w-[150px]" style="color:#1B3A4B">' + authState.user.email + '</span></div>' : ''}</div>
                     </div>
                     <div class="flex flex-wrap items-center gap-4 mb-4 mt-3">
-                        <div class="flex gap-2 p-1 rounded-xl" style="background:rgba(255,255,255,0.15)">
-                            <button onclick="setTimeFilter('week')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'week' ? 'time-filter-active' : ''}" style="${state.timeFilter !== 'week' ? 'background:transparent;border-color:transparent;color:rgba(255,255,255,0.8);' : ''}">Semana</button>
-                            <button onclick="setTimeFilter('month')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'month' ? 'time-filter-active' : ''}" style="${state.timeFilter !== 'month' ? 'background:transparent;border-color:transparent;color:rgba(255,255,255,0.8);' : ''}">Mes</button>
-                            <button onclick="setTimeFilter('year')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'year' ? 'time-filter-active' : ''}" style="${state.timeFilter !== 'year' ? 'background:transparent;border-color:transparent;color:rgba(255,255,255,0.8);' : ''}">Año</button>
+                        <div class="flex gap-2 p-1 rounded-xl" style="background:rgba(255,255,255,0.4)">
+                            <button onclick="setTimeFilter('week')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'week' ? 'time-filter-active' : ''}" style="${state.timeFilter !== 'week' ? 'background:transparent;border-color:transparent;color:#3D8FAE;' : ''}">Semana</button>
+                            <button onclick="setTimeFilter('month')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'month' ? 'time-filter-active' : ''}" style="${state.timeFilter !== 'month' ? 'background:transparent;border-color:transparent;color:#3D8FAE;' : ''}">Mes</button>
+                            <button onclick="setTimeFilter('year')" class="time-filter px-3 py-1.5 rounded-lg text-xs ${state.timeFilter === 'year' ? 'time-filter-active' : ''}" style="${state.timeFilter !== 'year' ? 'background:transparent;border-color:transparent;color:#3D8FAE;' : ''}">Año</button>
                         </div>
-                        ${earnedBadges.length > 0 ? '<div class="flex items-center gap-2"><span class="text-xs text-white opacity-70">🏆 ' + earnedBadges.length + '/' + badgeDefinitions.length + '</span>' + renderBadges() + '</div>' : ''}
+                        ${earnedBadges.length > 0 ? '<div class="flex items-center gap-2"><span class="text-xs" style="color:#3D8FAE">🏆 ' + earnedBadges.length + '/' + badgeDefinitions.length + '</span>' + renderBadges() + '</div>' : ''}
                     </div>
                     <div class="grid grid-cols-3 gap-3">
-                        <div class="income-card"><label class="text-xs block mb-1" style="color:rgba(255,255,255,0.75)">💵 Ingresos</label><input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('monthlyIncome', this.value)" /></div>
-                        <div class="income-card"><label class="text-xs block mb-1" style="color:rgba(255,255,255,0.75)">🎁 Donaciones</label><input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('creditCardIncome', this.value)" /></div>
-                        <div class="income-card" style="background: rgba(0,200,130,0.2); border-color: rgba(0,255,160,0.3);"><label class="text-xs block mb-1" style="color:rgba(160,255,200,0.9)">🤝 Me deben</label><div class="text-lg font-bold text-white">${formatEuro(getTotalOwed())}</div></div>
+                        <div class="income-card"><label class="text-xs block mb-1" style="color:rgba(27,58,75,0.6)">💵 Ingresos</label><input type="number" id="monthlyIncome" value="${state.monthlyIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('monthlyIncome', this.value)" /></div>
+                        <div class="income-card"><label class="text-xs block mb-1" style="color:rgba(27,58,75,0.6)">🎁 Donaciones</label><input type="number" id="creditCardIncome" value="${state.creditCardIncome}" placeholder="0,00€" step="0.01" oninput="handleIncomeInput('creditCardIncome', this.value)" /></div>
+                        <div class="income-card" style="background: rgba(58,170,138,0.15); border-color: rgba(58,170,138,0.3);"><label class="text-xs block mb-1" style="color:rgba(27,58,75,0.65)">🤝 Me deben</label><div class="text-lg font-bold" style="color:#1B3A4B">${formatEuro(getTotalOwed())}</div></div>
                     </div>
                 </div>
                 <div class="totals-grid mb-4">
