@@ -1037,6 +1037,24 @@
             document.getElementById('modalContent').innerHTML = content;
             document.getElementById('detailModal').classList.remove('hidden');
         }
+
+        function showSubscriptionsDetail() {
+            const subs = getFilteredExpenses().filter(e => getCategoryType(e.category) === 'suscripcion');
+            const subsTotal = subs.reduce((s, e) => s + e.amount, 0);
+            if (subs.length === 0) {
+                document.getElementById('modalTitle').textContent = '🔄 Suscripciones';
+                document.getElementById('modalContent').innerHTML = '<p class="text-gray-400 text-center py-8">Sin suscripciones registradas</p>';
+                document.getElementById('detailModal').classList.remove('hidden');
+                return;
+            }
+            const grouped = {};
+            subs.forEach(e => { grouped[e.description] = (grouped[e.description] || 0) + e.amount; });
+            let content = '<div class="mb-4 p-3 bg-violet-50 rounded-lg flex justify-between items-center"><span class="text-sm text-violet-600">' + subs.length + ' suscripción' + (subs.length !== 1 ? 'es' : '') + '</span><span class="font-bold text-violet-700">' + formatEuro(subsTotal) + '</span></div>' +
+                '<div class="space-y-2">' + Object.entries(grouped).sort((a,b) => b[1]-a[1]).map(([name, total]) => '<div class="flex justify-between items-center p-3 rounded-lg" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #ddd6fe"><div class="flex items-center gap-2 flex-1 min-w-0"><span class="text-sm">🔄</span><p class="text-sm font-medium text-violet-800 truncate">' + name + '</p></div><span class="font-semibold text-violet-700">' + formatEuro(total) + '</span></div>').join('') + '</div>';
+            document.getElementById('modalTitle').textContent = '🔄 Suscripciones';
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
         
         function showSavingsDetail() {
             const savingsExpenses = getFilteredExpenses().filter(exp => getCategoryType(exp.category) === 'ahorro');
@@ -1203,8 +1221,9 @@
                         ${balanceInfo.isUsingFromSavings ? '<p class="text-xs text-amber-600 mt-1 font-medium">⚠️ Usando ' + formatEuro(balanceInfo.usedFromSavings) + ' de ahorros</p>' : ''}
                     </div>
                     <div class="total-card rounded-xl p-3 border-l-4 border-green-400 animate-slide-in cursor-pointer hover:bg-green-50" onclick="showExpensesByType('esencial', 'Esenciales')"><p class="text-gray-400 text-xs">Esenciales</p><p class="amount-display text-gray-800">${formatEuro(typeTotals.esencial)}</p></div>
-                    <div class="total-card rounded-xl p-3 border-l-4 border-pink-400 animate-slide-in cursor-pointer hover:bg-pink-50">
-                        <div onclick="showExpensesByType('salida', 'Salidas')"><p class="text-gray-400 text-xs">Salidas</p><p class="amount-display text-gray-800">${formatEuro(typeTotals.salida)}</p></div>
+                    <div class="total-card rounded-xl p-3 border-l-4 border-pink-400 animate-slide-in">
+                        <div onclick="showExpensesByType('salida', 'Salidas')" class="cursor-pointer hover:opacity-80"><p class="text-gray-400 text-xs">Salidas</p><p class="amount-display text-gray-800">${formatEuro(typeTotals.salida)}</p></div>
+                        ${typeTotals.suscripcion > 0 ? '<div class="border-t border-gray-200 mt-2 pt-2 cursor-pointer hover:opacity-80" onclick="showSubscriptionsDetail()"><div class="flex justify-between items-center"><p class="text-violet-400 text-xs">🔄 Subs</p><p class="text-xs font-bold text-violet-600">' + formatEuro(typeTotals.suscripcion) + '</p></div></div>' : ''}
                     </div>
                     <div id="ahorroMesCard" class="total-card rounded-xl p-3 border-l-4 ${balanceInfo.isUsingFromSavings ? 'border-amber-400' : 'border-emerald-400'} animate-slide-in cursor-pointer hover:bg-emerald-50" onclick="showSavingsDetail()">
                         <p class="text-gray-400 text-xs">Ahorro Mes</p><p id="ahorroMesDisplay" class="amount-display ${balanceInfo.adjustedSavings >= 0 ? 'text-emerald-600' : 'text-red-600'}">${formatEuro(balanceInfo.adjustedSavings)}</p>
